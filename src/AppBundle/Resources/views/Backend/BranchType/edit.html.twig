@@ -1,0 +1,40 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Tipo de sucursal</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <a href="{{ path('backend_branch_type') }}" class="m-r-10"><h5><i class="feather icon-chevron-left"></i></h5></a>
+                        <li class="breadcrumb-item"><a href="{{ path('backend_branch_type') }}">Tipo de sucursal</a></li>
+                        <li class="breadcrumb-item"><a href="#!">Editar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+
+                    {{ include('@App/Backend/flash_message.html.twig') }}
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Editar el tipo de sucursal</h5>
+                        </div>
+                        <div class="card-block">
+                            {{ include('@App/Backend/BranchType/form.html.twig', { 'form': form }) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

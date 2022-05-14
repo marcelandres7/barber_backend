@@ -1,0 +1,62 @@
+AppBundle\Entity\InspectionRequirementPicture:
+    type: entity
+    table: inspection_requirement_picture
+    indexes:
+        inspectionpicture2inspection_idx:
+            columns:
+                - inspection_id
+        inspectionpicture2requirement_idx:
+            columns:
+                - requirement_id
+        inspectionoicture2user_idx:
+            columns:
+                - created_by
+    id:
+        inspectionRequirementPictureId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_requirement_picture_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        picturePath:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+            column: picture_path
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        requirement:
+            targetEntity: Requirement
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_id:
+                    referencedColumnName: requirement_id
+            orphanRemoval: false
+        inspection:
+            targetEntity: Inspection
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                inspection_id:
+                    referencedColumnName: inspection_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

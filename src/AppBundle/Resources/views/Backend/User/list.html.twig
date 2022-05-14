@@ -1,0 +1,79 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Avatar</th>
+                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Rol</th>
+                    <th>Organización</th>
+                    <th>Estado</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in list %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+	                    <td>
+		                    {% if user.avatarPath | length > 0 %}
+			                    <div style='background-image: url("{{ asset("uploads/"~user.avatarPath) }}");' class='avatar_circle'></div>
+		                    {% else %}
+								<div style='background-image: url("{{ asset("images/user_icon.png") }}");' class='avatar_circle'></div>		                    
+							{% endif %}	
+	                    </td>                        
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.firstName }}</td>
+                        <td>{{ user.lastName }}</td>
+                        <td>{{ user.userRole.name }}</td>
+                        <td>{{ user.organization }}</td>
+                        <td>
+                            {% if user.status == 'ACTIVO'%}
+                                <span class="label bg-c-green f-12 text-white" href="#!">ACTIVO</span>
+                            {% else %}
+                                <span class="label bg-c-red f-12 text-white" href="#!">INACTIVO</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if permits["ep"] %}
+                                <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_user_edit', {'id': user.id}) }}"  title="Editar" data-toggle="tooltip">
+                                    <i class="feather icon-edit-1"></i>
+                                </a>
+                            {% endif %}
+                            {% if permits["dp"] %}
+                                {% if user.status == 'ACTIVO'%}
+                                    <span  title="Usuario inactivo" data-toggle="tooltip">
+                                        <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white sweet-multiple"
+                                           data-id="{{ user.id }}" data-name="{{ user.firstName }} {{ user.lastName }}" 
+                                           data-href="{{ path('backend_user_delete',{'id': user.id}) }}">
+                                            <i class="feather icon-trash-2"></i>
+                                        </a>
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+

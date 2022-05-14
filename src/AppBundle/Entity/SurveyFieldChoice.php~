@@ -1,0 +1,167 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * SurveyFieldChoice
+ */
+class SurveyFieldChoice
+{
+    /**
+     * @var integer
+     */
+    private $surveyFieldChoiceId;
+
+    /**
+     * @var string
+     */
+    private $label;
+
+    /**
+     * @var string
+     */
+    private $inputValue;
+
+    /**
+     * @var \DateTime
+     */
+    private $createdAt;
+
+    /**
+     * @var \AppBundle\Entity\User
+     */
+    private $createdBy;
+
+    /**
+     * @var \AppBundle\Entity\SurveyField
+     */
+    private $surveyField;
+
+
+    /**
+     * Get surveyFieldChoiceId
+     *
+     * @return integer 
+     */
+    public function getSurveyFieldChoiceId()
+    {
+        return $this->surveyFieldChoiceId;
+    }
+
+    /**
+     * Set label
+     *
+     * @param string $label
+     * @return SurveyFieldChoice
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    
+        return $this;
+    }
+
+    /**
+     * Get label
+     *
+     * @return string 
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * Set inputValue
+     *
+     * @param string $inputValue
+     * @return SurveyFieldChoice
+     */
+    public function setInputValue($inputValue)
+    {
+        $this->inputValue = $inputValue;
+    
+        return $this;
+    }
+
+    /**
+     * Get inputValue
+     *
+     * @return string 
+     */
+    public function getInputValue()
+    {
+        return $this->inputValue;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     * @return SurveyFieldChoice
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime 
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createdBy
+     * @return SurveyFieldChoice
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
+    
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User 
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set surveyField
+     *
+     * @param \AppBundle\Entity\SurveyField $surveyField
+     * @return SurveyFieldChoice
+     */
+    public function setSurveyField(\AppBundle\Entity\SurveyField $surveyField = null)
+    {
+        $this->surveyField = $surveyField;
+    
+        return $this;
+    }
+
+    /**
+     * Get surveyField
+     *
+     * @return \AppBundle\Entity\SurveyField 
+     */
+    public function getSurveyField()
+    {
+        return $this->surveyField;
+    }
+}

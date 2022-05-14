@@ -1,0 +1,71 @@
+AppBundle\Entity\OrderDetail:
+    type: entity
+    table: order_detail
+    indexes:
+        summary2servicesummary_idx:
+            columns:
+                - summary_service_id
+        product2productid_idx:
+            columns:
+                - product_id
+        createdby2userid_idx:
+            columns:
+                - created_by
+    id:
+        orderDetailId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: order_detail_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        quantity:
+            type: integer
+            nullable: true
+            unsigned: false
+        paymentTotal:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+            column: payment_total
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        product:
+            targetEntity: Product
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                product_id:
+                    referencedColumnName: product_id
+            orphanRemoval: false
+        summaryService:
+            targetEntity: SummaryService
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                summary_service_id:
+                    referencedColumnName: id_summary_service
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

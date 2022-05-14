@@ -1,0 +1,135 @@
+AppBundle\Entity\SummaryService:
+    type: entity
+    table: summary_service
+    repositoryClass: AppBundle\Repository\SummaryServiceRepository
+    indexes:
+        fk_professional_idx:
+            columns:
+                - professional_id
+        fk_client_idx:
+            columns:
+                - client_id
+        fk_status_idx:
+            columns:
+                - status_id
+        fk_organization_id_idx:
+            columns:
+                - organization_id
+        fk_create_by_idx:
+            columns:
+                - created_by
+    id:
+        idSummaryService:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: id_summary_service
+            generator:
+                strategy: IDENTITY
+    fields:
+        totalPayment:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+            column: total_payment
+        methodPayment:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: method_payment
+        serviceStart:
+            type: datetime
+            nullable: true
+            column: service_start
+        serviceEnd:
+            type: datetime
+            nullable: true
+            column: service_end
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        services:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        random:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        color:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        payoutBarber:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: payout_barber
+        payoutDate:
+            type: datetime
+            nullable: true
+            column: payout_date
+        products:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        tips:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+    manyToOne:
+        client:
+            targetEntity: Client
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                client_id:
+                    referencedColumnName: client_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        organization:
+            targetEntity: Organization
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                organization_id:
+                    referencedColumnName: organization_id
+            orphanRemoval: false
+        professional:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                professional_id:
+                    referencedColumnName: id
+            orphanRemoval: false
+        status:
+            targetEntity: Status
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                status_id:
+                    referencedColumnName: status_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

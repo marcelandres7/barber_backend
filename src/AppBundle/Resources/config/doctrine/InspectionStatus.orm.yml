@@ -1,0 +1,56 @@
+AppBundle\Entity\InspectionStatus:
+    type: entity
+    table: inspection_status
+    repositoryClass: AppBundle\Repository\InspectionStatusRepository
+    id:
+        inspectionStatusId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_status_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        customColor:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: custom_color
+        customIcon:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: custom_icon
+        weight:
+            type: integer
+            nullable: true
+            unsigned: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
+    lifecycleCallbacks: {  }

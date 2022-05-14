@@ -1,0 +1,60 @@
+AppBundle\Entity\Organization:
+    type: entity
+    table: organization
+    repositoryClass: AppBundle\Repository\OrganizationRepository
+    indexes:
+        organization2user_idx:
+            columns:
+                - created_by
+        organization2user2_idx:
+            columns:
+                - updated_by
+    id:
+        organizationId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: organization_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 300
+            fixed: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+        status:
+            type: string
+            nullable: false
+            length: null
+            fixed: false
+            default: ACTIVO
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

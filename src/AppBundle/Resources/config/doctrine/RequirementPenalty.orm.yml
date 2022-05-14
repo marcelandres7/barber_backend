@@ -1,0 +1,53 @@
+AppBundle\Entity\RequirementPenalty:
+    type: entity
+    table: requirement_penalty
+    repositoryClass: AppBundle\Repository\RequirementPenaltyRepository
+    indexes:
+        fk_created_by_78546_idx:
+            columns:
+                - created_by
+    id:
+        requirementPenaltyId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: requirement_penalty_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        amount:
+            type: integer
+            nullable: true
+            unsigned: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

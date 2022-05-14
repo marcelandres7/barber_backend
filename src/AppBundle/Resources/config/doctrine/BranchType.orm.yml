@@ -1,0 +1,36 @@
+AppBundle\Entity\BranchType:
+    type: entity
+    table: branch_type
+    id:
+        branchTypeId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: branch_type_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        description:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        descriptionEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: description_eng
+    lifecycleCallbacks: {  }

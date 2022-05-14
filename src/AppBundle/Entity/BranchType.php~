@@ -1,0 +1,87 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * BranchType
+ */
+class BranchType
+{
+    /**
+     * @var integer
+     */
+    private $branchTypeId;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+
+    /**
+     * Get branchTypeId
+     *
+     * @return integer 
+     */
+    public function getBranchTypeId()
+    {
+        return $this->branchTypeId;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return BranchType
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    
+    public function __toString() {
+        return $this->name;
+    }
+    /**
+     * @var string
+     */
+    private $description;
+
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     * @return BranchType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+}

@@ -1,0 +1,88 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-9">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Penalización por requisito</h5>
+                    </div>
+                </div>
+                <div class="col-md-6 col-3 text-right">
+                    <span  title="Agregar Penalización por requisito" data-toggle="tooltip">
+                        <a class="btn btn-icon btn-rounded theme-bg text-white" data-toggle="modal" data-target="#exampleModalLive"><span><i class="fas fa-plus"></i></span></a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+
+                    {{ include('@App/Backend/flash_message.html.twig') }}
+
+                    <div class="card Application-list">
+                        {% if permits["wp"] %}
+                            {{
+                                include(
+                                        '@App/Backend/create_modal.html.twig',
+                                        {
+                                                'title': 'Penalización por requisito',
+                                                'form': form,
+                                                'formPath': '@App/Backend/RequirementPenalty/form.html.twig'
+                                        }
+                                )
+                            }}
+                        {% endif %}
+                        {% if permits["rp"] %}
+                            {{ include('@App/Backend/RequirementPenalty/list.html.twig', { 'list': list }) }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script type="text/javascript">
+        function activeChange(id)
+        {
+            var data = {
+                id: id
+            };
+
+            $.ajax({
+                data: data,
+                url: "{{path('backend_requirement_penalty_delete')}}",
+                success: function (result)
+                {
+                    //Aca podemos rastrear la respuesta que nos manda el controlador.
+                    console.log("result", result);
+                    location.reload();
+                }
+            });
+        }
+        $(document).ready(function () {
+            $('.dataTable').DataTable({
+                "stateSave": true
+            });
+            $('#sForm').validate({
+                submitHandler: function (form) {
+                    var saveButton = document.getElementById("button-save");
+                    var validateForm = document.getElementById("sForm");
+                    saveButton.setAttribute("disabled", true);
+                    saveButton.innerHTML = "<span class='spinner-border spinner-border-sm' role='status'></span> Loading...";
+                    var elements = validateForm.elements;
+                    for (var i = 0, len = elements.length; i < len; ++i) {
+                        elements[i].readOnly = true;
+                    }
+                    document.getElementById("sForm").submit();
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand">
+            <img class="" src="{{ asset('images/prlm_logo.png') }}" style='max-width:78px;padding:10px;'>			
+            <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar">
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Menu</label>
+                </li>
+                {% for module in userModules  %}							
+                    {% if module.parent_id == 0 %} 
+                        <li id="{{ module.mcid }}" data-username="{{ module.module_name }}" class="nav-item {{ module.count_children > 0 ? 'pcoded-hasmenu ' : ''}}{{ menuId == module.mcid ? 'active' : '' }}">
+                            <a href="{{ module.count_children > 0 ? 'javascript:' : path(module.url_access) }}" class="nav-link"> 
+                                <span class="pcoded-micon">
+                                    <i class="fa {{ module.module_icon }}"></i> 
+                                </span>
+                                <span class="pcoded-mtext">{{ module.module_name }}</span>
+                            </a>
+                            {% if module.count_children > 0 %} 
+                                <ul class="pcoded-submenu">
+                                    {% for subModule in module.children %}
+                                        <li class="{{ menuId == subModule.mcid ? 'active' : '' }}">
+                                            <a class="" href="{{ path(subModule.url_access) }}"> 
+                                                <span class="pcoded-micon">
+                                                    <i class="fa {{ subModule.module_icon }}"></i> 
+                                                </span>
+                                                <span class="">{{ subModule.module_name }}</span>
+                                            </a>
+                                        </li>
+                                        <script>
+                                            var menuId = {{ menuId }};
+                                            var subModuleId = {{ subModule.mcid }};
+                                            var parentId ={{ subModule.parent_id }}
+
+                                                    if (menuId == subModuleId){
+                                            $("#" + parentId).addClass("active");
+                                            $("#" + parentId).addClass("pcoded-trigger");
+                                            }
+                                        </script>
+                                    {% endfor %} 
+                                </ul> 
+                            {% endif %}
+                        </li>	
+                    {% endif %}				
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>

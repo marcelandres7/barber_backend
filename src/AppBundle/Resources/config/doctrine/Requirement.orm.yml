@@ -1,0 +1,128 @@
+AppBundle\Entity\Requirement:
+    type: entity
+    table: requirement
+    repositoryClass: AppBundle\Repository\RequirementRepository
+    indexes:
+        fk_requirement_type_id_1005_idx:
+            columns:
+                - requirement_type_id
+        fk_requirement_penalty_id_1005_idx:
+            columns:
+                - requirement_penalty_id
+        fk_requirement_group_id_1005_idx:
+            columns:
+                - requirement_group_id
+        fk_created_by_10081_idx:
+            columns:
+                - created_by
+        fk_updated_by_10081_idx:
+            columns:
+                - updated_by
+    id:
+        requirementId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: requirement_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        description:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        lawReference:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: law_reference
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        weight:
+            type: integer
+            nullable: true
+            unsigned: false
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        descriptionEng:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+            column: description_eng
+        lawReferenceEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: law_reference_eng
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        requirementGroup:
+            targetEntity: RequirementGroup
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_group_id:
+                    referencedColumnName: requirement_group_id
+            orphanRemoval: false
+        requirementPenalty:
+            targetEntity: RequirementPenalty
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_penalty_id:
+                    referencedColumnName: requirement_penalty_id
+            orphanRemoval: false
+        requirementType:
+            targetEntity: RequirementType
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_type_id:
+                    referencedColumnName: requirement_type_id
+            orphanRemoval: false
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

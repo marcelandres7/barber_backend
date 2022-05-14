@@ -1,0 +1,46 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+<div class="card-header">
+    <h5>Listado de Requisitos Evaluados</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+         <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Articulo</th>
+                    <th>Tipo Requisito</th>
+                    <th>Herramienta</th>     
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td style='white-space:normal !important;'><div style='width:200px;white-space:normal !important;'>{{ item.name }}</td>
+                        <td style='white-space:normal !important;'><div style='width:200px;white-space:normal !important;'>{{ item.law_reference }}</td>
+                        <td style='white-space:normal !important;'><div style='width:200px;white-space:normal !important;'>{{ item.type_name }}</td>
+                         <td> <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{path('backend_statistics_detail_requirement', {'requirement': item.requirement_id , 'iid': inspection })}}" title="Ver detalles" data-toggle="tooltip">
+                                <i class="fa fa-search"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table> 
+    </div>
+</div>
+{% endblock %}

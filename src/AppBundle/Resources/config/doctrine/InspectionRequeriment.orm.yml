@@ -1,0 +1,89 @@
+AppBundle\Entity\InspectionRequeriment:
+    type: entity
+    table: inspection_requeriment
+    indexes:
+        inspreqr2inspection_idx:
+            columns:
+                - inspection_id
+        inspreqr2requeriment_idx:
+            columns:
+                - requeriment_id
+        inspreqr2inspresult_idx:
+            columns:
+                - inspection_result_id
+        inspreq2user_idx:
+            columns:
+                - created_by
+        inspreq2user2_idx:
+            columns:
+                - updated_by
+    id:
+        inspectionRequerimentId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_requeriment_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        comments:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+    manyToOne:
+        inspection:
+            targetEntity: Inspection
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                inspection_id:
+                    referencedColumnName: inspection_id
+            orphanRemoval: false
+        inspectionResult:
+            targetEntity: InspectionResult
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                inspection_result_id:
+                    referencedColumnName: inspection_result_id
+            orphanRemoval: false
+        requeriment:
+            targetEntity: Requirement
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requeriment_id:
+                    referencedColumnName: requirement_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

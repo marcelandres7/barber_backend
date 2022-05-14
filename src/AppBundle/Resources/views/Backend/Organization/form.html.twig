@@ -1,0 +1,30 @@
+{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+<form method="post" action="" id="sForm" class="validateForm" autocomplete="false">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.name, "Nombre") }}
+                {{form_widget(form.name, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.status, "Estado") }}
+                {{form_widget(form.status, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6 col-6">
+            {% if 'edit' in currentPath %}
+                <button type="reset" onclick="window.location = '{{ path('backend_organization') }}'" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% else %}
+                <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% endif %}
+        </div>
+        <div class="col-md-6 col-6">
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    {{ form_widget(form._token) }}
+</form>

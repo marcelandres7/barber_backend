@@ -1,0 +1,46 @@
+AppBundle\Entity\Client:
+    type: entity
+    table: client
+    id:
+        clientId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: client_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        phone:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        email:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        avatar:
+            type: string
+            nullable: true
+            length: 1000
+            fixed: false
+        register:
+            type: integer
+            nullable: false
+            unsigned: false
+        promotion:
+            type: integer
+            nullable: false
+            unsigned: false
+    lifecycleCallbacks: {  }

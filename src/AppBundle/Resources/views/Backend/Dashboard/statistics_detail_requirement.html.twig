@@ -1,0 +1,62 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+<div class="card-header">
+    <h5>Resumen </h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+         <table >
+            <thead>
+                <tr>
+                    <th> {{ law }} </th>
+                </tr>
+                <tr>   
+                    <th style='white-space:normal !important;'><div style='width:400px;white-space:normal !important;'> {{description}} </th>
+                </tr>
+                <tr>   
+                    <th> {{ requirement_name }} </th>
+                </tr>
+                <tr>
+                    <th>Resultado: {{ result_name }} </th>
+                </tr>
+                <tr>
+                     <th>Tipo de Requisito: {{ requiremen_type_name }} </th>
+                </tr>
+                <tr> 
+                    <th>Item Evaluado: {{ requirement_name }} </th>
+                 </tr>    
+                    {% if result_id == 2 %}
+                    <tr>
+                        <th>Tipo Multa: {{ penalty_name }}  </th>
+                        <th>Multa: {{ penalty_amount }} </th>
+                     </tr>
+                     {% endif %} 
+                <tr>
+                    <th>Comentarios</th>  
+                     <th>{{comment}}</th>  
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in photos %}
+                    <tr>
+                         <td>{{ item.photo_path }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table> 
+    </div>
+</div>
+{% endblock %}

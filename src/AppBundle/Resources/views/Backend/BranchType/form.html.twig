@@ -1,0 +1,41 @@
+{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+<form method="post" action="" id="sForm" class="validateForm" autocomplete="false">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.name, "Nombre") }}
+                {{form_widget(form.name, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.nameEng, "Nombre en Inglés ") }}
+                {{form_widget(form.nameEng, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+            <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.description, "Contenido") }}
+                {{form_widget(form.description, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6 col-6">
+            {% if 'edit' in currentPath %}
+                <button type="reset" onclick="window.location = '{{ path('backend_branch_type') }}'" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% else %}
+                <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% endif %}
+        </div>
+        <div class="col-md-6 col-6">
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    {{ form_widget(form._token) }}
+</form>
+
+<script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
+<script>
+                    CKEDITOR.replace('appbundle_branchtype[description]');
+</script>

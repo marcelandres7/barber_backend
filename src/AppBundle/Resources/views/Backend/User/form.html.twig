@@ -1,0 +1,117 @@
+{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+
+<form method="post" action="" id="userForm" class="validateForm" autocomplete="false"  enctype="multipart/form-data">
+    <div class="row">
+	    
+	    {% if edit %}
+		    {% if form.vars.value.avatarPath | length > 0 %}
+			    <div class='col-md-12'>		    
+				    <img src="{{ asset('uploads/' ~ form.vars.value.avatarPath) }}" style='width:150px;'>
+					<br><br>				    				    
+			    </div>
+		    {% endif %}
+		{% endif %}		    
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.avatarPath, "Avatar") }}				
+				<input type="file" id="user_avatarPath" name="user[avatarPath]" class="form-control">			
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">	       	                 
+                {{ form_label(form.firstName, "Nombre") }}
+                {{ form_widget(form.firstName, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.lastName, "Apellido") }}
+                {{form_widget(form.lastName, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.email, "Email") }}
+                {{form_widget(form.email, {'attr': {'class': 'required email form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.password, "Contraseña") }}
+                {{form_widget(form.password, {'attr': {'class': 'form-control' }}) }}
+            </div>
+        </div>
+
+        {% if edit %}
+	        <div class="col-md-6">
+	            <div class="form-group">
+	                {{ form_label(form.status, "Estado") }}
+	                {{form_widget(form.status, {'attr': {'class': 'required form-control' }}) }}
+	            </div>
+	        </div>
+        {% else %}        
+        	<input type='hidden' id="user_status" name="user[status]" value="ACTIVO">
+        {% endif %}
+
+	        <div class="col-md-6">
+	            <div class="form-group">
+	                {{ form_label(form.userRole, "Rol") }}
+	                {{form_widget(form.userRole, {'attr': {'class': 'required form-control'}}) }}
+	            </div>
+	        </div>	
+
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.organization, "Organización") }}
+                {{form_widget(form.organization, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>	
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.bio, "Bio") }}
+                {{form_widget(form.bio, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>	        
+    </div>
+    <div class='row'>
+        <div class="col-md-6 col-6">
+            {% if 'edit' in currentPath %}
+                <button type="reset" onclick="window.location = '{{ path('backend_user') }}'" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% else %}
+                <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+            {% endif %}
+        </div>
+        <div class="col-md-6 col-6">
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right" style="margin-right: 0px;">Guardar</button>
+        </div>	
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    {{ form_widget(form._token) }}
+</form>
+<script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
+<script>
+    var cke = CKEDITOR.replace('user[bio]', {
+        toolbarGroups: [
+            {"name": "basicstyles", "groups": ["basicstyles"]},
+            {"name": "paragraph", "groups": ["list", "blocks"]},
+            {"name": "document", "groups": ["mode"]},
+            {"name": "insert", "groups": ["insert"]},
+            {"name": "styles", "groups": ["styles"]}
+        ]
+    });
+    
+    
+    {% if edit %} 
+    	$(document).ready(function()
+    	{
+	    	CKEDITOR.instances['user_bio'].setData("{{form.vars.value.bio | raw}}")
+	    });  
+    {% endif %}    
+    
+    
+    $('#userForm').on('submit',function()
+    {
+	   $('#user_bio').val(CKEDITOR.instances['user_bio'].getData());
+    });
+</script>

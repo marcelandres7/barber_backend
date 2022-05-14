@@ -1,0 +1,88 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre / Name</th>
+                    <th>Contenido</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.branchTypeId }}</td>
+                        <td>{{ item.name }} / {{ item.nameEng }}</td>
+                        <td>
+                            <a class="btn btn-icon text-white" style="width:150px;background: linear-gradient(-135deg,#23b7e5 0%,#1de9b6 100%);" href="javascript;" data-toggle="modal" data-target="#viewContent{{ item.branchTypeId }}">
+                                Ver Contenido
+                            </a>
+                        </td>
+                        <td>
+                            {% if permits["ep"] %}
+                                <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_branch_type_edit', {'id': item.branchTypeId|md5}) }}" title="Editar" data-toggle="tooltip">
+                                    <i class="feather icon-edit-1"></i>
+                                </a>
+                            {% endif %}
+
+                            {% if permits["dp"] %}
+                                <span  title="Eliminar" data-toggle="tooltip">
+                                    <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white sweet-multiple"
+                                       data-href="{{
+                                                            path(
+                                                                    'backend_branch_type_delete',
+                                                                    {'id': item.branchTypeId|md5}
+                                                    )}}"
+                                       data-name="{{ item.name }}"
+                                       href="javascript:;">
+                                        <i class="feather icon-trash-2"></i>
+                                    </a>
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <!-- The Modal -->
+                <div class="modal fade" id="viewContent{{item.branchTypeId}}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Contenido</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                    {{ item.description|raw }}
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-rounded btn-outline-danger" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

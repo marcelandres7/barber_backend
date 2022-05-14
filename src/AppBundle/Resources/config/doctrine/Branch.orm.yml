@@ -1,0 +1,72 @@
+AppBundle\Entity\Branch:
+    type: entity
+    table: branch
+    repositoryClass: AppBundle\Repository\BranchRepository
+    indexes:
+        fk_branch_type_id_1001_idx:
+            columns:
+                - branch_type_id
+        fk_created_by_1005_idx:
+            columns:
+                - created_by
+        fk_organixation_id_10258_idx:
+            columns:
+                - organization_id
+    id:
+        branchId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: branch_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        description:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        branchType:
+            targetEntity: BranchType
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                branch_type_id:
+                    referencedColumnName: branch_type_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        organization:
+            targetEntity: Organization
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                organization_id:
+                    referencedColumnName: organization_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

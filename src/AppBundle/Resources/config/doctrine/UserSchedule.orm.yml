@@ -1,0 +1,98 @@
+AppBundle\Entity\UserSchedule:
+    type: entity
+    table: user_schedule
+    indexes:
+        fk_user_id_1002_idx:
+            columns:
+                - user_id
+        fk_origanization_id_10023_idx:
+            columns:
+                - organization_id
+        fk_category_id_2001_idx:
+            columns:
+                - category_id
+        fk_event_id_5201_idx:
+            columns:
+                - event_id
+        fk_created_by_5201_idx:
+            columns:
+                - created_by
+    id:
+        userScheduleId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: user_schedule_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        weekday:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        startAt:
+            type: datetime
+            nullable: true
+            column: start_at
+        endAt:
+            type: datetime
+            nullable: true
+            column: end_at
+        isActive:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        category:
+            targetEntity: Category
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                category_id:
+                    referencedColumnName: category_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        event:
+            targetEntity: Event
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                event_id:
+                    referencedColumnName: event_id
+            orphanRemoval: false
+        organization:
+            targetEntity: Organization
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                organization_id:
+                    referencedColumnName: organization_id
+            orphanRemoval: false
+        user:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                user_id:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

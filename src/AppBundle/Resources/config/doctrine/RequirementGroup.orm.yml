@@ -1,0 +1,31 @@
+AppBundle\Entity\RequirementGroup:
+    type: entity
+    table: requirement_group
+    repositoryClass: AppBundle\Repository\RequirementGroupRepository
+    id:
+        requirementGroupId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: requirement_group_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        color:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+    lifecycleCallbacks: {  }

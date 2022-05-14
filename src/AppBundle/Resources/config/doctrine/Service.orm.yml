@@ -1,0 +1,68 @@
+AppBundle\Entity\Service:
+    type: entity
+    table: service
+    repositoryClass: AppBundle\Repository\ServiceRepository
+    indexes:
+        fk_organization_id_15879_idx:
+            columns:
+                - organization_id
+        fk_created_by_47850_idx:
+            columns:
+                - created_by
+    id:
+        serviceId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: service_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        description:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        descriptionEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: description_eng
+    manyToOne:
+        organization:
+            targetEntity: Organization
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                organization_id:
+                    referencedColumnName: organization_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

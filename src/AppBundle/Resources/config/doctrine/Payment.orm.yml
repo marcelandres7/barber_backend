@@ -1,0 +1,56 @@
+AppBundle\Entity\Payment:
+    type: entity
+    table: payment
+    repositoryClass: AppBundle\Repository\PaymentRepository
+    indexes:
+        profesionalId2profesional_idx:
+            columns:
+                - professional_id
+    id:
+        paymentId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: payment_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        amountPay:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+            column: amount_pay
+        amountPending:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+            column: amount_pending
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        description:
+            type: string
+            nullable: true
+            length: 200
+            fixed: false
+        confirmationPay:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: confirmation_pay
+    manyToOne:
+        professional:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                professional_id:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

@@ -1,0 +1,131 @@
+AppBundle\Entity\Inspection:
+    type: entity
+    table: inspection
+    repositoryClass: AppBundle\Repository\InspectionRepository    
+    indexes:
+        inspection2organization_idx:
+            columns:
+                - organization_id
+        inspection2branch_idx:
+            columns:
+                - branch_id
+        inspection2status_idx:
+            columns:
+                - current_inspection_status_id
+        inspection2requerimentgroup_idx:
+            columns:
+                - requeriment_group_id
+        inspection2service_idx:
+            columns:
+                - service_id
+        inspection2user_idx:
+            columns:
+                - assigned_user_id
+        inspection2updateuser_idx:
+            columns:
+                - updated_by
+        inspection2Createduser_idx:
+            columns:
+                - created_by
+    id:
+        inspectionId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+        gpsLocation:
+            type: string
+            nullable: true
+            length: 300
+            fixed: false
+            column: gps_location
+        isActive:
+            type: boolean
+            nullable: true
+            column: is_active
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        branch:
+            targetEntity: Branch
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                branch_id:
+                    referencedColumnName: branch_id
+            orphanRemoval: false
+        organization:
+            targetEntity: Organization
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                organization_id:
+                    referencedColumnName: organization_id
+            orphanRemoval: false
+        requerimentGroup:
+            targetEntity: RequirementGroup
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requeriment_group_id:
+                    referencedColumnName: requirement_group_id
+            orphanRemoval: false
+        service:
+            targetEntity: Service
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                service_id:
+                    referencedColumnName: service_id
+            orphanRemoval: false
+        currentInspectionStatus:
+            targetEntity: InspectionStatus
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                current_inspection_status_id:
+                    referencedColumnName: inspection_status_id
+            orphanRemoval: false
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        assignedUser:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                assigned_user_id:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

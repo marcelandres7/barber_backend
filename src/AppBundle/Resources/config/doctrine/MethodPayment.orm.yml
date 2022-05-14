@@ -1,0 +1,40 @@
+AppBundle\Entity\MethodPayment:
+    type: entity
+    table: method_payment
+    id:
+        methodPaymentId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: method_payment_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        description:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        isActive:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: is_active
+        percent:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+        addClient:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: add_client
+    lifecycleCallbacks: {  }

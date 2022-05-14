@@ -1,0 +1,69 @@
+AppBundle\Entity\InspectionStatusLog:
+    type: entity
+    table: inspection_status_log
+    indexes:
+        statuslog2inspection_idx:
+            columns:
+                - inspection_id
+        statuslog2statusinspection_idx:
+            columns:
+                - inspection_status_id
+        statuslog2user_idx:
+            columns:
+                - created_by
+    id:
+        inspectionStatusLogId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_status_log_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        startTime:
+            type: datetime
+            nullable: true
+            column: start_time
+        endTime:
+            type: datetime
+            nullable: true
+            column: end_time
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        geolocation:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+    manyToOne:
+        inspection:
+            targetEntity: Inspection
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                inspection_id:
+                    referencedColumnName: inspection_id
+            orphanRemoval: false
+        inspectionStatus:
+            targetEntity: InspectionStatus
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                inspection_status_id:
+                    referencedColumnName: inspection_status_id
+            orphanRemoval: false
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

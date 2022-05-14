@@ -1,0 +1,72 @@
+AppBundle\Entity\InspectionResult:
+    type: entity
+    table: inspection_result
+    repositoryClass: AppBundle\Repository\InspectionResultRepository
+    indexes:
+        fk_requirement_penalty_id_78520_idx:
+            columns:
+                - requirement_penalty_id
+        fk_created_by_01124_idx:
+            columns:
+                - created_by
+    id:
+        inspectionResultId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: inspection_result_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        description:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        descriptionEng:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+            column: description_eng
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        requirementPenalty:
+            targetEntity: RequirementPenalty
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_penalty_id:
+                    referencedColumnName: requirement_penalty_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

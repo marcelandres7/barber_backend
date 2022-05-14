@@ -1,0 +1,65 @@
+AppBundle\Entity\RequirementType:
+    type: entity
+    table: requirement_type
+    repositoryClass: AppBundle\Repository\RequirementTypeRepository
+    indexes:
+        fk_created_by_09735_idx:
+            columns:
+                - created_by
+        fk_requirement_group_id_7854_idx:
+            columns:
+                - requirement_group_id
+    id:
+        requirementTypeId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: requirement_type_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+        weight:
+            type: integer
+            nullable: true
+            unsigned: false
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        nameEng:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: name_eng
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        requirementGroup:
+            targetEntity: RequirementGroup
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_group_id:
+                    referencedColumnName: requirement_group_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

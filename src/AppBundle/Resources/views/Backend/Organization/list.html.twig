@@ -1,0 +1,74 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.organizationId }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>
+                            {% if item.status == 'ACTIVO'%}
+                                <span class="label bg-c-green f-12 text-white" href="#!">ACTIVO</span>
+                            {% else %}
+                                <span class="label bg-c-red f-12 text-white" href="#!">INACTIVO</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-icon btn-rounded theme-bg2 text-white" style="background: linear-gradient(-135deg,#3ebfea 0%,#1de9b6 100%);" href="{{ path('backend_branch', {'id': item.organizationId|md5}) }}" title="Sucursal" data-toggle="tooltip">
+                                <i class="fas fa-square"></i>
+                            </a>
+                            {% if permits["ep"] %}
+                                <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_organization_edit', {'organizationId': item.organizationId|md5}) }}" title="Editar" data-toggle="tooltip">
+                                    <i class="feather icon-edit-1"></i>
+                                </a>
+                            {% endif %}
+
+                            {% if permits["dp"] %}
+                                {% if item.status == 'ACTIVO'%}
+                                    <span  title="Inactivar organización" data-toggle="tooltip">
+                                        <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white sweet-multiple"
+                                           data-href="{{
+                                                            path(
+                                                                    'backend_organization_delete',
+                                                                    {'organizationId': item.organizationId|md5}
+                                                    )}}"
+                                           data-name="{{ item.name }}"
+                                           href="javascript:;">
+                                            <i class="feather icon-trash-2"></i>
+                                        </a>
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,83 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * RoomTypeId
+ */
+class RoomTypeId
+{
+    /**
+     * @var integer
+     */
+    private $roomTypeId;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var boolean
+     */
+    private $isActive;
+
+
+    /**
+     * Get roomTypeId
+     *
+     * @return integer 
+     */
+    public function getRoomTypeId()
+    {
+        return $this->roomTypeId;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return RoomTypeId
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $isActive
+     * @return RoomTypeId
+     */
+    public function setIsActive($isActive)
+    {
+        $this->isActive = $isActive;
+    
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean 
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+}

@@ -1,0 +1,55 @@
+AppBundle\Entity\Product:
+    type: entity
+    table: product
+    id:
+        productId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: product_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        productName:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: product_name
+        inventoryQuantity:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: inventory_quantity
+        price:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        description:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+        isActive:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: is_active
+        pathImagen:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+            column: path_imagen
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    lifecycleCallbacks: {  }

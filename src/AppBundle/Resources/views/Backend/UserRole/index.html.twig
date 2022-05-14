@@ -1,0 +1,96 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-9">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Rol</h5>
+                    </div>
+                </div>
+                <div class="col-md-6 col-3 text-right">
+                    <span  title="Agregar rol" data-toggle="tooltip">
+                        <a class="btn btn-icon btn-rounded theme-bg text-white" data-toggle="modal" data-target="#exampleModalLive"><span><i class="feather icon-plus"></i></span></a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+
+                    {{ include('@App/Backend/flash_message.html.twig') }}
+
+                    <div class="card Application-list">
+
+                        {{
+                            include(
+                                    '@App/Backend/create_modal.html.twig',
+                                    {
+                                            'title': 'Rol',
+                                            'form': form,
+                                            'formPath': '@App/Backend/UserRole/form.html.twig'
+                                    }
+                            )
+                        }}
+
+                        {{ include('@App/Backend/UserRole/list.html.twig', { 'list': list }) }}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.dataTable').DataTable({
+                "stateSave": true
+            });
+
+            $('table').on('click', '#btn-delete', function () {
+                $('.sweet-multiple').on('click', function () {
+                    swal({
+                        title: '¿Quieres quitar el rol "' + $(this).attr('data-name') + '" ?',
+                        icon: "warning",
+                        buttons: ["Cancel", true],
+                        dangerMode: true,
+                    }).then((willDelete) => {
+                        if (willDelete) {
+                            swal({
+                                text: 'El rol "' + $(this).attr('data-name') + '" se está eliminandod',
+                                icon: "info",
+                                buttons: false,
+                                content: {
+                                    element: "span",
+                                    attributes: {
+                                        className: "spinner-border spinner-border-sm"
+                                    }
+                                }
+                            });
+                            window.location = $(this).attr('data-href');
+                        }
+                    });
+                });
+            });
+            $('#userRoleForm').validate({
+                submitHandler: function (form) {
+                    var saveButton = document.getElementById("button-save");
+                    var validateForm = document.getElementById("userRoleForm");
+                    saveButton.setAttribute("disabled", true);
+                    saveButton.innerHTML = "<span class='spinner-border spinner-border-sm' role='status'></span> Loading...";
+                    var elements = validateForm.elements;
+                    for (var i = 0, len = elements.length; i < len; ++i) {
+                        elements[i].readOnly = true;
+                    }
+                    document.getElementById("userRoleForm").submit();
+                }
+            });
+        });
+    </script>
+{% endblock %}

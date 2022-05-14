@@ -1,0 +1,20 @@
+AppBundle\Entity\MenuType:
+    type: entity
+    table: menu_type
+    id:
+        menuTypeId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: menu_type_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        menuTypeName:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: menu_type_name
+    lifecycleCallbacks: {  }

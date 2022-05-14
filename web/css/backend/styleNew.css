@@ -1,0 +1,204 @@
+/* Carga de imagen */
+.avatar-wrapper {
+    position: relative;
+    height: 150px;
+    width: 150px;
+    margin: 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 1px 1px 15px -5px black;
+    transition: all .3s ease;
+  }
+  .avatar-wrapper:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+  .avatar-wrapper:hover .profile-pic {
+    opacity: .5;
+  }
+  .avatar-wrapper .profile-pic {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    transition: all .3s ease;
+  }
+  .avatar-wrapper .profile-pic:after {
+    font-family: FontAwesome;
+    content: "\f007";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    font-size: 190px;
+    background: #ecf0f1;
+    color: #34495e;
+    text-align: center;
+  }
+  .avatar-wrapper .upload-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  }
+  .avatar-wrapper .upload-button .fa-arrow-circle-up {
+    position: absolute;
+    font-size: 175px;
+    top: -10px;
+    left: -10px;
+    text-align: center;
+    opacity: 0;
+    transition: all .3s ease;
+    color: #0186c2;
+  }
+  .avatar-wrapper .upload-button:hover .fa-arrow-circle-up {
+    opacity: .9;
+  }
+
+/* IMAGEN REDONDA */
+.image-rounded {
+  object-fit: contain;
+  border-radius: 50%;
+  height: 100px;
+  width: 100px;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
+.b-brand .b-bg {
+  /*background: linear-gradient(-135deg,#46b5ff 0%,#0067AC 100%) !important;*/
+  background: #fff !important;
+  width: 50px;
+  height: 50px;
+}
+
+.logo-login {
+  border-radius: 30px;
+  width: 300px;
+}
+
+.logo-menu {
+  border-radius: 7px;
+  width: 47px;
+  height: 47px;
+}
+
+.pcoded-navbar .header-logo img{
+  border-radius: 7px;
+  width: 47px;
+  height: 47px;
+}
+
+.pcoded-navbar.navbar-collapsed .header-logo .logo-thumb {
+  left: calc((74px/2) - 20px);
+}
+
+.pcoded-navbar .header-logo {
+  padding: 10px 20px 10px 15px !important;
+}
+
+.zoomA {
+  /*width: 600px;*/
+  /*height: auto;*/
+  transition-duration: 1s;
+  transition-timing-function: ease;
+}
+.zoomA:hover {
+  transform: scale(3.0);
+  border-radius: 16%;
+  margin-left: -75px;
+}
+
+/* select2 arriba de modal */
+.select2-container {
+  z-index:1072;
+}
+
+/* select2 style */
+.select2-container--default .select2-selection--multiple {
+  background: #f4f7fa !important;
+  padding: 5px 10px !important;
+  height: auto !important;
+  display: block !important;
+  width: 100% !important;
+  line-height: 1.5 !important;
+  color: #495057 !important;
+  border: 1px solid #ced4da !important;
+  border-radius: .25rem !important;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
+}
+
+.select2-container--focus {
+  color:#495057;
+  background-color:#fff;
+  border: 1px solid #80bdff;
+  border-radius: .25rem;
+  outline:0;
+  box-shadow:0 0 0 .2rem rgba(0,123,255,.25)
+}
+
+/* Nav bar sobre el select2 */
+.pcoded-navbar {
+  z-index: 1074 !important;
+}
+
+.pcoded-navbar.mob-open~.pcoded-header:before, .pcoded-navbar.mob-open~.pcoded-main-container:before, .pcoded-navbar.navbar-collapsed:hover~.pcoded-header:before, .pcoded-navbar.navbar-collapsed:hover~.pcoded-main-container:before {
+  z-index: 1073 !important;
+}
+
+.with-wrap {
+  white-space:normal!important;
+}
+
+.pcoded-navbar .pcoded-submenu {
+  background: #39465e;
+  padding: 0px 0 !important; 
+}
+
+.border-radius-gray {
+  border: solid 1px #9292923b; 
+  border-radius: 10px;
+}
+
+.comment-note {
+  background: #f6e58d !important; 
+  /*color: #000 !important;*/
+}
+
+.comment-btn-border {
+  border: 1px solid #fff;
+}
+
+
+
+
+.select2-selection__rendered {
+    line-height: 42px !important;
+}
+.select2-container .select2-selection--single {
+    height: 42px !important;
+}
+.select2-selection__arrow {
+    height: 42px !important;
+}
+
+.select2-container--default .select2-selection--single {
+	background-color:#f4f7fa;
+	border: 1px solid #ced4da;
+}
+
+
+.avatar_circle {
+	background-size:cover; 
+	background-position:center center;
+	width:50px;
+	height:50px;
+	border-radius:100%;
+}

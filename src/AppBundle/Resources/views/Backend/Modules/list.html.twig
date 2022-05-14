@@ -1,0 +1,70 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Symfony Path</th>
+                    <th>Orden</th>
+                    <th>Visible</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td class="text-wrap">{{ item.description }}</td>
+                        <td>{{ item.urlAccess }}</td>
+                        <td>{{ item.orderModule }}</td>
+                        <td>
+                            {% if item.visible %}
+                                <a class="label bg-c-green f-12 text-white" href="#!">Si</a>
+                            {% else %}
+                                <a class="label bg-c-red f-12 text-white" href="#!">No</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_modules_edit', {'moduleId': item.id|md5}) }}" title="Editar" data-toggle="tooltip">
+                                <i class="feather icon-edit-1"></i>
+                            </a>
+                            <span  title="Eliminar" data-toggle="tooltip">
+                                <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white sweet-multiple"
+                                   data-href="{{
+                                                    path(
+                                                            'backend_modules_delete',
+                                                            {'moduleId': item.id|md5}
+                                            )}}"
+                                   data-name="{{ item.name }}"
+                                   href="javascript:;">
+                                    <i class="feather icon-trash-2"></i>
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

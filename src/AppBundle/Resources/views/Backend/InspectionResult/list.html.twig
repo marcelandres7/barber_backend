@@ -1,0 +1,94 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Nombre / Name</th>
+                    <th>Descripción</th>
+                    <th>Activo</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.name }} / {{ item.nameEng }}</td>
+                        <td>
+
+                            {% if item.inspectionResultId > 2 %}
+                                <a class="btn btn-icon text-white" style="width:150px;background: linear-gradient(-135deg,#23b7e5 0%,#1de9b6 100%);" href="javascript;" data-toggle="modal" data-target="#viewContent{{ item.inspectionResultId }}">
+                                    Ver Contenido
+                                </a>
+                            {% else %}
+                                Estatus Obligatorio / No modificable	                            
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if permits["dp"] %}
+                                {% if item.inspectionResultId > 2 %}
+                                    <div class="form-group">
+                                        <div class="switch switch-success d-inline m-r-10">
+                                            <input type="checkbox" id="switch-{{ item.inspectionResultId }}" {% if item.isActive == '1' %}checked{% endif %} onchange="activeChange({{ item.inspectionResultId }})" >
+                                            <label for="switch-{{ item.inspectionResultId }}" class="cr"></label> 
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if permits["ep"] %}
+                                {% if item.inspectionResultId > 2 %}                            
+                                    <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_inspection_result_edit', {'id': item.inspectionResultId|md5}) }}" title="Editar" data-toggle="tooltip">
+                                        <i class="feather icon-edit-1"></i>
+                                    </a>
+                                {% endif %}   
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <!-- The Modal -->
+                <div class="modal fade" id="viewContent{{item.inspectionResultId}}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Contenido / Content</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                    {{ item.description|raw }}
+                                </p>
+                                <p>
+                                    {{ item.descriptionEng|raw }}
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-rounded btn-outline-danger" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

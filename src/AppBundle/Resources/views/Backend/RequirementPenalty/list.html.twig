@@ -1,0 +1,59 @@
+<div class="card-header">
+    <h5>Listado</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Nombre / Name</th>
+                    <th>Cantidad</th>
+                    <th>Fecha de creación</th>
+                    <th>Activo</th>
+                     <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.name }} / {{ item.nameEng }}</td>
+                        <td>{{ item.amount }}</td>
+                        <td>{{ item.createdAt |date('d/M/Y H:m a') }}</td>
+                        <td>
+                            {% if permits["dp"] %}
+                                <div class="form-group">
+                                    <div class="switch switch-success d-inline m-r-10">
+                                        <input type="checkbox" id="switch-{{ item.requirementPenaltyId }}" {% if item.isActive == '1' %}checked{% endif %} onchange="activeChange({{ item.requirementPenaltyId }})" >
+                                        <label for="switch-{{ item.requirementPenaltyId }}" class="cr"></label> 
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if permits["ep"] %}
+                                <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_requirement_penalty_edit', {'id': item.requirementPenaltyId|md5}) }}" title="Editar" data-toggle="tooltip">
+                                    <i class="feather icon-edit-1"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

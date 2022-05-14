@@ -1,0 +1,1215 @@
+<?php
+
+namespace AppBundle\Controller\Webservice;
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type,x-prototype-version,x-requested-with');
+header('Content-type: application/json; charset=utf-8');
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use AppBundle\Entity\Inspection;
+use AppBundle\Entity\InspectionStatusLog;
+//use AppBundle\Entity\Branch;
+//use AppBundle\Entity\Organization;
+use AppBundle\Entity\InspectionRequeriment;
+//use AppBundle\Repository\EbClosion;
+use AppBundle\Helper\MailHelper;
+use Doctrine\ORM\EntityRepository;
+use AppBundle\Repository\RequirementRepository;
+use AppBundle\Entity\InspectionRequirementPicture;
+
+
+/**
+ * Webservice controller.
+ */
+class WebserviceController extends Controller{
+
+
+
+    public function getProjectPaths(){
+        $enviroment = $this->container->get('kernel')->getEnvironment();
+        $paths = array();
+        if($enviroment == "prod"){
+            $paths["uploads_path"]= 'https://ideas.aguilalibreweb.com/prlm_backend/web/';
+        }else{
+            $paths["uploads_path"]= 'https://ideas.aguilalibreweb.com/prlm_backend/web/';
+        }
+        
+        return $paths;
+        
+    }
+   	
+   	
+   		
+    /**
+     * @Route("/ws/organizations", name="/ws/organizations")
+     */
+    public function getOrganizations(Request $request)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+		$organizations = $em->getRepository('AppBundle:Organization')->findBy(array("status" => 'ACTIVO'));
+		
+		$list = array();
+		foreach($organizations as $org)
+		{
+			
+			$branch = $em->getRepository('AppBundle:Branch')->findBy(array("organization" => $org->getOrganizationId(), "isActive" => 1));
+			$branch_list = array();
+			foreach($branch as $location)
+			{
+				$branch_list[] = array(
+					'branchId' => $location->getBranchId(),
+					'name'	   => $location->getName(),
+					'description' => $location->getDescription(),
+					'type'     => $location->getBranchType()->getName(),
+					'type_eng'     => $location->getBranchType()->getNameEng()
+					
+				);
+			}
+			
+			$list[] = array(
+				'organizationId' => $org->getOrganizationId(),
+				'name'           => $org->getName(),
+				'branch_list'    =>	$branch_list
+			);
+		}
+		
+		return new JsonResponse(array('organizations' => $list));
+		
+	}
+	
+	
+	/**
+     * @Route("/ws/pending", name="/ws/pending")
+     */
+   public function getPending(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$list = array();
+
+		$em = $this->getDoctrine()->getManager();
+		
+		if($data)
+		{
+		   		$user = $data->user;			   
+			    $statusArray = array();
+			   	$inspectionStatus = $em->getRepository('AppBundle:InspectionStatus')->findBy(array("isActive" => 1));
+			   	foreach($inspectionStatus as $statusRaw)		
+			   	{
+				   	if($statusRaw->getInspectionStatusId() != 3)
+				   	{
+				   		$statusArray[] = $statusRaw->getInspectionStatusId();
+				   	}
+ 			   	}
+			   
+				$inspection = $em->getRepository('AppBundle:Inspection')->findBy(array("assignedUser"=>$user->id,"currentInspectionStatus" => $statusArray, "isActive" => 1));		
+				//$inspection = $em->getRepository('AppBundle:Inspection')->findBy(array("currentInspectionStatus" => array(1,2)));	
+				if ($inspection){
+						foreach($inspection as $insp)
+						{
+							$barprogress = $em->getRepository('AppBundle:Inspection')->getStaticsInspection($insp->getRequerimentGroup()->getRequirementGroupId(), $insp->getInspectionId());
+							switch($insp->getCurrentInspectionStatus()->getInspectionStatusId())
+							{
+								//en proceso
+								case 1:
+									$class = 'secondary';
+								break;
+								//pendiente
+								case 2:
+									$class = 'warning';						
+								break;
+								//completado
+								case 3:
+									$class = 'success';						
+								break;
+								default:
+									$class = 'dark';						
+								break;																		
+							}
+						
+							$list[] = array(
+								'status_class'	    => $class,
+								'status'			=> $insp->getCurrentInspectionStatus()->getName(),
+								'status_eng'			=> $insp->getCurrentInspectionStatus()->getNameEng(),
+								'status_id'			=> $insp->getCurrentInspectionStatus()->getInspectionStatusId(),						
+								'inspection'		=> $insp->getInspectionId(),
+								'organizationName'  => $insp->getOrganization()->getName(),
+								'branchName' 		=> $insp->getBranch()->getName(),
+								'organization' 		=> $insp->getOrganization()->getOrganizationId(),
+								'branch'			=> $insp->getBranch()->getBranchId(),
+								'service'			=> $insp->getService()->getServiceId(),
+								'type'				=> $insp->getRequerimentGroup()->getRequirementGroupId(),
+								'dateCreated' 		=> $insp->getCreatedAt(),
+								'barprogress'		=> $barprogress
+								
+							);
+						}
+			    }else{
+					return new JsonResponse(array('data' => "error inspection" ));
+				}
+				
+			}
+
+	   return new JsonResponse(array('data' => $list ));
+		
+	}
+
+	/**
+     * @Route("/ws/complete", name="/ws/complete")
+     */
+	public function getComplete(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		//print_r($data);
+		//exit;
+		$list = array();
+		//$user = $data->user;
+
+		if($data){
+			$user = $data->user;
+			$em = $this->getDoctrine()->getManager();
+			//$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user));
+			//$inspection = $em->getRepository('AppBundle:Inspection')->findBy(array("currentInspectionStatus" => 3));
+			$inspection = $em->getRepository('AppBundle:Inspection')->findBy(array("assignedUser"=>$user->id, "currentInspectionStatus" => 3, 'isActive' => 1));
+
+			if($inspection) {
+				foreach($inspection as $insp)
+				{   
+					$barprogress = $em->getRepository('AppBundle:Inspection')->getStaticsInspection($insp->getRequerimentGroup()->getRequirementGroupId(), $insp->getInspectionId());					
+					$list[] = array(
+						'inspection' => $insp->getInspectionId(),
+						'name'       => $insp->getOrganization()->getName(),
+						'branch' 	 => $insp->getBranch()->getName(),
+						'datefinish' => $insp->getUpdatedAt(),
+						'barprogress'=> $barprogress
+					);
+				}
+			}
+		}
+	return new JsonResponse(array('data' => $list));
+		
+	}
+
+
+	/**
+     * @Route("/ws/changestatusinspection", name="/ws/changestatusinspection")
+     */
+	public function changeStatusInspection(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		//$obj="";
+		
+		if($data)
+		//if(true)
+		{		      
+		    $status= $data->status*1;
+			$insp = $data->inspection*1;
+			$user =  $data->user;
+			$location=$data->latLng;
+            			
+		    /*$status = 2;
+			$insp = 172;
+			$user = 1;*/
+			
+				$em = $this->getDoctrine()->getManager();
+				$inspection = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+				$status = $em->getRepository('AppBundle:InspectionStatus')->findOneBy(array("inspectionStatusId" => $status));
+				$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user));	
+				
+				$inspectionLog = $em->getRepository('AppBundle:InspectionStatusLog')->findOneBy(array("inspection" => $inspection), array('inspectionStatusLogId' => 'DESC'));
+				if($inspectionLog){
+				    $inspectionLog->setEndTime(new \DateTime());				    
+				    $em->persist($inspectionLog);
+				    $em->flush();
+				    
+				    $insLog = new InspectionStatusLog();
+				    $insLog->setInspection($inspection);
+				    $insLog->setInspectionStatus($status);
+				    $insLog->setStartTime(new \DateTime());
+				    $insLog->setCreatedAt(new \DateTime());
+					$insLog->setCreatedBy($user);
+					$insLog->setGeolocation($location);
+				    $em->persist($insLog);
+				    $em->flush();
+				    				    
+				}else{
+				    $insLog = new InspectionStatusLog();
+				    $insLog->setInspection($inspection);
+				    $insLog->setInspectionStatus($status);
+				    $insLog->setStartTime(new \DateTime());
+				    $insLog->setCreatedAt(new \DateTime());
+					$insLog->setCreatedBy($user);
+					$insLog->setGeolocation($location);
+				    $em->persist($insLog);
+				    $em->flush();
+				}
+				
+				
+				if($inspection){
+
+					//$obj=$inspection->getInspectionId();
+
+					$inspection->setCurrentInspectionStatus($status);
+					$inspection->setUpdatedBy($user);
+					$inspection->setUpdatedAt(new \DateTime());
+					$em->persist($inspection);
+					$em->flush();
+					$data="Actualizado";
+					$objStatus=$inspection->getCurrentInspectionStatus()->getInspectionStatusId();
+					
+
+					return new JsonResponse(array('data' => $objStatus));
+				}
+			}
+
+		return new JsonResponse(array('data' => "Fallo de Actualizacion de ESTATUS"));
+
+	}
+	
+	/**
+     * @Route("/ws/services", name="/ws/services")
+     */
+    public function getServicesRequeriments(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$servArray = array();
+		$ReqArray = array();
+		$list = array();
+
+		if($data)
+		   {
+				//$branchid  = $data->branchid;
+				$em = $this->getDoctrine()->getManager();
+				$services = $em->getRepository('AppBundle:Service')->findBy(array("isActive" => 1));
+						
+				foreach($services as $serv)
+				{
+					$servArray[] = array(
+						'serviceid' => $serv->getServiceId(),
+						'name'      => $serv->getName(),
+						'name_eng'  => $serv->getNameEng()
+					);
+				}
+
+				$requirement=$em->getRepository('AppBundle:RequirementGroup')->findAll();
+				foreach($requirement as $req)
+				{
+					$ReqArray[] = array(
+						'requirementid' => $req->getRequirementGroupId(),
+						'name'      => $req->getName(),
+						'name_eng'  => $req->getNameEng(),
+						'color'     => $req->getColor()
+ 					);
+				}
+			}
+
+			$list = array(
+				'services' => $servArray,
+				'requirementsgroup' => $ReqArray
+			);
+
+	return new JsonResponse(array('data' => $list));
+		
+	}
+
+
+	/**
+     * @Route("/ws/create-inspection", name="/ws/create-inspection")
+     */
+    public function createInspection(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	
+			$branch = $data->branch;
+			$service = $data->service;
+			$type = $data->type;
+			$user = $data->user;
+			$gps =$data ->gps;
+
+			$branch = $em->getRepository('AppBundle:Branch')->findOneBy(array("branchId" => $branch));
+			$service = $em->getRepository('AppBundle:Service')->findOneBy(array("serviceId" => $service)); 
+			$type = $em->getRepository('AppBundle:RequirementGroup')->findOneBy(array("requirementGroupId" => $type));
+			$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user));
+			$status = $em->getRepository('AppBundle:InspectionStatus')->findOneBy(array("inspectionStatusId" => 2));
+		    
+			 $annObj = new Inspection();
+			 $annObj->setOrganization($branch->getOrganization());
+			 $annObj->setBranch($branch);			
+			 $annObj->setAssignedUser($user);		
+			 $annObj->setService($service);	
+			 $annObj->setCurrentInspectionStatus($status);
+			 $annObj->setRequerimentGroup($type);
+			 $annObj->setGpsLocation($gps);	
+			 $annObj->setIsActive(1);				 
+			 $annObj->setCreatedAt(new \DateTime());				
+			 $annObj->setCreatedBy($user);				
+			 $em->persist($annObj);
+			 $em->flush();			
+			 $data = $annObj->getInspectionId();        
+		
+			 return new JsonResponse(array('status' => 'success','data' => $data));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }    
+
+
+	/**
+     * @Route("/ws/requirement-type", name="/ws/requirement-type")
+     */
+    public function getRequirementType(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$ReqtypeArray = array();
+		$ReqStatusArray = array();
+		$list = array();
+		$em = $this->getDoctrine()->getManager();
+		
+		if($data)
+		{
+
+		   	$inspection = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $data->inspection, 'isActive' => 1));				
+			
+			if($inspection)
+			{	
+					$em = $this->getDoctrine()->getManager();
+					$typereq = $em->getRepository('AppBundle:Inspection')->getTypesByGroupId($inspection->getRequerimentGroup()->getRequirementGroupId(), $data->inspection);
+							
+					foreach($typereq as $typerq)
+					{
+						$ReqtypeArray[] = array(
+							'total_count'     => $typerq['total_count'],
+							'total_done'      => $typerq['total_completed'],							
+							'type_name'       => $typerq['type_name'],
+							'type_name_eng'   => $typerq['type_name_eng'],
+							'group_name'      => $typerq['group_name'],
+							'group_name_eng'  => $typerq['group_name_eng'],
+							'group_color'     => $typerq['color'],
+							'reqtypeid'       => $typerq['type_id'],
+							'progress'        => ($typerq['total_completed'] * 100 / $typerq['total_count'] / 100)
+						);
+					}
+	
+					$reqstatus = $em->getRepository('AppBundle:InspectionStatus')->findBy(array("isActive" => 1));
+	
+					foreach($reqstatus as $est)
+					{
+						if($inspection->getCurrentInspectionStatus()->getInspectionStatusId() != $est->getInspectionStatusId())
+						{
+							$ReqStatusArray[] = array(
+								'statusid' => $est->getInspectionStatusId(),
+								'name'  => $est->getName(),
+								'name_eng' => $est->getNameEng()
+		
+							);
+						}
+					}
+
+					$barprogress = $em->getRepository('AppBundle:Inspection')->getStaticsInspection($inspection->getRequerimentGroup()->getRequirementGroupId(), $data->inspection);
+							
+							
+				switch($inspection->getCurrentInspectionStatus()->getInspectionStatusId())
+				{
+					//en proceso
+					case 1:
+						$class = 'secondary';
+					break;
+					//pendiente
+					case 2:
+						$class = 'warning';						
+					break;
+					//completado
+					case 3:
+						$class = 'success';						
+					break;
+					default:
+						$class = 'dark';						
+					break;																		
+				}							
+							
+
+				$list = array(
+					'status'  		  => $inspection->getCurrentInspectionStatus()->getName(),
+					'status_eng'      => $inspection->getCurrentInspectionStatus()->getNameEng(),
+					'status_class'    => $class,
+					'reqtype' 		  => $ReqtypeArray,
+					'reqstatus' 	  => $ReqStatusArray,
+					'barprogress'     => $barprogress,
+					'statusinpection' => $inspection->getCurrentInspectionStatus()-> getInspectionStatusId()
+				);
+			}				
+		}	
+
+
+	return new JsonResponse(array('data' => $list));
+		
+	}
+
+	/**
+     * @Route("/ws/requirements", name="/ws/requirements")
+     */
+    public function getRequirements(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$ReqArray = array();
+		$OptsArray = array();  
+		$list = array();
+
+		if($data)
+		   {
+				$reqtype=$data->type;
+				$typegroup=$data->typegroup;
+				$em = $this->getDoctrine()->getManager();
+				$typegroup = $em->getRepository('AppBundle:RequirementGroup')->findBy(array("requirementGroupId" => $typegroup));
+				$requeriments = $em->getRepository('AppBundle:Requirement')->findBy(array("isActive" => 1,"requirementType" => $reqtype,"requirementGroup" => $typegroup));
+						
+				foreach($requeriments as $req)
+				{
+					$ReqArray[] = array(
+						'requirement' => $req->getRequirementId(),
+						'name'      => $req->getName(),
+						'name_eng'  => $req->getNameEng(),
+						'description' => $req->getDescription(),
+						'description_eng' => $req-> getDescriptionEng(),
+						'law_reference' => $req->getLawReference(),
+						'law_reference_eng' => $req->getLawReferenceEng(),
+						'penalty' => $req->getRequirementPenalty()->getRequirementPenaltyId()
+
+					);
+				}
+
+				$options = $em->getRepository('AppBundle:InspectionResult')->findBy(array("isActive" => 1));
+
+				foreach($options as $opt)
+				{
+					$OptsArray[] = array(
+						'optid' => $opt->getInspectionResultId(),
+						'name'  => $opt->getName(),
+						'name_eng' => $opt->getNameEng()
+
+					);
+				}	
+			}
+
+			$list = array(
+				'reqs' => $ReqArray,
+				'opts' => $OptsArray
+			);
+
+	return new JsonResponse(array('data' => $list));
+		
+	}
+
+     /**
+     * @Route("/ws/updaterequirementslist", name="/ws/updaterequirementslist")
+     */
+    public function updateRequiremtsList(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		$insp="";
+		$type="";
+		$typegroup="";
+		$requirement=array();
+		$DoneArray=array();
+		$pendingArray=array();		
+		$OptsArray = array();  
+		
+		if($data)
+		{
+			$insp = $data->inspection;
+			$type = $data->type;
+			$typegroup=$data->typegroup;
+			$em = $this->getDoctrine()->getManager();
+		
+			$requirement=$em->getRepository('AppBundle:Requirement')->getListByRequirement($type,$typegroup,$insp);
+		
+			//$ObjInspection=$em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+			//$ObjType=$em->getRepository('AppBundle:RequirementGroup')->findOneBy(array("requirementGroupId" => $type));
+			//$requirementDone=$em->getRepository('AppBundle:InspectionRequeriment')->findBy(array("inspection" => $ObjInspection));
+			$requirementDone=$em->getRepository('AppBundle:Requirement')->getListByRequirementDone($type,$typegroup,$insp);
+			
+			foreach($requirementDone as $done)
+			{
+				$DoneArray[] = array(			
+					'requirement'       => $done['requirement'],
+					'name'              => $done['name'],
+					'name_eng'          => $done['name_eng'],
+					'description'       => $done['description'],
+					'description_eng'   => $done['description_eng'],
+					'law_reference'     => $done['law_reference'],
+					'law_reference_eng' => $done['law_reference_eng'],
+					'penalty'           => $done['requirement_penalty_id'],
+					'option'            => $done['inspection_result_id'],
+					'comment'           => $done['comments'],
+					'picture_count'     => $done['picture_count'],
+					'isVisible'		    => false
+				);
+			}	
+			
+			foreach($requirement as $pending)
+			{
+				$pendingArray[] = array(
+					'requirement'       => $pending['requirement'],
+					'name'              => $pending['name'],
+					'name_eng'          => $pending['name_eng'],
+					'description'       => $pending['description'],
+					'description_eng'   => $pending['description_eng'],
+					'law_reference'     => $pending['law_reference'],
+					'law_reference_eng' => $pending['law_reference_eng'],
+					'penalty'           => $pending['requirement_penalty_id'],
+					'comment'           => $pending['comments'],
+					'picture_count'    => $pending['picture_count'],
+					'isVisible'	       => false				
+				);
+			}				
+			
+
+			$options = $em->getRepository('AppBundle:InspectionResult')->findBy(array("isActive" => 1));
+			
+			foreach($options as $opt)
+				{
+					$OptsArray[] = array(
+						'optid' => $opt->getInspectionResultId(),
+						'name'  => $opt->getName(),
+						'name_eng'  => $opt->getNameEng()
+					);
+				}	
+
+		}	
+
+		$list = array(
+			'requirement' => $pendingArray,
+			'requirementdone' => $DoneArray,
+			'opts' => $OptsArray
+		);
+		return new JsonResponse(array('data' => $list ));
+		//return new JsonResponse(array('data' => $type ));
+	}
+
+
+    /**
+     * @Route("/ws/setitemrequirement", name="/ws/setitemrequirement")
+     */
+	
+	public function setItemRequirement(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$ReqArray = array();
+		$OptsArray = array();  
+		$list = array();
+        $salida="NO CAMBIO";
+		if($data)
+		   {
+				$req = $data->requirement;
+				$insp = $data->inspection;
+				$opt = $data->option;
+				//$comment = $data->comment;
+				$reqinsp = $data->reqinspecid;
+				$user = $data->user;
+
+				$em = $this->getDoctrine()->getManager();
+				$requirement = $em->getRepository('AppBundle:Requirement')->findOneBy(array("requirementId" => $req));
+				$inspection = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+				$option = $em->getRepository('AppBundle:InspectionResult')->findOneBy(array("inspectionResultId" => $opt));
+				$inspection_req= $em->getRepository('AppBundle:InspectionRequeriment')->findOneBy(array("inspection" => $inspection,"requeriment" => $requirement)); 
+				$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user));		
+				
+				$data="Actualizando";
+				if($inspection_req)
+				{  
+					//$inspection_req->setComments($comment);	
+					$inspection_req->setInspectionResult($option);
+					$inspection_req->setUpdatedBy($user);
+					$inspection_req->setUpdatedAt(new \DateTime());
+					$em->persist($inspection_req);
+					$em->flush();
+					$data="Actualizado";
+
+				}
+				else{ $data="Insertando";
+					$annObj = new InspectionRequeriment();
+					$annObj->setInspection($inspection);
+					$annObj->setInspectionResult($option);			
+					$annObj->setRequeriment($requirement);
+					//$annObj->setComments($comment);		
+					$annObj->setCreatedAt(new \DateTime());				
+					$annObj->setCreatedBy($user);				
+					$em->persist($annObj);
+					$em->flush();			
+					//$data = $annObj->getInspectionId();    
+
+				}
+			
+			}
+
+			// $list = array(
+			// 	'reqs' => $ReqArray,
+			// 	'opts' => $OptsArray
+			// );
+			
+	return new JsonResponse(array('data' => "success",'salida' => $data));
+		
+	}
+
+
+	 /**
+     * @Route("/ws/savecommets", name="/ws/savecommets")
+     */
+	
+	public function saveCommets(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		$em = $this->getDoctrine()->getManager();		
+		$list = array();
+        $salida="NO CAMBIO";
+        
+		if($data)
+		{
+			$req = $data->requirement;
+			$insp = $data->inspection;
+			$comment = $data->comment;
+			$user = $data->user;
+
+			
+			$requirement    = $em->getRepository('AppBundle:Requirement')->findOneBy(array("requirementId" => $req));
+			$inspection     = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+			$inspection_req = $em->getRepository('AppBundle:InspectionRequeriment')->findOneBy(array("inspection" => $inspection,"requeriment" => $requirement)); 
+			$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user));		
+			
+			$data="Actualizando";
+			if($inspection_req)
+			{  
+				$inspection_req->setComments($comment);	
+				//$inspection_req->setInspectionResult($option);
+				$inspection_req->setUpdatedBy($user);
+				$inspection_req->setUpdatedAt(new \DateTime());
+				$em->persist($inspection_req);
+				$em->flush();
+				$data="Actualizado";
+			} else {
+				
+				$inspection_req = new InspectionRequeriment();
+				$inspection_req->setComments($comment);	
+				$inspection_req->setInspection($inspection);
+				$inspection_req->setRequeriment($requirement);				
+				$inspection_req->setUpdatedBy($user);
+				$inspection_req->setUpdatedAt(new \DateTime());
+				$em->persist($inspection_req);
+				$em->flush();
+								
+			}	
+		}
+			
+			return new JsonResponse(array('data' => "success",'salida' => $data));
+		
+	}
+
+	 /**
+     * @Route("/ws/generatesummary", name="/ws/generatesummary")
+     */
+	
+	public function generateSummary(Request $request)
+    {	
+		$data = json_decode(file_get_contents("php://input"));
+		$InspArray=array();
+		$list = array();
+		$summary = array();
+
+		if($data)
+		   {				
+				$insp = $data->inspection;
+		
+				$em         = $this->getDoctrine()->getManager();		
+				$summary    = $em->getRepository('AppBundle:Inspection')->getSummaryInspection($insp);
+				$inspection = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+				
+				$data = "Actualizando";
+				if($inspection)
+				{  
+					$InspArray[] = array(
+						'organization' =>$inspection->getOrganization()->getName(),
+						'branch'  => $inspection->getBranch()->getName(),
+						'service' => $inspection->getService()->getName(),
+						'reqgroup'=> $inspection->getRequerimentGroup()->getName(),
+						'reqgroup_eng'=> $inspection->getRequerimentGroup()->getNameEng(),
+						'creation'  => $inspection->getCreatedAt(),
+						'finish'  => $inspection->getUpdatedAt()
+					);
+				
+					$data = "Actualizado";
+				}
+							}
+				
+			 $list = array(
+			 	'insp'    => $InspArray,
+			 	'summary' => $summary
+			  );
+			
+	       return new JsonResponse(array('data' => $list));
+	
+	}
+
+	
+	/**
+     * @Route("/ws/getlistreqcomplete", name="/ws/getlistreqcomplete")
+     */
+    public function getListReqComplete(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$ReqArray = array();
+		
+
+		if($data)
+		   {
+				$inspection=$data->inspection;
+				$result=$data->result;
+
+				$em = $this->getDoctrine()->getManager();
+
+				$inspection_req = $em->getRepository('AppBundle:InspectionRequeriment')->findBy(array("inspection" => $inspection,"inspectionResult" => $result)); 
+						
+				foreach($inspection_req as $insReq)
+				{
+					
+					$ReqArray[] = array(
+						'requirement' => $insReq->getRequeriment()->getName(),
+						'requirement_eng' => $insReq->getRequeriment()->getNameEng(),
+						'requerimentId'=> $insReq->getRequeriment()->getRequirementId(),
+						'type'      => $insReq->getRequeriment()->getRequirementType()->getName(),
+						'type_eng'      => $insReq->getRequeriment()->getRequirementType()->getNameEng(),
+						'law'       => $insReq->getRequeriment()->getLawReference(),
+						'law_eng'       => $insReq->getRequeriment()->getLawReferenceEng(),							
+						'typeId' => $insReq->getRequeriment()->getRequirementType()->getRequirementTypeId()
+					);
+				}
+
+				
+			}
+
+
+	return new JsonResponse(array('data' => $ReqArray));
+		
+	}
+
+	
+	/**
+     * @Route("/ws/getcompleteitemdetail", name="/ws/getcompleteitemdetail")
+     */
+    public function getCompleteItemDetail(Request $request)
+    {
+		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$ReqArray = array();
+		$PictureArray= array();
+
+		if($data)
+		   {
+				$inspection=$data->inspection;
+				$requirement=$data->requirement;
+
+				$em = $this->getDoctrine()->getManager();
+
+				$inspection_req = $em->getRepository('AppBundle:InspectionRequeriment')->findOneBy(array("inspection" => $inspection,"requeriment" => $requirement)); 
+			    $inspection_picture=$em->getRepository('AppBundle:InspectionRequirementPicture')->findBy(array("inspection" => $inspection,"requirement" => $requirement)); 
+		
+				foreach($inspection_picture as $picture)
+				{
+	
+					$PictureArray[] = array(
+						'picture' => $picture->getPicturePath()
+					);
+				}
+				
+				
+				    $ReqArray[] = array(
+						'req_name' => $inspection_req->getRequeriment()->getName(),
+						'req_name_eng' => $inspection_req->getRequeriment()->getNameEng(),
+						'req_law'=> $inspection_req->getRequeriment()->getLawReference(),
+						'req_law_eng'=> $inspection_req->getRequeriment()->getLawReferenceEng(),
+						'req_description'=> $inspection_req->getRequeriment()->getDescription(),
+						'req_description_eng'=> $inspection_req->getRequeriment()->getDescriptionEng(),
+						'type'      => $inspection_req->getRequeriment()->getRequirementType()->getName(),
+						'type_eng'      => $inspection_req->getRequeriment()->getRequirementType()->getNameEng(),
+						'result' => $inspection_req->getInspectionResult()->getName(),
+						'result_eng' => $inspection_req->getInspectionResult()->getNameEng(),
+						'comments' => $inspection_req->getComments(),
+						'pictures'  => $PictureArray,
+						'penalty'  => $inspection_req->getRequeriment()->getRequirementPenalty()->getName(),
+						'penalty_eng'  => $inspection_req->getRequeriment()->getRequirementPenalty()->getNameEng(),
+						'penalty_amount'  => $inspection_req->getRequeriment()->getRequirementPenalty()->getAmount()
+					);
+			
+			}
+
+
+	      return new JsonResponse(array('data' => $ReqArray));
+		
+	}
+
+
+ 
+	/**
+     * @Route("/ws/check_user", name="/ws/check_user")
+     */
+    public function checkUserAction(Request $request) {
+
+		$data = json_decode(file_get_contents("php://input"));
+ 
+		if($data)
+		{
+			$user = $data->user;
+			$pwd  = $this->encodePassword($data->pwd);
+ 
+			$em = $this->getDoctrine()->getManager();
+			$user = $em->getRepository('AppBundle:User')->findOneBy(array(
+				"email" => $user,
+				"password" => $pwd,
+				'status' => 'ACTIVO'
+			));
+			
+			if($user)
+			{
+				
+			/*	$path = $this->images_path."user_icon.png";
+				if(strlen($user->getAvatarPath()) > 0)
+				{
+					 $path = $this->uploads_path.$user->getAvatarPath();
+				}			   
+			*/	
+				$data = array(
+					  'id'         => $user->getId(),
+					  'name'       => $user->getFirstName()." ".$user->getLastName(),
+					  'first_name' => $user->getFirstName(),
+					  'last_name'  => $user->getLastName(),			   	  
+					  'email'      => $user->getEmail(),
+					  'token'      => md5($user->getId()),			   	  			   	  
+					//  'avatar'     => $path,
+					  'organizationId' => $user->getOrganization()->getOrganizationId()
+				);
+			
+				return new JsonResponse(array('status' => 'success', 'data' => $data ));	       
+				
+			} else {
+				return new JsonResponse(array('status' => 'invalid'));	       
+			}
+		} else {
+			return new JsonResponse(array('status' => 'error'));	       
+		}
+ 
+		 
+	 }
+
+   
+	
+
+	public function addMinutes($date_start, $minutes ){
+	    $newDate = date('Y-m-d H:i:s',strtotime("+$minutes minutes",strtotime($date_start)));
+	    return $newDate;
+	}    
+        
+    
+    
+    public function encodePassword($raw)
+	{
+		
+		$iterations = 5000;
+		$salted = $raw;
+		$digest = hash('md5', $salted, true);
+		for ($i = 1; $i < $iterations; ++$i) {
+	            $digest = hash('md5', $digest.$salted, true);
+	    }
+		
+		return base64_encode($digest);
+		
+	}	
+
+
+    public function time_elapsed_string($datetime)
+    {
+	    $full = false;
+	    $now = new \DateTime;
+	    $ago = new \DateTime($datetime);
+	    $diff = $now->diff($ago);
+	
+	    $diff->w = floor($diff->d / 7);
+	    $diff->d -= $diff->w * 7;
+	
+	    $string = array(
+	        'y' => 'aÃ±o',
+	        'm' => 'mes',
+	        'w' => 'semana',
+	        'd' => 'dÃ­a',
+	        'h' => 'hora',
+	        'i' => 'minuto',
+	        's' => 'segundo',
+	    );
+	    foreach($string as $k => &$v)
+	    {
+	        if($diff->$k)
+	        {
+		        
+		        if($k == 'm' && $diff->$k > 1)
+		        {
+			    	$v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 'es' : '');    
+		        } else {
+			        $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');    
+		        }
+	            
+	        } else {
+	            unset($string[$k]);
+	        }
+	    }
+	
+	    if (!$full) $string = array_slice($string, 0, 1);
+	    return $string ? implode(', ', $string) . '' : 'Hace un momento';
+
+    }
+  
+	public function wrap($text, $quantity = 15)
+    {        
+    
+    	// trim and lowercase
+    	$xtext = substr($text, 0, $quantity);
+
+		if(strlen($xtext)==0)
+		{
+		   return "";
+		} else {
+		
+			if(strlen($text) > $quantity)
+			{
+				return $xtext."...";
+			}
+			
+			return $xtext;		
+		}
+		
+
+		
+    	return $xtext;
+	}
+	
+	/**
+     * @Route("/ws/prueba", name="/ws/prueba")
+     */
+	public function prueba(Request $request)
+    {
+		$data = 1;//json_decode(file_get_contents("php://input"));
+		$insp=16;
+		$type=4;
+		$typegroup=1;
+		$requirement=array();
+		$DoneArray=array();
+		$OptsArray = array();  
+		
+		if($data)
+		{
+			//$insp = $data->inspection;
+			//$type = $data->type;
+			//$typegroup=$data->typegroup;
+			$em = $this->getDoctrine()->getManager();
+		
+			$requirement=$em->getRepository('AppBundle:Requirement')->getListByRequirement($type,$typegroup,$insp);
+		
+			//$ObjInspection=$em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $insp));
+			//$ObjType=$em->getRepository('AppBundle:RequirementGroup')->findOneBy(array("requirementGroupId" => $type));
+			//$requirementDone=$em->getRepository('AppBundle:InspectionRequeriment')->findBy(array("inspection" => $ObjInspection));
+			
+			/*foreach($requirementDone as $done)
+			{
+				$DoneArray[] = array(
+					'requeriment' => $done->getRequeriment()->getRequirementId(),
+					'name'  => $done->getRequeriment()->getName(),
+					'description' => $done->getRequeriment()->getDescription(),
+					'law_reference'  => $done->getRequeriment()->getLawReference(),
+					'penalty'  => $done->getRequeriment()->getRequirementPenalty()->getRequirementPenaltyId(),
+					'option' => $done->getInspectionResult()->getInspectionResultId()
+				);
+			}	
+
+			$options = $em->getRepository('AppBundle:InspectionResult')->findBy(array("isActive" => 1));
+			
+			foreach($options as $opt)
+				{
+					$OptsArray[] = array(
+						'optid' => $opt->getInspectionResultId(),
+						'name'  => $opt->getName()
+					);
+				}	
+          */
+		}	
+
+		
+		return new JsonResponse(array('data' => $requirement ));
+		//return new JsonResponse(array('data' => $type ));
+	}
+
+
+
+    /**
+     * @Route("/ws/upload-file", name="/ws/upload-file")
+     */
+    public function uploadAction(Request $request) {
+
+
+       $em = $this->getDoctrine()->getManager();		
+	   
+       $uploadfile     = $_FILES['file']['name'];
+       $uploadfilename = $_FILES['file']['tmp_name'];
+	   $array          = array();
+      
+	   if($uploadfile)
+	   {
+		   
+	        $ext         = $_POST['ext'];
+	        $inspectionNum  = $_POST['inspection'];	        
+	        $requirementNum = $_POST['requirement'];	        	        
+	        $token       = json_decode($_POST['token']);	        
+
+			$fileName = md5(date("YmdHis")).".".$ext;
+	        $new = "uploads/".$fileName;
+	       // $newPath = $this->uploads_path.$fileName;
+	        $datos = "";
+            if(move_uploaded_file($uploadfilename, $new))
+            {			   		        		        		        
+				$userObj = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $token->id));												
+				$inspection = $em->getRepository('AppBundle:Inspection')->findOneBy(array("inspectionId" => $inspectionNum));
+				$requirement = $em->getRepository('AppBundle:Requirement')->findOneBy(array("requirementId" => $requirementNum));
+			  
+				$dato1  = $inspection->getInspectionId();
+				$dato2  = $requirement->getRequirementId();
+				
+					
+				$insReqPict = new InspectionRequirementPicture();
+				$insReqPict->setInspection($inspection);	
+				$insReqPict->setRequirement($requirement);			
+				$insReqPict->setCreatedBy($userObj);
+				$insReqPict->setPicturePath($new);
+				$insReqPict->setCreatedAt(new \DateTime());
+				$em->persist($insReqPict);
+				$em->flush();
+            
+	            
+				$path = $this->getProjectPaths();	
+	            $pictures = $em->getRepository('AppBundle:InspectionRequirementPicture')->findBy(array("inspection" => $inspection,"requirement" => $requirement));
+		        foreach($pictures as $picture)
+				{
+					$picturePath = $path['uploads_path'].$picture->getPicturePath();					            					
+					$array[] = array(
+						'picture_id'   => $picture->getInspectionRequirementPictureId(),						
+						'picture_path' => $picturePath
+					);
+				}
+
+				return new JsonResponse(array('status' => 'success','Insp'=>$dato1,'Req'=>$dato2,'pictures' => $array, 'datos'=>$datos));				
+			} 
+						
+		}
+		
+		return new JsonResponse(array('status' => 'error'));		
+    }   
+    
+    
+	/**
+     * @Route("/ws/get-files", name="/ws/get-files")
+     */
+    public function getFilesAction(Request $request) {
+
+		$array = array();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		$path = $this->getProjectPaths();
+		if($data)
+		{
+			$inspection  = $data->inspection;
+			$requirement = $data->requirement;
+
+			$em = $this->getDoctrine()->getManager();
+		
+			$pictures = $em->getRepository('AppBundle:InspectionRequirementPicture')->findBy(array("inspection" => $inspection, "requirement" => $requirement));
+			
+
+			foreach($pictures as $picture)
+			{
+				$picturePath = $path['uploads_path'].$picture->getPicturePath();
+				$array[] = array(
+					'picture_id'   => $picture->getInspectionRequirementPictureId(),
+					'picture_path' => $picturePath
+				);
+			}
+		}	
+
+		
+		return new JsonResponse(array('data' => $array ));
+
+    }        
+
+
+
+	/**
+     * @Route("/ws/d-file", name="/ws/d-file")
+     */
+    public function deleteFileAction(Request $request) {
+
+		$array = array();		
+		$data = json_decode(file_get_contents("php://input"));	
+		if($data)
+		{
+			$fid         = $data->fid;
+			$inspection  = $data->inspection;			
+			$requirement = $data->requirement;			
+
+			$em = $this->getDoctrine()->getManager();
+		
+			$picture = $em->getRepository('AppBundle:InspectionRequirementPicture')->findOneBy(array("inspectionRequirementPictureId" => $fid));			
+			@unlink($picture->getPicturePath());
+			
+			$em->remove($picture);
+			$em->flush();
+			
+			$path = $this->getProjectPaths();				
+			$pictures = $em->getRepository('AppBundle:InspectionRequirementPicture')->findBy(array("inspection" => $inspection, "requirement" => $requirement));			
+			foreach($pictures as $picture)
+			{
+				$picturePath = $path['uploads_path'].$picture->getPicturePath();
+				$array[] = array(
+					'picture_id'   => $picture->getInspectionRequirementPictureId(),
+					'picture_path' => $picturePath
+				);
+			}			
+			
+			
+		}	
+
+		
+		return new JsonResponse(array('data' => $array ));
+
+    }        
+    
+
+
+}

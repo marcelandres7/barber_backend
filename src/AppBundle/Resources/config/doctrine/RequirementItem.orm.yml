@@ -1,0 +1,71 @@
+AppBundle\Entity\RequirementItem:
+    type: entity
+    table: requirement_item
+    indexes:
+        fk_requirement_id_1005_idx:
+            columns:
+                - requirement_id
+        fk_created_by_8545_idx:
+            columns:
+                - created_by
+        fk_updated_by_754_idx:
+            columns:
+                - updated_by
+    id:
+        requirementItemId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: requirement_item_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        articleContent:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+            column: article_content
+        isActive:
+            type: boolean
+            nullable: true
+            default: '0'
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+    manyToOne:
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        requirement:
+            targetEntity: Requirement
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                requirement_id:
+                    referencedColumnName: requirement_id
+            orphanRemoval: false
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

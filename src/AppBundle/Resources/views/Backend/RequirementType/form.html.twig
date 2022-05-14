@@ -1,0 +1,47 @@
+{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+<form method="post" action="" id="sForm" class="validateForm" autocomplete="false" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.name, "Nombre") }}
+                {{form_widget(form.name, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.nameEng, "Nombre en ingles") }}
+                {{form_widget(form.nameEng, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.weight, "Peso") }}
+                {{form_widget(form.weight, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.requirementGroup, "Grupo de requisitos") }}
+                {{form_widget(form.requirementGroup, {'attr': {'class': 'required select form-control' }}) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-6">
+            <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+
+        </div>
+        <div class="col-md-6 col-6">
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    {{ form_widget(form._token) }}
+</form>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.select').select2();
+    });
+</script>

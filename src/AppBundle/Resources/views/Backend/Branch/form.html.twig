@@ -1,0 +1,44 @@
+{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+<form method="post" action="" id="sForm" class="validateForm" autocomplete="false" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.name, "Nombre") }}
+                {{form_widget(form.name, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ form_label(form.branchType, "Tipo de sucursal") }}
+                {{form_widget(form.branchType, {'attr': {'class': 'required select form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ form_label(form.description, "Contenido") }}
+                {{form_widget(form.description, {'attr': {'class': 'required form-control' }}) }}
+            </div>
+        </div>
+        <div class="col-md-6 col-6">
+            <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+
+        </div>
+        <div class="col-md-6 col-6">
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    {{ form_widget(form._token) }}
+</form>
+<script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
+<script>
+    CKEDITOR.replace('appbundle_branch[description]');
+</script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.select').select2();
+    });
+</script>

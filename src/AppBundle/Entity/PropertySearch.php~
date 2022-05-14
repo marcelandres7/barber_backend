@@ -1,0 +1,587 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * PropertySearch
+ */
+class PropertySearch
+{
+    /**
+     * @var integer
+     */
+    private $propertySearchId;
+
+    /**
+     * @var boolean
+     */
+    private $buy;
+
+    /**
+     * @var boolean
+     */
+    private $rent;
+
+    /**
+     * @var string
+     */
+    private $country;
+
+    /**
+     * @var string
+     */
+    private $state;
+
+    /**
+     * @var string
+     */
+    private $subdivision;
+
+    /**
+     * @var string
+     */
+    private $zipcode;
+
+    /**
+     * @var string
+     */
+    private $price;
+
+    /**
+     * @var integer
+     */
+    private $betrooms;
+
+    /**
+     * @var integer
+     */
+    private $badrooms;
+
+    /**
+     * @var integer
+     */
+    private $garage;
+
+    /**
+     * @var boolean
+     */
+    private $swimmingPool;
+
+    /**
+     * @var boolean
+     */
+    private $waterfront;
+
+    /**
+     * @var boolean
+     */
+    private $singleFamily;
+
+    /**
+     * @var boolean
+     */
+    private $apartment;
+
+    /**
+     * @var boolean
+     */
+    private $towhouse;
+
+    /**
+     * @var boolean
+     */
+    private $other;
+
+    /**
+     * @var string
+     */
+    private $address;
+
+    /**
+     * @var string
+     */
+    private $comments;
+
+    /**
+     * @var \DateTime
+     */
+    private $createdAt;
+
+    /**
+     * @var \AppBundle\Entity\Contact
+     */
+    private $contact;
+
+
+    /**
+     * Get propertySearchId
+     *
+     * @return integer 
+     */
+    public function getPropertySearchId()
+    {
+        return $this->propertySearchId;
+    }
+
+    /**
+     * Set buy
+     *
+     * @param boolean $buy
+     * @return PropertySearch
+     */
+    public function setBuy($buy)
+    {
+        $this->buy = $buy;
+    
+        return $this;
+    }
+
+    /**
+     * Get buy
+     *
+     * @return boolean 
+     */
+    public function getBuy()
+    {
+        return $this->buy;
+    }
+
+    /**
+     * Set rent
+     *
+     * @param boolean $rent
+     * @return PropertySearch
+     */
+    public function setRent($rent)
+    {
+        $this->rent = $rent;
+    
+        return $this;
+    }
+
+    /**
+     * Get rent
+     *
+     * @return boolean 
+     */
+    public function getRent()
+    {
+        return $this->rent;
+    }
+
+    /**
+     * Set country
+     *
+     * @param string $country
+     * @return PropertySearch
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+    
+        return $this;
+    }
+
+    /**
+     * Get country
+     *
+     * @return string 
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * Set state
+     *
+     * @param string $state
+     * @return PropertySearch
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
+    
+        return $this;
+    }
+
+    /**
+     * Get state
+     *
+     * @return string 
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * Set subdivision
+     *
+     * @param string $subdivision
+     * @return PropertySearch
+     */
+    public function setSubdivision($subdivision)
+    {
+        $this->subdivision = $subdivision;
+    
+        return $this;
+    }
+
+    /**
+     * Get subdivision
+     *
+     * @return string 
+     */
+    public function getSubdivision()
+    {
+        return $this->subdivision;
+    }
+
+    /**
+     * Set zipcode
+     *
+     * @param string $zipcode
+     * @return PropertySearch
+     */
+    public function setZipcode($zipcode)
+    {
+        $this->zipcode = $zipcode;
+    
+        return $this;
+    }
+
+    /**
+     * Get zipcode
+     *
+     * @return string 
+     */
+    public function getZipcode()
+    {
+        return $this->zipcode;
+    }
+
+    /**
+     * Set price
+     *
+     * @param string $price
+     * @return PropertySearch
+     */
+    public function setPrice($price)
+    {
+        $this->price = $price;
+    
+        return $this;
+    }
+
+    /**
+     * Get price
+     *
+     * @return string 
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * Set betrooms
+     *
+     * @param integer $betrooms
+     * @return PropertySearch
+     */
+    public function setBetrooms($betrooms)
+    {
+        $this->betrooms = $betrooms;
+    
+        return $this;
+    }
+
+    /**
+     * Get betrooms
+     *
+     * @return integer 
+     */
+    public function getBetrooms()
+    {
+        return $this->betrooms;
+    }
+
+    /**
+     * Set badrooms
+     *
+     * @param integer $badrooms
+     * @return PropertySearch
+     */
+    public function setBadrooms($badrooms)
+    {
+        $this->badrooms = $badrooms;
+    
+        return $this;
+    }
+
+    /**
+     * Get badrooms
+     *
+     * @return integer 
+     */
+    public function getBadrooms()
+    {
+        return $this->badrooms;
+    }
+
+    /**
+     * Set garage
+     *
+     * @param integer $garage
+     * @return PropertySearch
+     */
+    public function setGarage($garage)
+    {
+        $this->garage = $garage;
+    
+        return $this;
+    }
+
+    /**
+     * Get garage
+     *
+     * @return integer 
+     */
+    public function getGarage()
+    {
+        return $this->garage;
+    }
+
+    /**
+     * Set swimmingPool
+     *
+     * @param boolean $swimmingPool
+     * @return PropertySearch
+     */
+    public function setSwimmingPool($swimmingPool)
+    {
+        $this->swimmingPool = $swimmingPool;
+    
+        return $this;
+    }
+
+    /**
+     * Get swimmingPool
+     *
+     * @return boolean 
+     */
+    public function getSwimmingPool()
+    {
+        return $this->swimmingPool;
+    }
+
+    /**
+     * Set waterfront
+     *
+     * @param boolean $waterfront
+     * @return PropertySearch
+     */
+    public function setWaterfront($waterfront)
+    {
+        $this->waterfront = $waterfront;
+    
+        return $this;
+    }
+
+    /**
+     * Get waterfront
+     *
+     * @return boolean 
+     */
+    public function getWaterfront()
+    {
+        return $this->waterfront;
+    }
+
+    /**
+     * Set singleFamily
+     *
+     * @param boolean $singleFamily
+     * @return PropertySearch
+     */
+    public function setSingleFamily($singleFamily)
+    {
+        $this->singleFamily = $singleFamily;
+    
+        return $this;
+    }
+
+    /**
+     * Get singleFamily
+     *
+     * @return boolean 
+     */
+    public function getSingleFamily()
+    {
+        return $this->singleFamily;
+    }
+
+    /**
+     * Set apartment
+     *
+     * @param boolean $apartment
+     * @return PropertySearch
+     */
+    public function setApartment($apartment)
+    {
+        $this->apartment = $apartment;
+    
+        return $this;
+    }
+
+    /**
+     * Get apartment
+     *
+     * @return boolean 
+     */
+    public function getApartment()
+    {
+        return $this->apartment;
+    }
+
+    /**
+     * Set towhouse
+     *
+     * @param boolean $towhouse
+     * @return PropertySearch
+     */
+    public function setTowhouse($towhouse)
+    {
+        $this->towhouse = $towhouse;
+    
+        return $this;
+    }
+
+    /**
+     * Get towhouse
+     *
+     * @return boolean 
+     */
+    public function getTowhouse()
+    {
+        return $this->towhouse;
+    }
+
+    /**
+     * Set other
+     *
+     * @param boolean $other
+     * @return PropertySearch
+     */
+    public function setOther($other)
+    {
+        $this->other = $other;
+    
+        return $this;
+    }
+
+    /**
+     * Get other
+     *
+     * @return boolean 
+     */
+    public function getOther()
+    {
+        return $this->other;
+    }
+
+    /**
+     * Set address
+     *
+     * @param string $address
+     * @return PropertySearch
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    
+        return $this;
+    }
+
+    /**
+     * Get address
+     *
+     * @return string 
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * Set comments
+     *
+     * @param string $comments
+     * @return PropertySearch
+     */
+    public function setComments($comments)
+    {
+        $this->comments = $comments;
+    
+        return $this;
+    }
+
+    /**
+     * Get comments
+     *
+     * @return string 
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     * @return PropertySearch
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime 
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set contact
+     *
+     * @param \AppBundle\Entity\Contact $contact
+     * @return PropertySearch
+     */
+    public function setContact(\AppBundle\Entity\Contact $contact = null)
+    {
+        $this->contact = $contact;
+    
+        return $this;
+    }
+
+    /**
+     * Get contact
+     *
+     * @return \AppBundle\Entity\Contact 
+     */
+    public function getContact()
+    {
+        return $this->contact;
+    }
+}

@@ -1,0 +1,78 @@
+AppBundle\Entity\Booking:
+    type: entity
+    table: booking
+    repositoryClass: AppBundle\Repository\BookingRepository
+    indexes:
+        booking2created_idx:
+            columns:
+                - created_by
+        booking2updated_idx:
+            columns:
+                - updated_by
+        booking2bookingarea_idx:
+            columns:
+                - booking_area_id
+        booking2status_idx:
+            columns:
+                - booking_status_id
+        booking2unit_idx:
+            columns:
+                - unit_id
+    id:
+        bookingId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: booking_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        scheduledAt:
+            type: datetime
+            nullable: true
+            column: scheduled_at
+        bookingConsumeMinutes:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: booking_consume_minutes
+        checkIn:
+            type: datetime
+            nullable: true
+            column: check_in
+        checkOut:
+            type: datetime
+            nullable: true
+            column: check_out
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        updatedAt:
+            type: datetime
+            nullable: true
+            column: updated_at
+    manyToOne:
+        
+        createdBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                created_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+       
+        updatedBy:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                updated_by:
+                    referencedColumnName: id
+            orphanRemoval: false
+        
+    lifecycleCallbacks: {  }

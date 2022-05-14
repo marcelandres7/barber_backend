@@ -1,0 +1,80 @@
+<div class="card-header">
+    <h5>{% if isComplete == 1 %}Completados{% endif %}{% if isComplete == 0 %}Pendientes{% endif %}{% if isComplete == 2 %}Cancelados{% endif %}</h5>
+    <div class="card-header-right">
+        <div class="btn-group card-option">
+            <button type="button" class="btn dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="feather icon-more-horizontal"></i>
+            </button>
+            <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> Maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> Collapse</span><span style="display:none"><i class="feather icon-plus"></i> Expand</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card-block table-border-style">
+    <div class="table-responsive">
+        <table class="table table-hover dataTable">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Avance</th>
+                    <th>Estatus</th>                    
+                    <th>Organizaci&oacute;n</th>                    
+                    <th>Servicio</th>
+                    <th>Asignado a</th>
+                    <th>Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list %}
+                    <tr>
+                        <td>{{ item.inspection.createdAt | date("d/m/Y") }}</td>
+                        <td>
+	                        <div class="progress">
+							  <div class="progress-bar" role="progressbar" style="width: {{item.progress.percent * 100}}%" aria-valuenow="{{item.progress.percent * 100}}" aria-valuemin="0" aria-valuemax="100"></div>
+							</div>
+							<small>{{item.progress.total_done}} / {{item.progress.total_requirements}}</small>
+                        </td>
+                        <td>{{ item.inspection.currentInspectionStatus.name }}</td>                                                   
+                        <td>{{ item.inspection.organization.name }}&nbsp;&nbsp;<i class='fa fa-chevron-right'></i>&nbsp;&nbsp;{{ item.inspection.branch.name }}</td>
+                        <td>{{ item.inspection.service.name }} ({{ item.inspection.requerimentGroup.name }})</td>                           
+                        <td>{{ item.inspection.assignedUser.firstName }} {{ item.inspection.assignedUser.lastName }}</td>                                                
+                        <td>
+                            <a class="btn btn-icon btn-rounded theme-bg2 text-white" href="{{ path('backend_statistics_view', {'id': item.inspection.inspectionId | md5}) }}" title="Ver detalles" data-toggle="tooltip">
+                                <i class="fa fa-search"></i>
+                            </a>
+                            
+                            {% if isComplete == 0 %}
+		                             <span  title="Cancelar" data-toggle="tooltip">
+                                        <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white cancel_button sweet-multiple"
+                                           data-id="{{ item.inspection.inspectionId }}" data-name="registro" 
+                                           data-href="{{ path('backend_statistics', {'cid': item.inspection.inspectionId | md5, 'cancel':true}) }}">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </span>
+                            
+                            {% endif %}
+							{% if isComplete == 2 %}
+		                             <span  title="Activar" data-toggle="tooltip">
+                                        <a id="btn-delete" class="btn btn-icon btn-rounded btn-info text-white active_button sweet-multiple"
+                                           data-id="{{ item.inspection.inspectionId }}" data-name="registro" 
+                                           data-href="{{ path('backend_statistics', {'cid': item.inspection.inspectionId | md5, 'cancel':true}) }}">
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                    </span>
+                            
+                            {% endif %}
+
+                        </td>
+                    </tr>
+               
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+

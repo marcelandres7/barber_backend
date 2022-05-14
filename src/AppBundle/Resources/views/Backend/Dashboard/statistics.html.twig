@@ -1,0 +1,127 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-9">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Listado de ejecución</h5>
+                    </div>                    
+                </div>
+                <div class="col-md-6 col-3 text-right">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+	{{ include('@App/Backend/flash_message.html.twig') }}
+    <div class="main-body">
+        <div class="page-wrapper">
+	        
+            <div class="row">
+                <div class="col-sm-12">
+	                <div class="card Application-list">                   
+                        {% if permits["rp"] %}
+                            {{ include('@App/Backend/Dashboard/statistics_list.html.twig', { 'list': list, isComplete: 0 }) }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+            <div class="row">
+                <div class="col-sm-12">
+	                <div class="card Application-list">                   
+                        {% if permits["rp"] %}
+                            {{ include('@App/Backend/Dashboard/statistics_list.html.twig', { 'list': listDone, isComplete: 1 }) }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+			<br>
+            <div class="row">
+                <div class="col-sm-12">
+	                <div class="card Application-list">                   
+                        {% if permits["rp"] %}
+                            {{ include('@App/Backend/Dashboard/statistics_list.html.twig', { 'list': listCancel, isComplete: 2 }) }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>            
+        </div>
+    </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script type="text/javascript">       
+        $(document).ready(function () {
+            $('.dataTable').DataTable({
+                "stateSave": true
+            });
+            $('#sForm').validate({
+                submitHandler: function (form) {
+                    var saveButton = document.getElementById("button-save");
+                    var validateForm = document.getElementById("sForm");
+                    saveButton.setAttribute("disabled", true);
+                    saveButton.innerHTML = "<span class='spinner-border spinner-border-sm' role='status'></span> Loading...";
+                    var elements = validateForm.elements;
+                    for (var i = 0, len = elements.length; i < len; ++i) {
+                        elements[i].readOnly = true;
+                    }
+                    document.getElementById("sForm").submit();
+                }
+            });
+        });
+        
+        
+		
+        $('.cancel_button').on('click', function () {
+            swal({
+                title: '¿Quieres cancelar este registro?',
+                icon: "warning",
+                buttons: ["Cancelar", true],
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    swal({
+                        text: 'Un momento...',
+                        icon: "info",
+                        buttons: false,
+                        content: {
+                            element: "span",
+                            attributes: {
+                                className: "spinner-border spinner-border-sm"
+                            }
+                        }
+                    });
+                    window.location = $(this).attr('data-href');
+                }
+            });
+        });
+        
+        $('.active_button').on('click', function () {
+            swal({
+                title: '¿Quieres activar este registro?',
+                icon: "warning",
+                buttons: ["Cancelar", true],
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    swal({
+                        text: 'Un momento...',
+                        icon: "info",
+                        buttons: false,
+                        content: {
+                            element: "span",
+                            attributes: {
+                                className: "spinner-border spinner-border-sm"
+                            }
+                        }
+                    });
+                    window.location = $(this).attr('data-href');
+                }
+            });
+        });        
+     
+    </script>
+{% endblock %}

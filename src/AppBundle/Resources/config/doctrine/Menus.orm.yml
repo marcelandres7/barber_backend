@@ -1,0 +1,82 @@
+AppBundle\Entity\Menus:
+    type: entity
+    table: menus
+    repositoryClass: AppBundle\Repository\MenusRepository
+    indexes:
+        menu2class_idx:
+            columns:
+                - menu_class_id
+        menu2type_idx:
+            columns:
+                - menu_type_id
+    id:
+        menuId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: menu_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        menuName:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: menu_name
+        picturePath:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+            column: picture_path
+        price:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+        menuOrder:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: menu_order
+        description:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+        isActive:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: is_active
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
+    manyToOne:
+        menuClass:
+            targetEntity: MenuClass
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                menu_class_id:
+                    referencedColumnName: menu_class_id
+            orphanRemoval: false
+        menuType:
+            targetEntity: MenuType
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                menu_type_id:
+                    referencedColumnName: menu_type_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

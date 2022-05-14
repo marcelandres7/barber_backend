@@ -1,0 +1,223 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * InspectionStatus
+ */
+class InspectionStatus
+{
+    /**
+     * @var integer
+     */
+    private $inspectionStatusId;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $customColor;
+
+    /**
+     * @var string
+     */
+    private $customIcon;
+
+    /**
+     * @var integer
+     */
+    private $weight;
+
+    /**
+     * @var boolean
+     */
+    private $isActive;
+
+    /**
+     * @var \DateTime
+     */
+    private $createdAt;
+
+    /**
+     * @var integer
+     */
+    private $createdBy;
+
+
+    /**
+     * Get inspectionStatusId
+     *
+     * @return integer 
+     */
+    public function getInspectionStatusId()
+    {
+        return $this->inspectionStatusId;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return InspectionStatus
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set customColor
+     *
+     * @param string $customColor
+     * @return InspectionStatus
+     */
+    public function setCustomColor($customColor)
+    {
+        $this->customColor = $customColor;
+    
+        return $this;
+    }
+
+    /**
+     * Get customColor
+     *
+     * @return string 
+     */
+    public function getCustomColor()
+    {
+        return $this->customColor;
+    }
+
+    /**
+     * Set customIcon
+     *
+     * @param string $customIcon
+     * @return InspectionStatus
+     */
+    public function setCustomIcon($customIcon)
+    {
+        $this->customIcon = $customIcon;
+    
+        return $this;
+    }
+
+    /**
+     * Get customIcon
+     *
+     * @return string 
+     */
+    public function getCustomIcon()
+    {
+        return $this->customIcon;
+    }
+
+    /**
+     * Set weight
+     *
+     * @param integer $weight
+     * @return InspectionStatus
+     */
+    public function setWeight($weight)
+    {
+        $this->weight = $weight;
+    
+        return $this;
+    }
+
+    /**
+     * Get weight
+     *
+     * @return integer 
+     */
+    public function getWeight()
+    {
+        return $this->weight;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $isActive
+     * @return InspectionStatus
+     */
+    public function setIsActive($isActive)
+    {
+        $this->isActive = $isActive;
+    
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean 
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     * @return InspectionStatus
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime 
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param integer $createdBy
+     * @return InspectionStatus
+     */
+    public function setCreatedBy($createdBy)
+    {
+        $this->createdBy = $createdBy;
+    
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return integer 
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+}
