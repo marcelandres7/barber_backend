@@ -9,7 +9,28 @@ class SummaryServiceRepository extends EntityRepository
 {
 	
 
-	
+  public function getHoursScheduled( $idMenus,$idProfs ) {
+    $dateTime   = new \DateTime();
+    $dateNow    = $dateTime->format('Y-m-d H:i:s');
+    $dateEnd    = $dateTime->format('Y-m-d ')."23:59:00";
+		$query = "  SELECT 	  ss.scheduled_to , ss.professional_id
+                FROM 	    summary_service ss 
+                WHERE 	  ss.professional_id IN ($idProfs)
+                AND 	    (scheduled_to BETWEEN '2022-05-16 00:15:50' AND '2022-05-16 23:59:00') ";
+    $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+		return $res->fetchAll ();
+	}
+
+  public function getProfMenus( $idMenus ) {
+    $query = "  SELECT 	  GROUP_CONCAT(mu.user_id) as id_profs  
+                FROM 	    menus_user mu 
+                WHERE  	  mu.menus_id = '$idMenus' ";
+    $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+		return $res->fetchAll ();
+	}
+
 	public function reportDay($prof_id) {
 		$query = "
         SELECT Date_format(created_at,'%Y-%m-%d') created_date, count(1) attended_client,sum(1+(length(services)-length(replace(services,',','')))) as service_count, 

@@ -1,0 +1,25 @@
+<div class="row">
+    {% for item in list %}
+    <div class="col-xl-6 col-md-12">
+        <a href="javascript:;" class="ancServ" data-id={{item.menuId}} data-href="{{ path('backend_get_profs_hours',{ 'id': item.menuId }) }}">
+
+            <div class="card">
+                <div class="card-block">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-auto">
+                            <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
+                                style="max-width: 70px;">
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-2">{{ item.description }}</h6>
+                            <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
+                            <p>{{ item.duration }} minutos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </a>
+    </div>
+    {% endfor %}
+</div>

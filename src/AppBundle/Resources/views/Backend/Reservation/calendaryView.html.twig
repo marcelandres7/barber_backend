@@ -1,0 +1,66 @@
+<div class="row">
+    {% for item in service %}
+    <div class="col-xl-12 col-md-12">
+        <div class="card">
+            <div class="card-block">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-auto">
+                        <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
+                            style="max-width: 70px;">
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-2">{{ item.description }}</h6>
+                        <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
+                        <p>{{ item.duration }} minutos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row">
+    <div class="col-lg-4 col-md-12 col-xs-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="exampleFormControlSelect1">Example select</label>
+                    <select class="form-control" id="exampleFormControlSelect1">
+                        {% for item in prof %}
+                        <option id="item.id">{{ item.firstName }}&nbsp;{{ item.lastName }}</option>
+                        {% endfor%}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 col-xs-12">
+        <div class="card">
+            <div class="card-body d-flex justify-content-center">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 col-xs-12">
+        <div class="card">
+            <div class="card-body text-center">
+                    {% for item in listHours %}
+                        {% if item.start == '09:00' %}
+                            <p>Mañana</p>
+                        {% endif %}
+                        {% if item.start == '12:00' %}
+                            <div></div>
+                            <br>
+                            <p>Tarde</p>
+                        {% endif %}
+                            <button type="button" class="btn btn-outline-primary btn-sm" title="" data-toggle="tooltip"
+                                data-original-title="btn btn-outline-primary">{{item.start}}&nbsp;-&nbsp;{{item.end}}</button>
+                    {% endfor %}
+                
+            </div>
+        </div>
+    </div>
+</div>

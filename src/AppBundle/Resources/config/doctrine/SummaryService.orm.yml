@@ -47,6 +47,10 @@ AppBundle\Entity\SummaryService:
             type: datetime
             nullable: true
             column: service_end
+        scheduledTo:
+            type: datetime
+            nullable: true
+            column: scheduled_to           
         createdAt:
             type: datetime
             nullable: true

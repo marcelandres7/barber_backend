@@ -36,6 +36,11 @@ AppBundle\Entity\Menus:
             nullable: true
             precision: 10
             scale: 2
+        duration:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: duration            
         menuOrder:
             type: integer
             nullable: true

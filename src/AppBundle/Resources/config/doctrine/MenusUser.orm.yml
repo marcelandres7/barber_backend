@@ -1,0 +1,57 @@
+AppBundle\Entity\MenusUser:
+    type: entity
+    table: menus_user
+    indexes:
+        menus_user_FK:
+            columns:
+                - menus_id
+        menus_user_FK_1:
+            columns:
+                - user_id
+    id:
+        menusUserId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: menus_user_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        status:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+            default: 'NULL'
+        createdAt:
+            type: datetime
+            nullable: true
+            default: 'NULL'
+            column: created_at
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            default: 'NULL'
+            column: created_by
+    manyToOne:
+        menus:
+            targetEntity: Menus
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                menus_id:
+                    referencedColumnName: menu_id
+            orphanRemoval: false
+        user:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                user_id:
+                    referencedColumnName: id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

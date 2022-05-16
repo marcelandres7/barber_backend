@@ -35,6 +35,11 @@ class Menus
     private $menuOrder;
 
     /**
+     * @var integer
+     */
+    private $duration;
+
+    /**
      * @var string
      */
     private $description;
@@ -48,6 +53,7 @@ class Menus
      * @var integer
      */
     private $createdBy;
+
 
 
     /**
@@ -127,6 +133,29 @@ class Menus
     public function getPrice()
     {
         return $this->price;
+    }
+
+    /**
+     * Set duration
+     *
+     * @param integer $duration
+     * @return Menus
+     */
+    public function setDuration($duration)
+    {
+        $this->duration = $duration;
+    
+        return $this;
+    }
+
+    /**
+     * Get duration
+     *
+     * @return integer 
+     */
+    public function getDuration()
+    {
+        return $this->duration;
     }
 
     /**

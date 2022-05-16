@@ -37,6 +37,11 @@ class SummaryService
     /**
      * @var \DateTime
      */
+    private $scheduledTo;
+
+    /**
+     * @var \DateTime
+     */
     private $createdAt;
 
     /**
@@ -165,6 +170,29 @@ class SummaryService
     public function getServiceEnd()
     {
         return $this->serviceEnd;
+    }
+
+    /**
+     * Set scheduledTo
+     *
+     * @param \DateTime $scheduledTo
+     * @return SummaryService
+     */
+    public function setScheduledTo($scheduledTo)
+    {
+        $this->scheduledTo = $scheduledTo;
+    
+        return $this;
+    }
+
+    /**
+     * Get scheduledTo
+     *
+     * @return \DateTime 
+     */
+    public function getScheduledTo()
+    {
+        return $this->scheduledTo;
     }
 
     /**

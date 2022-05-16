@@ -1,0 +1,70 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
+
+    <div class="page-header">
+        <div class="page-block">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-9">
+                    <div class="page-header-title">
+                        <h5 class="m-b-10">Reservaciones de Servicio</h5>
+                    </div>
+                </div>
+                <div class="col-md-6 col-3 text-right">
+                    <span  title="Agregar organización" data-toggle="tooltip">
+                        <a class="btn btn-icon btn-rounded theme-bg text-white" data-toggle="modal" data-target="#exampleModalLive"><span><i class="feather icon-plus"></i></span></a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+<hr>
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="row">
+                {{ include('@App/Backend/flash_message.html.twig') }}
+                <div class="col-sm-12">
+                    
+                    {% if permits["rp"] %}
+                        {% if view == 'services' %}
+                            {{ include('@App/Backend/Reservation/servicesView.html.twig', { 'list': list }) }}
+                        {% endif %}
+                        {% if view == 'prof_hours' %}
+                            {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof': prof, 'day': day, 'listHours': listHours }) }}
+                        {% endif %}
+                    {% endif %}
+
+
+                </div>
+                <div class="col-sm-6">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block extra_scripts %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('.ancServ').on('click', function(){
+                const menuId = $(this).attr('data-id');
+                const dataHref = $(this).attr('data-href');
+                console.log("clickeo: ", menuId);
+                console.log("Data href: ", dataHref);
+                window.location = $(this).attr('data-href');
+            });
+            $("#calendar").datepicker({
+                minDate:new Date(),
+            });
+            $("#calendar").on('change', function() {
+                var selected = $(this).val();
+            });
+        });
+    </script>
+{% endblock %}

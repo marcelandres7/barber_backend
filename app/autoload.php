@@ -8,7 +8,7 @@ use Composer\Autoload\ClassLoader;
  */
 $loader = require __DIR__.'/../vendor/autoload.php';
 
-date_default_timezone_set('America/Guatemala');
+date_default_timezone_set('America/Caracas');
 
 AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 
