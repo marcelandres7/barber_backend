@@ -84,6 +84,11 @@ class User implements UserInterface, \Serializable
      */
     private $securityCode;
 
+     /**
+     * @var float
+     */
+    private $userOrder;
+
     /**
      * Get id
      *
@@ -511,5 +516,28 @@ class User implements UserInterface, \Serializable
     public function getGainFactor()
     {
         return $this->gainFactor;
+    }
+
+    /**
+     * Set userOrder
+     *
+     * @param float $userOrder
+     * @return User
+     */
+    public function setUserOrder($userOrder)
+    {
+        $this->orderModule = $userOrder;
+
+        return $this;
+    }
+
+    /**
+     * Get userOrder
+     *
+     * @return float 
+     */
+    public function getUserOrder()
+    {
+        return $this->userOrder;
     }
 }

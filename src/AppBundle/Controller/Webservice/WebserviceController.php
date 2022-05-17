@@ -2596,30 +2596,30 @@ class WebserviceController extends Controller{
 								);
 							}
 
-							if($list->getPayoutBarber() =="no"){
+							// if($list->getPayoutBarber() =="no"){
 
-								$listServicesPending[] = array(
-									'service_id'   => $list->getIdSummaryService(),
-									'total' => $list->getTotalPayment(),
-									'start' => $list->getServiceStart(),
-									'end'  => $list->getServiceEnd(),
-									'created_at' => $list->getCreatedAt(),
-									'client' => $list->getClient()->getName(),
-									'$prods' =>$listProd
-								);
+							// 	$listServicesPending[] = array(
+							// 		'service_id'   => $list->getIdSummaryService(),
+							// 		'total' => $list->getTotalPayment(),
+							// 		'start' => $list->getServiceStart(),
+							// 		'end'  => $list->getServiceEnd(),
+							// 		'created_at' => $list->getCreatedAt(),
+							// 		'client' => $list->getClient()->getName(),
+							// 		'$prods' =>$listProd
+							// 	);
 
-							}else{
+							// }else{
 							
-								$listServicesDone[] = array(
-									'service_id'   => $list->getIdSummaryService(),
-									'total' => $list->getTotalPayment(),
-									'start' => $list->getServiceStart(),
-									'end'  => $list->getServiceEnd(),
-									'created_at' => $list->getCreatedAt(),
-									'client' => $list->getClient()->getName(),
-									'$prods' =>$listProd
-								);
-							}
+							// 	$listServicesDone[] = array(
+							// 		'service_id'   => $list->getIdSummaryService(),
+							// 		'total' => $list->getTotalPayment(),
+							// 		'start' => $list->getServiceStart(),
+							// 		'end'  => $list->getServiceEnd(),
+							// 		'created_at' => $list->getCreatedAt(),
+							// 		'client' => $list->getClient()->getName(),
+							// 		'$prods' =>$listProd
+							// 	);
+							// }
 
 					 }
 
@@ -2629,12 +2629,17 @@ class WebserviceController extends Controller{
 					'professional_id'   => $listProf->getId(),
 					'professional_name' => $listProf->getFirstName()." ".$listProf->getLastName(),
 					'gain_percent'		=> $listProf->getGainFactor(),
+					'order'				=> $listProf->getUserOrder(),
 					'avatar'            => $paths["uploads_path"].$listProf->getAvatarPath(),
-					'services_pending'  => $listServicesPending,
-					'services_done'     => $listServicesDone
+					// 'services_pending'  => $listServicesPending,
+					// 'services_done'     => $listServicesDone
 				);
 				
 			}
+			$order = array_column($listProfessional, 'order');
+
+             array_multisort($order, SORT_ASC, $listProfessional);
+
 			 return new JsonResponse(array('status' => 'success','data' => $listProfessional));									 
 		 }
 		
