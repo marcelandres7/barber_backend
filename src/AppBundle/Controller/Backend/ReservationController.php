@@ -82,12 +82,15 @@ class ReservationController extends Controller {
         $userData = $this->get("session")->get("userData");
         $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
         $idProfMenus = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getProfMenus( $idMenus );
-        $profWService = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getHoursScheduled( $idMenus, $idProfMenus[0]['id_profs'] );
+        if ($idProfMenus[0]['id_profs'] == null) {
+            $this->addFlash('error_message', 'No hay Profesionales disponibles para este servicio');
+            return $this->redirectToRoute("backend_reservation");
+        }
+        $profWService = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getHoursScheduled( $idProfMenus[0]['id_profs'] );
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
-        //$hours = ["00","01","02","03","04","05","06","07","07","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
         $hours = ["00","01","02","03","04","05","06","07","07","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
         $minutes = ["00","15","30","45"];
         $hm = [];

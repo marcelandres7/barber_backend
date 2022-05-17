@@ -9,7 +9,7 @@ class SummaryServiceRepository extends EntityRepository
 {
 	
 
-  public function getHoursScheduled( $idMenus,$idProfs ) {
+  public function getHoursScheduled( $idProfs ) {
     $dateTime   = new \DateTime();
     $dateNow    = $dateTime->format('Y-m-d H:i:s');
     $dateEnd    = $dateTime->format('Y-m-d ')."23:59:00";
