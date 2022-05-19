@@ -52,6 +52,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            
             $('.ancServ').on('click', function(){
                 const menuId = $(this).attr('data-id');
                 const dataHref = $(this).attr('data-href');
@@ -64,6 +65,13 @@
             });
             $("#calendar").on('change', function() {
                 var selected = $(this).val();
+            });
+            $(".hours-btn").on("click", function(){
+                const idBtn = $(this).attr('id');
+                $(".hours-btn").css("color","#04a9f5");
+                $(".hours-btn").css("background-color","#fff");
+                $('#'+idBtn).css("color","#fff");
+                $('#'+idBtn).css("background-color","#04a9f5");
             });
         });
     </script>

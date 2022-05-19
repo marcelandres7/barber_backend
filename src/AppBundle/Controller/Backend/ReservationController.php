@@ -105,13 +105,18 @@ class ReservationController extends Controller {
         $listHours = [];
         foreach ($hm as $value) {
             $pairHour = [];
-            for ($j=0; $j < 2; $j++) {
+            for ($j=0; $j < 3; $j++) {
                 if ($j == 0) {
                     $pairHour["start"] = $value->format('H:i');
-                }else{
-                    $k1 = $value->modify('+45 minute');
+                }else if ($j == 1){
+                    $k1 = $value->modify('+'.$serviceData[0]->getDuration().' minute');
                     $k1 = $k1->format('H:i');
                     $pairHour["end"] = $k1;
+                    //array_push($listHours, $pairHour);
+                }else{
+                    $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+                    $k2 = substr(str_shuffle($permitted_chars), 0, 5);
+                    $pairHour["uid"] = $k2;
                     array_push($listHours, $pairHour);
                 }
             }

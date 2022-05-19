@@ -24,13 +24,33 @@
     <div class="col-lg-4 col-md-12 col-xs-12">
         <div class="card">
             <div class="card-body">
-                <div class="form-group">
-                    <label for="exampleFormControlSelect1">Example select</label>
-                    <select class="form-control" id="exampleFormControlSelect1">
-                        {% for item in prof %}
-                        <option id="item.id">{{ item.firstName }}&nbsp;{{ item.lastName }}</option>
-                        {% endfor%}
-                    </select>
+                <h5 class="card-title d-flex justify-content-center">Profesional</h5>
+                <hr>
+                {% for item in prof %}
+                <a href="#">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-auto">
+                            <img class="img-fluid rounded-circle" style="width:80px;"
+                                src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
+                        </div>
+                        <div class="col">
+                            <h5>{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
+                            <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                        </div>
+                    </div>
+                    <hr>
+                </a>
+                {% endfor%}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 col-xs-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-center">Día de Reserva</h5>
+                <div class="d-flex justify-content-center">
+                    <div id="calendar"></div>
                 </div>
             </div>
         </div>
@@ -38,28 +58,21 @@
 
     <div class="col-lg-4 col-md-6 col-xs-12">
         <div class="card">
-            <div class="card-body d-flex justify-content-center">
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-6 col-xs-12">
-        <div class="card">
             <div class="card-body text-center">
-                    {% for item in listHours %}
-                        {% if item.start == '09:00' %}
-                            <p>Mañana</p>
-                        {% endif %}
-                        {% if item.start == '12:00' %}
-                            <div></div>
-                            <br>
-                            <p>Tarde</p>
-                        {% endif %}
-                            <button type="button" class="btn btn-outline-primary btn-sm" title="" data-toggle="tooltip"
-                                data-original-title="btn btn-outline-primary">{{item.start}}&nbsp;-&nbsp;{{item.end}}</button>
-                    {% endfor %}
-                
+                <h5 class="card-title">Hora de Reserva</h5>
+                {% for item in listHours %}
+                {% if item.start == '09:00' %}
+                <p>Mañana</p>
+                {% endif %}
+                {% if item.start == '12:00' %}
+                <div></div>
+                <br>
+                <p>Tarde</p>
+                {% endif %}
+                <button type="button" class="btn btn-outline-primary btn-sm hours-btn" title="" data-toggle="tooltip"
+                    data-original-title="btn btn-outline-primary" id={{item.uid}}>{{item.start}}&nbsp;-&nbsp;{{item.end}}</button>
+                {% endfor %}
+
             </div>
         </div>
     </div>
