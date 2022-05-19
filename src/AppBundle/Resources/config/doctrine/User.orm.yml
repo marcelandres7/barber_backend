@@ -28,6 +28,12 @@ AppBundle\Entity\User:
             generator:
                 strategy: IDENTITY
     fields:
+        gainFactor:
+            type: decimal
+            nullable: true
+            precision: 3
+            scale: 2
+            column: gain_factor
         firstName:
             type: string
             nullable: true
@@ -76,6 +82,19 @@ AppBundle\Entity\User:
             type: datetime
             nullable: true
             column: updated_at
+        securityCode:
+            type: string
+            nullable: true
+            length: 64
+            fixed: false
+            column: security_code
+        userOrder:
+            type: float
+            nullable: false
+            precision: 10
+            scale: 2
+            default: '0.00'
+            column: user_order
     manyToOne:
         organization:
             targetEntity: Organization
