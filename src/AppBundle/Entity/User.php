@@ -526,7 +526,7 @@ class User implements UserInterface, \Serializable
      */
     public function setUserOrder($userOrder)
     {
-        $this->orderModule = $userOrder;
+        $this->userOrder = $userOrder;
 
         return $this;
     }
