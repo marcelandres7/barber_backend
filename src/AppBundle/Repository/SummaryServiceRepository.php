@@ -7,16 +7,17 @@ use Doctrine\ORM\EntityRepository;
 
 class SummaryServiceRepository extends EntityRepository
 {
-	
 
-  public function getHoursScheduled( $idProfs ) {
-    $dateTime   = new \DateTime();
-    $dateNow    = $dateTime->format('Y-m-d H:i:s');
-    $dateEnd    = $dateTime->format('Y-m-d ')."23:59:00";
-		$query = "  SELECT 	  ss.scheduled_to , ss.professional_id
-                FROM 	    summary_service ss 
-                WHERE 	  ss.professional_id IN ($idProfs)
-                AND 	    (scheduled_to BETWEEN '2022-05-16 00:15:50' AND '2022-05-16 23:59:00') ";
+  public function getListBooking( $pId, $sId, $dateSearch ) {
+    $dateStart    = $dateSearch." 00:00:00";
+    $dateEnd      = $dateSearch." 23:59:59";
+		$query = "  SELECT 	  	ss.id_summary_service , ss.scheduled_to , ss.professional_id, ss.status_id , ss.services,
+                (	  SELECT 		SUM(m.duration) 
+                    FROM 		  menus m
+                    WHERE 		FIND_IN_SET(m.menu_id,ss.services) ) AS total_duration
+                FROM 	      summary_service ss 
+                WHERE 	  	ss.professional_id = $pId
+                AND 	      (scheduled_to BETWEEN '$dateStart' AND '$dateEnd') ";
     $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
 		return $res->fetchAll ();

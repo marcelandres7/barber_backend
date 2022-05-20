@@ -30,7 +30,7 @@
                             {{ include('@App/Backend/Reservation/servicesView.html.twig', { 'list': list }) }}
                         {% endif %}
                         {% if view == 'prof_hours' %}
-                            {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof': prof, 'day': day, 'listHours': listHours }) }}
+                            {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof': prof, 'day': day }) }}
                         {% endif %}
                     {% endif %}
 
@@ -52,27 +52,112 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            
+            $("#calendar").datepicker({
+                minDate:new Date()
+            });
+
+            $("#calendar").on('change', function() {
+                var dateSelected = $(this).val();
+            });
+
+            $(".prof-list").on('click', function(){
+                var myDate = $("#calendar").datepicker("getDate");
+                var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
+                var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+                const data = {
+                    p_id: $(this).data('id'),
+                    s_id: $("#service-id").data('sid'),
+                    date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
+                };
+                console.log("PROF: ",data);
+                getListHours(data);
+            });
+
+
+            function getListHours(data){
+                $.ajax({
+                    data: data,
+                    url: "{{path('backend_get_list_hours_available')}}",
+                    success: function (result)
+                    {
+                        /*console.log("result", result.data);*/
+                        var clearAfternoon = true;
+                        var clearEvening = true;
+                        $.each(result.data, function( index, value ) {
+                            
+                            if (value.momment == "morning") {
+                                $("#morning-title").html("<p>Mañana</p>");
+                            }else if (value.momment == "afternoon") {
+                                $("#afternoon-title").html("<p>Tarde</p>");
+                            }else if (value.momment == "evening") {
+                                $("#evening-title").html("<p>Noche</p>");
+                            }
+
+                            if (value.momment == "morning") {
+                                var prevHtml = "";
+                                if (index == 0) {
+                                    $("#morning-hour").html("");
+                                }else{
+                                    prevHtml = $("#morning-hour").html();
+                                }
+                                $("#morning-hour").html(prevHtml+"<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id="+value.uid+" start="+value.start+" end="+value.end+">"+value.start+" - "+value.end+"</button>");
+                            }else if (value.momment == "afternoon") {
+                                var prevHtml = "";
+                                if (clearAfternoon) {
+                                    clearAfternoon = false;
+                                    $("#afternoon-hour").html("");
+                                }else{
+                                    prevHtml = $("#afternoon-hour").html();
+                                }
+                                $("#afternoon-hour").html(prevHtml+"<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id="+value.uid+" start="+value.start+" end="+value.end+">"+value.start+" - "+value.end+"</button>");
+                            }else if (value.momment == "evening") {
+                                var prevHtml = "";
+                                if (clearEvening) {
+                                    clearEvening = false;
+                                    $("#evening-hour").html("");
+                                }else{
+                                    prevHtml = $("#evening-hour").html();
+                                }
+                                $("#evening-hour").html(prevHtml+"<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id="+value.uid+" start="+value.start+" end="+value.end+">"+value.start+" - "+value.end+"</button>");
+                            }
+
+                        });  
+                    }
+                });
+            }
+
             $('.ancServ').on('click', function(){
                 const menuId = $(this).attr('data-id');
                 const dataHref = $(this).attr('data-href');
-                console.log("clickeo: ", menuId);
-                console.log("Data href: ", dataHref);
                 window.location = $(this).attr('data-href');
             });
-            $("#calendar").datepicker({
-                minDate:new Date(),
-            });
-            $("#calendar").on('change', function() {
-                var selected = $(this).val();
-            });
-            $(".hours-btn").on("click", function(){
+
+            $(document).on("click",".hours-btn", function(){
                 const idBtn = $(this).attr('id');
+                const hStart = $(this).attr('start');
+                const hEnd = $(this).attr('end');
+                console.log("ID: ", idBtn);
+                console.log("Start: ", hStart);
+                console.log("End: ", hEnd);
                 $(".hours-btn").css("color","#04a9f5");
                 $(".hours-btn").css("background-color","#fff");
                 $('#'+idBtn).css("color","#fff");
                 $('#'+idBtn).css("background-color","#04a9f5");
             });
+
+            var myDate = $("#calendar").datepicker("getDate");
+            var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
+            var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+            const data = {
+                p_id: $("#firstProf").data("id"),
+                s_id: $("#service-id").data('sid'),
+                date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
+            };
+            console.log("data: ", data);
+            if (data.p_id && data.s_id) {
+                getListHours(data);
+            }
+
         });
     </script>
 {% endblock %}

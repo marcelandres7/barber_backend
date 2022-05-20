@@ -12,6 +12,7 @@
                         <h6 class="mb-2">{{ item.description }}</h6>
                         <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
                         <p>{{ item.duration }} minutos</p>
+                        <div style="display: none;" id="service-id" data-sid="{{item.menuId}}"></div>
                     </div>
                 </div>
             </div>
@@ -26,20 +27,24 @@
             <div class="card-body">
                 <h5 class="card-title d-flex justify-content-center">Profesional</h5>
                 <hr>
-                {% for item in prof %}
-                <a href="#">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-auto">
-                            <img class="img-fluid rounded-circle" style="width:80px;"
-                                src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
+                {% for key,item in prof %}
+
+                    {%if key == 0 %}
+                        <div id="firstProf" data-id="{{item.id}}"></div>
+                    {% endif %}
+                    <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" class="prof-list" data-order="{{key}}">
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col-auto">
+                                <img class="img-fluid rounded-circle" style="width:80px;"
+                                    src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
+                            </div>
+                            <div class="col">
+                                <h5>{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
+                                <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                            </div>
                         </div>
-                        <div class="col">
-                            <h5>{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
-                            <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
-                        </div>
-                    </div>
-                    <hr>
-                </a>
+                        <hr>
+                    </a>
                 {% endfor%}
             </div>
         </div>
@@ -59,20 +64,17 @@
     <div class="col-lg-4 col-md-6 col-xs-12">
         <div class="card">
             <div class="card-body text-center">
-                <h5 class="card-title">Hora de Reserva</h5>
-                {% for item in listHours %}
-                {% if item.start == '09:00' %}
-                <p>Mañana</p>
-                {% endif %}
-                {% if item.start == '12:00' %}
-                <div></div>
-                <br>
-                <p>Tarde</p>
-                {% endif %}
-                <button type="button" class="btn btn-outline-primary btn-sm hours-btn" title="" data-toggle="tooltip"
-                    data-original-title="btn btn-outline-primary" id={{item.uid}}>{{item.start}}&nbsp;-&nbsp;{{item.end}}</button>
-                {% endfor %}
-
+                <h5 class="card-title" hourSelected()>Hora de Reserva</h5>
+                <div id="hour-reserve">
+                    <div id="morning-title"></div>
+                    <div id="morning-hour"></div>
+                    <br>
+                    <div id="afternoon-title"></div>
+                    <div id="afternoon-hour"></div>
+                    <br>
+                    <div id="evening-title"></div>
+                    <div id="evening-hour"></div>
+                </div>
             </div>
         </div>
     </div>
