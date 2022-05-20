@@ -39,12 +39,12 @@ class WebserviceController extends Controller{
         $enviroment = $this->container->get('kernel')->getEnvironment();
         $paths = array();
         if($enviroment == "prod"){
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+           // $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }else{
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+            //$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }
         
@@ -1217,6 +1217,8 @@ class WebserviceController extends Controller{
 			$profesional->setBio($data->bio);
 			$profesional->setStatus($active);
 			$profesional->setEmail($data->email);
+			$profesional->setUserOrder($data->order);
+
 			if ($data->pass){
 				$profesional->setPassword($this->encodePassword($data->pass));
 				
@@ -1351,14 +1353,20 @@ class WebserviceController extends Controller{
 		
 		if($data)
 		{	$active="INACTIVO";
-			$ext    = $data->ext;
-	        $base64 = $data->hash;
-			$fileName = md5(date("YmdHis")).rand("1000","9000").".".$ext;
-	        $new = "uploads/".$fileName;
-			$paths = $this->getProjectPaths();	        
-	       // $new = $paths["uploads_path"].$fileName;
-			$decoded = base64_decode($base64);
-			file_put_contents($new, $decoded);
+			
+			if( $data->ext){
+				$ext    = $data->ext;
+				$base64 = $data->hash;
+				$fileName = md5(date("YmdHis")).rand("1000","9000").".".$ext;
+				$new = "uploads/".$fileName;
+				$paths = $this->getProjectPaths();	        
+			// $new = $paths["uploads_path"].$fileName;
+				$decoded = base64_decode($base64);
+				file_put_contents($new, $decoded);
+			}else{
+				$fileName = 'barberlogo.png';
+			}
+			
 
 			$userRole = $em->getRepository('AppBundle:UserRole')->findOneBy(array("id" => 2));
 			$organization = $em->getRepository('AppBundle:Organization')->findOneBy(array("organizationId" => 1));
@@ -1379,6 +1387,7 @@ class WebserviceController extends Controller{
 			$userNew->setCreatedAt(new \DateTime());
 			$userNew->setUserRole($userRole);
 			$userNew->setOrganization($organization);
+			$userNew->setUserOrder($data->order);
 			$em->persist($userNew);
 			$em->flush();
 				
@@ -1413,7 +1422,8 @@ class WebserviceController extends Controller{
 					'picture_path' => $paths["uploads_path"].$prof->getAvatarPath(),
 					'email'        => $prof->getEmail(),
 					'gain_factor'  => $prof->getGainFactor()*100,
-					'rol_id'       => $prof->getUserRole()->getId()
+					'rol_id'       => $prof->getUserRole()->getId(),
+					'order'		   => $prof->getUserOrder()
 				);
 			  }
 			}
