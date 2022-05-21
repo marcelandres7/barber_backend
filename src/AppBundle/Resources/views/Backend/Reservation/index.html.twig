@@ -33,8 +33,6 @@
                             {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof': prof, 'day': day }) }}
                         {% endif %}
                     {% endif %}
-
-
                 </div>
                 <div class="col-sm-6">
                     
@@ -45,9 +43,9 @@
 
 {% endblock %}
 {% block extra_scripts %}
-<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -57,15 +55,13 @@
             });
 
             $("#calendar").on('change', function() {
-                var dateSelected = $(this).val();
-            });
-
-            $(".prof-list").on('click', function(){
+                //var dateSelected = $(this).val();
                 var myDate = $("#calendar").datepicker("getDate");
                 var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
                 var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+                var profId = $("#firstProf").val();
                 const data = {
-                    p_id: $(this).data('id'),
+                    p_id: profId,
                     s_id: $("#service-id").data('sid'),
                     date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
                 };
@@ -73,6 +69,23 @@
                 getListHours(data);
             });
 
+            $(".prof-list").on('click', function(){
+                var myDate = $("#calendar").datepicker("getDate");
+                var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
+                var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+                var profId = $(this).data('id');
+                $("#firstProf").val(profId);
+                const data = {
+                    p_id: profId,
+                    s_id: $("#service-id").data('sid'),
+                    date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
+                };
+                console.log("PROF: ",data);
+                getListHours(data);
+                $(".prof-item").css({"border-radius":"unset", "background-color":"unset"});
+                $(this).children().css({"border-radius":"8px", "background-color":"#04a9f5"});
+                
+            });
 
             function getListHours(data){
                 $.ajax({
@@ -80,7 +93,6 @@
                     url: "{{path('backend_get_list_hours_available')}}",
                     success: function (result)
                     {
-                        /*console.log("result", result.data);*/
                         var clearAfternoon = true;
                         var clearEvening = true;
                         $.each(result.data, function( index, value ) {
@@ -148,8 +160,9 @@
             var myDate = $("#calendar").datepicker("getDate");
             var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
             var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+            var profId = $("#firstProf").val();
             const data = {
-                p_id: $("#firstProf").data("id"),
+                p_id: profId,
                 s_id: $("#service-id").data('sid'),
                 date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
             };
@@ -157,6 +170,9 @@
             if (data.p_id && data.s_id) {
                 getListHours(data);
             }
+
+            
+
 
         });
     </script>

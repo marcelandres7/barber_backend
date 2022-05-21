@@ -30,10 +30,10 @@
                 {% for key,item in prof %}
 
                     {%if key == 0 %}
-                        <div id="firstProf" data-id="{{item.id}}"></div>
+                        <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
                     {% endif %}
                     <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" class="prof-list" data-order="{{key}}">
-                        <div class="row align-items-center justify-content-center">
+                        <div class="row align-items-center justify-content-center prof-item">
                             <div class="col-auto">
                                 <img class="img-fluid rounded-circle" style="width:80px;"
                                     src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">

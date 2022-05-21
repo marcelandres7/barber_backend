@@ -24,47 +24,9 @@ class ReservationController extends Controller {
     public function indexAction(Request $request) {
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
-        //$organization = new Organization();
-        //$form = $this->createForm(new OrganizationType(), $organization);
-        //$form->handleRequest($request);
         $userData = $this->get("session")->get("userData");
-        
-        // Validar formulario
-        /*if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-
-                $createdBy = $em->getRepository('AppBundle:User')->findOneBy(array(
-                    "id" => $this->getUser()->getId()
-                ));
-
-                $organizationExist = $em->getRepository('AppBundle:Organization')->findOneByName($organization->getName());
-
-                if (!$organizationExist) {
-                    // save
-                    $organization->setCreatedAt(new \DateTime());
-                    $organization->setCreatedBy($createdBy);
-                    $em->persist($organization);
-                    $em->flush();
-
-                    $this->addFlash('success_message', $this->getParameter('exito'));
-                } else {
-                    $this->addFlash('error_message', $this->getParameter('error_existente'));
-                }
-
-                return $this->redirectToRoute("backend_organization");
-            } else {
-                $this->addFlash('error_message', $this->getParameter('error_form'));
-            }
-        }*/
-
-        /*if ($userData['role_id'] != '2') {
-            $query = $em->getRepository('AppBundle:Organization')->findAll();
-        } else {
-            $query = $em->getRepository('AppBundle:Organization')->findBy(array("organizationId" => $userData['organization_id']));
-        }*/
         $list = $em->getRepository('AppBundle:Menus')->findBy(["isActive"=>1]);
         $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
-
         return $this->render('@App/Backend/Reservation/index.html.twig', array(
                     "permits" => $mp,
                     "list" => $list,
@@ -88,7 +50,6 @@ class ReservationController extends Controller {
             $this->addFlash('error_message', 'No hay Profesionales disponibles para este servicio');
             return $this->redirectToRoute("backend_reservation");
         }
-        //$profWService = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getHoursScheduled( $idProfMenus[0]['id_profs'] );
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
         $dateTime   = new \DateTime();
