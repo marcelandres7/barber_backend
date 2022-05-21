@@ -80,10 +80,11 @@
                     s_id: $("#service-id").data('sid'),
                     date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
                 };
-                console.log("PROF: ",data);
                 getListHours(data);
-                $(".prof-item").css({"border-radius":"unset", "background-color":"unset"});
-                $(this).children().css({"border-radius":"8px", "background-color":"#04a9f5"});
+                $(".prof-item").css({"border-radius":"unset", "background-color":"unset", "color":"unset"});
+                $(".prof-title").css({"color":"unset"});
+                $(this).children().css({"border-radius":"8px", "background-color":"#04a9f5", "color":"#fff"});
+                $(this).find("h5.prof-title").css({"color":"#fff"});
                 
             });
 
