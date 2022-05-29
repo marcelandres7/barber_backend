@@ -18,13 +18,39 @@
             </div>
         </div>
     </div>
+
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+                    {{ include('@App/Backend/flash_message.html.twig') }}
+
+                    <div class="card Application-list">
+
+                        {% if permits["wp"] and view == 'prof_hours' %}
+                            {{
+                                include(
+                                        '@App/Backend/create_modal.html.twig',
+                                        {
+                                                'title': 'Reservación',
+                                                'form': form,
+                                                'formPath': '@App/Backend/Reservation/form.html.twig'
+                                        }
+                                )
+                            }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <hr>
     <div class="main-body">
         <div class="page-wrapper">
             <div class="row">
                 {{ include('@App/Backend/flash_message.html.twig') }}
                 <div class="col-sm-12">
-                    
                     {% if permits["rp"] %}
                         {% if view == 'services' %}
                             {{ include('@App/Backend/Reservation/servicesView.html.twig', { 'list': list }) }}

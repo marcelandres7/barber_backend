@@ -1,30 +1,146 @@
 {% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
 <form method="post" action="" id="sForm" class="validateForm" autocomplete="false">
+
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                {{ form_label(form.name, "Nombre") }}
-                {{form_widget(form.name, {'attr': {'class': 'required form-control' }}) }}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.firstName, "Nombre") }}
+                            {{form_widget(form.firstName, {'attr': {'class': 'required form-control' }}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.lastName, "Apellido") }}
+                            {{form_widget(form.lastName, {'attr': {'class': 'required form-control' }}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.email, "Email") }}
+                            {{form_widget(form.email, {'attr': {'class': 'required form-control' }}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.phone, "Telefono - 04--5555555") }}
+                            {{form_widget(form.phone, {'attr': {'class': 'required form-control' }}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.message, "Comentario") }}
+                            {{form_widget(form.message, {'attr': {'class': 'required form-control' }}) }}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ form_label(form.status, "Estado") }}
-                {{form_widget(form.status, {'attr': {'class': 'required form-control' }}) }}
+        <div class="col-md-6 p-t-15">
+            <div class="col-md-12">
+                <div class="form-group">
+                    {{form_widget(form.services, {'attr': {'class': 'required form-control' }}) }}
+                </div>
             </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    {{form_widget(form.professional, {'attr': {'class': 'required form-control' }}) }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    {{form_widget(form.scheduleTo, {'attr': {'class': 'required form-control' }}) }}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="card" style="background-color:#e0ffff; border-radius: 6px; width: 100%;">
+                            <div class="card-header">
+                                <h5>Resumen</h5>
+                            </div>
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <span class="d-block text-muted">Corte de cabello</span>
+                                        <span class="d-block text-muted">Barba</span>
+                                        <span class="d-block text-muted">Depilación de piernas</span>
+                                        <span class="d-block text-muted">Tratamiento de uñas</span>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="d-block">$12,00</span>
+                                        <span class="d-block">$8,00</span>
+                                        <span class="d-block">$18,00</span>
+                                        <span class="d-block">$24,00</span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <p class="d-block text-muted"> <b>Total</b> </p>
+                                    </div>
+                                    <div class="col-8 text-right">
+                                        <h3 class="f-w-300">$17,400</h3>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-5">
+                                        <h6 class=" text-muted f-w-300 m-b-0">Profesional</h6>
+                                    </div>
+                                    <div class="col-7 text-right">
+                                        <h6 class="text-muted">Marcel Granier</h6>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <h6 class=" text-muted f-w-300 m-b-0">Cuando</h6>
+                                    </div>
+                                    <div class="col-8 text-right">
+                                        <h6 class="text-muted">30 de mayo, 16:45 PM</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <h6 class=" text-muted f-w-300 m-b-0">Duración</h6>
+                                    </div>
+                                    <div class="col-8 text-right">
+                                        <h6 class="text-muted">110 minutos</h6>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <h6 class=" text-muted f-w-300 m-b-0">Donde</h6>
+                                    </div>
+                                    <div class="col-8 text-right">
+                                        <h6 class="text-muted">Direción de ubicación del local comercial o del profesional</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+
+
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </div>
+    <div class="row">
         <div class="col-md-6 col-6">
-            {% if 'edit' in currentPath %}
-                <button type="reset" onclick="window.location = '{{ path('backend_organization') }}'" class="btn btn-rounded btn-danger">Cancelar</button>
-            {% else %}
-                <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
-            {% endif %}
+            <button type="reset" data-disiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
         </div>
         <div class="col-md-6 col-6">
             <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
         </div>
-        <!-- /.col -->
     </div>
-    <!-- /.row -->
     {{ form_widget(form._token) }}
 </form>

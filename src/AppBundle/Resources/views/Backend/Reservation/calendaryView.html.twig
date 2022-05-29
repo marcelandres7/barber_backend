@@ -23,28 +23,29 @@
 
 <div class="row">
     <div class="col-lg-4 col-md-12 col-xs-12">
-        <div class="card">
+        <div class="card" style="max-height:500px; overflow-y:scroll;">
             <div class="card-body">
                 <h5 class="card-title d-flex justify-content-center">Profesional</h5>
                 <hr>
                 {% for key,item in prof %}
 
-                    {%if key == 0 %}
-                        <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
-                    {% endif %}
-                    <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" class="prof-list" data-order="{{key}}">
-                        <div class="row align-items-center justify-content-center prof-item">
-                            <div class="col-auto">
-                                <img class="img-fluid rounded-circle" style="width:80px;"
-                                    src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
-                            </div>
-                            <div class="col">
-                                <h5 class="prof-title">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
-                                <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
-                            </div>
+                {%if key == 0 %}
+                <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
+                {% endif %}
+                <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" class="prof-list"
+                    data-order="{{key}}">
+                    <div class="row align-items-center justify-content-center prof-item">
+                        <div class="col-auto">
+                            <img class="img-fluid rounded-circle" style="width:80px;"
+                                src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
                         </div>
-                        <hr>
-                    </a>
+                        <div class="col">
+                            <h5 class="prof-title">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
+                            <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                        </div>
+                    </div>
+                    <hr>
+                </a>
                 {% endfor%}
             </div>
         </div>
@@ -62,7 +63,7 @@
     </div>
 
     <div class="col-lg-4 col-md-6 col-xs-12">
-        <div class="card">
+        <div class="card" style="max-height:500px; overflow-y:scroll;">
             <div class="card-body text-center">
                 <h5 class="card-title" hourSelected()>Hora de Reserva</h5>
                 <div id="hour-reserve">
@@ -77,5 +78,12 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="text-align:right;">
+        <button type="button" class="btn btn-primary" title="" data-toggle="modal" data-target="#exampleModalLive"
+                    data-original-title="btn btn-primary">Siguiente</button>
     </div>
 </div>

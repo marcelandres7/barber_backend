@@ -6,8 +6,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use AppBundle\Entity\SumaryService;
-use AppBundle\Form\OrganizationType;
+use AppBundle\Entity\SummaryService;
+use AppBundle\Form\SummaryServiceType;
 use AppBundle\Repository\EbClosion;
 
 
@@ -40,6 +40,9 @@ class ReservationController extends Controller {
      */
     public function GetProfessionalHoursAction(Request $request) {
 
+        //$sumaryService = new SummaryService();
+        //$form = $this->createForm(new SummaryServiceType(), $sumaryService);
+
         $idMenus = $request->get("id");
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
@@ -52,9 +55,32 @@ class ReservationController extends Controller {
         }
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
+        //var_dump($idProfMenus[0]['id_profs']);die;
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
+
+        //$defaultData = array('message' => 'Type your message here');
+        $form = $this->createFormBuilder()
+            ->add('firstName', 'text')
+            ->add('lastName', 'text')
+            ->add('email', 'email')
+            ->add('phone', 'text')
+            ->add('message', 'textarea')
+            ->add('services', 'hidden')
+            ->add('professional', 'hidden')
+            ->add('scheduleTo', 'hidden')
+            ->add('send', 'submit')
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            // data is an array with "name", "email", and "message" keys
+            $data = $form->getData();
+        }
+
         return $this->render('@App/Backend/Reservation/index.html.twig', array(
+            "form" => $form->createView(),
             "permits" => $mp,
             "service" => $serviceData,
             "prof" => $profMenus,
@@ -62,7 +88,6 @@ class ReservationController extends Controller {
             "view" => "prof_hours"
         ));
         
-
     }
 
     /**
