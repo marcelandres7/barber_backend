@@ -1,6 +1,5 @@
-{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
-<form method="post" action="" id="sForm" class="validateForm" autocomplete="false">
 
+<form method="post" action="{{path('backend_reservation_create')}}" id="sForm" class="" autocomplete="false" novalidate>
 
     <div class="row">
         <div class="col-md-6">
@@ -9,31 +8,31 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             {{ form_label(form.firstName, "Nombre") }}
-                            {{form_widget(form.firstName, {'attr': {'class': 'required form-control' }}) }}
+                            {{form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             {{ form_label(form.lastName, "Apellido") }}
-                            {{form_widget(form.lastName, {'attr': {'class': 'required form-control' }}) }}
+                            {{form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             {{ form_label(form.email, "Email") }}
-                            {{form_widget(form.email, {'attr': {'class': 'required form-control' }}) }}
+                            {{form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             {{ form_label(form.phone, "Telefono - 04--5555555") }}
-                            {{form_widget(form.phone, {'attr': {'class': 'required form-control' }}) }}
+                            {{form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             {{ form_label(form.message, "Comentario") }}
-                            {{form_widget(form.message, {'attr': {'class': 'required form-control' }}) }}
+                            {{form_widget(form.message, {'attr': {'class': 'form-control'}}) }}
                         </div>
                     </div>
 
@@ -43,17 +42,17 @@
         <div class="col-md-6 p-t-15">
             <div class="col-md-12">
                 <div class="form-group">
-                    {{form_widget(form.services, {'attr': {'class': 'required form-control' }}) }}
+                    {{form_widget(form.services, {'attr': {'class': 'form-control'}}) }}
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group">
-                    {{form_widget(form.professional, {'attr': {'class': 'required form-control' }}) }}
+                    {{form_widget(form.professional, {'attr': {'class': 'form-control'}}) }}
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group">
-                    {{form_widget(form.scheduleTo, {'attr': {'class': 'required form-control' }}) }}
+                    {{form_widget(form.scheduledTo, {'attr': {'class': 'form-control'}}) }}
                 </div>
             </div>
             <div class="col-12">
@@ -102,7 +101,7 @@
                                         <h6 class=" text-muted f-w-300 m-b-0">Cuando</h6>
                                     </div>
                                     <div class="col-8 text-right">
-                                        <h6 class="text-muted">30 de mayo, 16:45 PM</h6>
+                                        <h6 class="text-muted" id="when_datetime">30 de mayo, 16:45 PM</h6>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -111,6 +110,14 @@
                                     </div>
                                     <div class="col-8 text-right">
                                         <h6 class="text-muted">110 minutos</h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <h6 class=" text-muted f-w-300 m-b-0">Hasta</h6>
+                                    </div>
+                                    <div class="col-8 text-right">
+                                        <h6 class="text-muted" id="hour_to">18:35 PM</h6>
                                     </div>
                                 </div>
                                 <hr>
@@ -136,7 +143,7 @@
     </div>
     <div class="row">
         <div class="col-md-6 col-6">
-            <button type="reset" data-disiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
+            <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
         </div>
         <div class="col-md-6 col-6">
             <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
@@ -144,3 +151,22 @@
     </div>
     {{ form_widget(form._token) }}
 </form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+<script>
+    $("#sForm").validate({
+        rules: {
+            'form[firstName]': { required: true },
+            'form[lastName]': { required: true },
+            'form[email]': { required: true},
+            'form[phone]': { required: true},
+            'form[message]': { required: false}
+        },
+        messages: {
+            'form[firstName]': { required: "Campo requerido"},
+            'form[lastName]': { required: "Campo requerido"},
+            'form[email]': { required: "Campo requerido", 'form[email]': "Formato:  nombrecorreo@dominio.abc" },
+            'form[phone]': { required: "Campo requerido", 'form[phone]': "Formato:  nombrecorreo@dominio.abc" }
+        }
+    });
+</script>

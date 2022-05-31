@@ -10,11 +10,11 @@
                         <h5 class="m-b-10">Reservaciones de Servicio</h5>
                     </div>
                 </div>
-                <div class="col-md-6 col-3 text-right">
+                <!--div class="col-md-6 col-3 text-right">
                     <span  title="Agregar organización" data-toggle="tooltip">
                         <a class="btn btn-icon btn-rounded theme-bg text-white" data-toggle="modal" data-target="#exampleModalLive"><span><i class="feather icon-plus"></i></span></a>
                     </span>
-                </div>
+                </!div-->
             </div>
         </div>
     </div>
@@ -76,6 +76,16 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            var sidStr = '';
+            $(".service-ids").each(function(index, item){
+                if (sidStr.length == 0) {
+                    sidStr = $(item).data('sid');
+                }else{
+                    sidStr = sidStr+','+$(item).data('sid');
+                } 
+            });
+            $("#form_services").val(sidStr);
+
             $("#calendar").datepicker({
                 minDate:new Date()
             });
@@ -88,11 +98,14 @@
                 var profId = $("#firstProf").val();
                 const data = {
                     p_id: profId,
-                    s_id: $("#service-id").data('sid'),
+                    s_id: sidStr,
                     date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
                 };
                 console.log("PROF: ",data);
                 getListHours(data);
+                $("#form_scheduleTo").val('');
+                $("#when_datetime").html('');
+                $("#hour_to").html('');
             });
 
             $(".prof-list").on('click', function(){
@@ -103,7 +116,7 @@
                 $("#firstProf").val(profId);
                 const data = {
                     p_id: profId,
-                    s_id: $("#service-id").data('sid'),
+                    s_id: sidStr,
                     date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
                 };
                 getListHours(data);
@@ -111,7 +124,10 @@
                 $(".prof-title").css({"color":"unset"});
                 $(this).children().css({"border-radius":"8px", "background-color":"#04a9f5", "color":"#fff"});
                 $(this).find("h5.prof-title").css({"color":"#fff"});
-                
+                $("#form_scheduleTo").val('');
+                $("#when_datetime").html('');
+                $("#form_professional").val(profId);
+
             });
 
             function getListHours(data){
@@ -182,25 +198,38 @@
                 $(".hours-btn").css("background-color","#fff");
                 $('#'+idBtn).css("color","#fff");
                 $('#'+idBtn).css("background-color","#04a9f5");
+
+                let myDate      = $("#calendar").datepicker("getDate");
+                let monthW2d    = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
+                let dayW2d      = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
+                let date        = myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d;
+                let fullDT      = date+' '+hStart;
+                
+                $("#form_scheduleTo").val(fullDT);
+                $("#when_datetime").html(fullDT);
             });
 
+            
+            
             var myDate = $("#calendar").datepicker("getDate");
             var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
             var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
             var profId = $("#firstProf").val();
             const data = {
                 p_id: profId,
-                s_id: $("#service-id").data('sid'),
+                s_id: sidStr,
                 date: myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d,
             };
             console.log("data: ", data);
             if (data.p_id && data.s_id) {
                 getListHours(data);
             }
+            $("#form_scheduleTo").val('');  
+            $("#when_datetime").html('');
+            $("#form_professional").val(profId);
+
 
             
-
-
         });
     </script>
 {% endblock %}

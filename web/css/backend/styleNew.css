@@ -22,6 +22,10 @@
     object-fit: contain;
     transition: all .3s ease;
   }
+
+  label.error {
+    color: #cb2e1b;
+  }
   .avatar-wrapper .profile-pic:after {
     font-family: FontAwesome;
     content: "\f007";

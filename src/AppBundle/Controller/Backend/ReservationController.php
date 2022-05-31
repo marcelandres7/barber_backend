@@ -7,9 +7,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\Entity\SummaryService;
+use AppBundle\Entity\Client;
 use AppBundle\Form\SummaryServiceType;
 use AppBundle\Repository\EbClosion;
-
+use DateTime;
 
 /**
  * Reservation controller.
@@ -54,6 +55,7 @@ class ReservationController extends Controller {
             return $this->redirectToRoute("backend_reservation");
         }
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
+        //$serviceData = $em->getRepository('AppBundle:Menus')->findAll();
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
         //var_dump($idProfMenus[0]['id_profs']);die;
         $dateTime   = new \DateTime();
@@ -68,7 +70,7 @@ class ReservationController extends Controller {
             ->add('message', 'textarea')
             ->add('services', 'hidden')
             ->add('professional', 'hidden')
-            ->add('scheduleTo', 'hidden')
+            ->add('scheduledTo', 'hidden')
             ->add('send', 'submit')
             ->getForm();
 
@@ -116,7 +118,7 @@ class ReservationController extends Controller {
             } 
         }
         $dateTime   = new \DateTime();
-        $dateNow    = $dateTime->format('Y-m-d H:i:s');
+        //$dateNow    = $dateTime->format('Y-m-d H:i:s');
         $hours = ["00","01","02","03","04","05","06","07","07","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
         $minutes = ["00","15","30","45"];
         $hm = [];
@@ -130,19 +132,25 @@ class ReservationController extends Controller {
                         if ($timeToVerify >= $valueExclude["start"] &&  $timeToVerify <= $valueExclude["end"]) {
                             $includeFlag = false;
                         }
+                        if ($timeToVerify <= new \DateTime()) {
+                            $includeFlag = false;
+                        }
                     }
                     if ($includeFlag) {
                         array_push($hm, $timeToVerify);
                     }
                 }
             }
-            if (intval($valH)>=14 && intval($valH)<21) {
+            if (intval($valH)>=14 && intval($valH)<23) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
                     $includeFlag    = true;
                     foreach ($toExclude as $valueExclude) {
                         if ($timeToVerify >= $valueExclude["start"] &&  $timeToVerify <= $valueExclude["end"]) {
+                            $includeFlag = false;
+                        }
+                        if ($timeToVerify <= new \DateTime()) {
                             $includeFlag = false;
                         }
                     }
@@ -202,6 +210,46 @@ class ReservationController extends Controller {
             )
         );
         return $response;
+    }
+
+    /**
+     * @Route("/backend/reservation/create", name="backend_reservation_create")
+     */
+    public function CreateReservationAction(Request $request){
+        $data = $request->get('form');
+        $em = $this->getDoctrine()->getManager();
+        $clientObj = $em->getRepository('AppBundle:Client')->findOneBy(["email" => $data['email']]);
+        $userObj = $em->getRepository('AppBundle:User')->findOneBy(["id" => $data['professional']]);
+        $arrServices = explode(',',$data['services']);
+        $totalPrice = 0;
+        if (count($arrServices)>0) {
+            foreach ($arrServices as $value) {
+                $serviceObj = $em->getRepository('AppBundle:Menus')->findOneBy(["menuId" => $value]);
+                $totalPrice = $totalPrice + $serviceObj->getPrice();
+            }
+        }
+        $statusObj = $em->getRepository('AppBundle:Status')->findOneBy(["statusId" => 6]);
+        if (!$clientObj) {
+            $clientObj = new Client();
+            $clientObj->setName($data['firstName'].' '.$data['lastName']);
+            $clientObj->setEmail($data['email']);
+            $clientObj->setPhone($data['phone']);
+            $clientObj->setRegister(0);
+            $clientObj->setPromotion(0);
+            $clientObj->setCreatedAt(new \DateTime());
+            $em->persist($clientObj);
+        }
+        $sumaryServiceObj = new SummaryService();
+        $sumaryServiceObj->setClient($clientObj);
+        $sumaryServiceObj->setProfessional($userObj);
+        $sumaryServiceObj->setScheduledTo(new \DateTime($data['scheduledTo']));
+        $sumaryServiceObj->setTotalPayment($totalPrice);
+        $sumaryServiceObj->setServices($data['services']);
+        $sumaryServiceObj->setStatus($statusObj);
+        $em->persist($sumaryServiceObj);
+        $em->flush();
+        $this->addFlash('success_message', $this->getParameter('exito'));
+        return $this->redirectToRoute('backend_reservation');
     }
 
 }
