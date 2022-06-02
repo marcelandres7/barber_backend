@@ -96,7 +96,10 @@ class SummaryServiceRepository extends EntityRepository
 	
   public function reportSummaryGeneralToday( ) {
 		$query = "
-            SELECT  sum(ss.total_payment) as total_payment, 
+            SELECT  sum(ss.total_payment ) as total_payment, 
+                    (SELECT IFNULL(sum(payment_total) ,0)FROM order_detail 
+                      WHERE  date_format(created_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')
+                        AND summary_service_id is null) as total_products,
                     count(1) as qty_client,
                     sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
                     sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, 
@@ -188,6 +191,10 @@ class SummaryServiceRepository extends EntityRepository
 
 		$query = "
     SELECT      sum(ss.total_payment) as total_payment, 
+                (SELECT sum(payment_total) FROM order_detail 
+                  WHERE  date_format(created_at,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
+                    AND  date_format(created_at,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')
+                    AND summary_service_id is null ) as total_products,
                 count(1) as qty_client,
                 sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
                 sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, 
@@ -502,6 +509,61 @@ class SummaryServiceRepository extends EntityRepository
 	  //  	}
 
 		// $query .= ";";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reportSummaryBarberTodayCancel() {
+
+
+		$query = "
+            SELECT todos-eliminados as cancelados, eliminados 
+             FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
+                        FROM summary_service ss 
+                       WHERE ss.status_id in (4)
+                         AND date_format(ss.created_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')) as result
+	          	";
+
+    //     if($created_date) {
+		// 	$query .= "AND ss.created_at > '$created_date'";
+	  //  	}
+
+		// $query .= ";";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reportSummaryGeneralRangeCancel($data_start,$data_end ) {
+
+    if( !$data_start )
+		{
+			$data_start = $data_end;
+		}
+		if( !$data_end )
+		{
+			$data_end = $data_start;
+		}
+
+    if( !$data_end && !$data_start)
+		{
+			$data_start = '2000-01-01';
+			$data_end = '2121-01-01';
+		}
+
+		$query = "
+               SELECT todos-eliminados as cancelados, eliminados 
+                 FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
+                            FROM summary_service ss 
+                           WHERE ss.status_id in (4)
+                             AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
+                             AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')) as result
+		        ";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();

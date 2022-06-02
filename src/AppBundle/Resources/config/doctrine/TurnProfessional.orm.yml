@@ -1,0 +1,34 @@
+AppBundle\Entity\TurnProfessional:
+    type: entity
+    table: turn_professional
+    repositoryClass: AppBundle\Repository\TurnProfessionalRepository
+    id:
+        turnId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: turn_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        profId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: prof_id
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        turnDate:
+            type: datetime
+            nullable: true
+            column: turn_date
+        organizationId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: organization_id
+    lifecycleCallbacks: {  }

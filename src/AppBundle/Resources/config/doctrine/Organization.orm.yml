@@ -33,33 +33,30 @@ AppBundle\Entity\Organization:
             type: datetime
             nullable: true
             column: created_at
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
         updatedAt:
             type: datetime
             nullable: true
             column: updated_at
+        updatedBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: updated_by
         status:
             type: string
-            nullable: false
+            nullable: true
             length: null
             fixed: false
             default: ACTIVO
-    manyToOne:
-        createdBy:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                created_by:
-                    referencedColumnName: id
-            orphanRemoval: false
-        updatedBy:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                updated_by:
-                    referencedColumnName: id
-            orphanRemoval: false
+        passwdApp:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: passwd_app
     lifecycleCallbacks: {  }
