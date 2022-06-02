@@ -20,11 +20,6 @@ class Organization
     private $name;
 
     /**
-     * @var string
-     */
-    private $address;    
-
-    /**
      * @var \DateTime
      */
     private $createdAt;
@@ -80,29 +75,6 @@ class Organization
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Set address
-     *
-     * @param string $address
-     * @return Organization
-     */
-    public function setAddress($address)
-    {
-        $this->address = $address;
-    
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return string 
-     */
-    public function getAddress()
-    {
-        return $this->address;
     }
 
     /**
