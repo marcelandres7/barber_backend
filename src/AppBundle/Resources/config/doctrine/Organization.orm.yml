@@ -24,6 +24,11 @@ AppBundle\Entity\Organization:
             nullable: true
             length: 300
             fixed: false
+        address:
+            type: string
+            nullable: true
+            length: 2000
+            fixed: false            
         createdAt:
             type: datetime
             nullable: true

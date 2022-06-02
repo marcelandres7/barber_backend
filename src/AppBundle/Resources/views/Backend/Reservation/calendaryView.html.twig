@@ -29,33 +29,34 @@
                 <hr>
                 {% for key,item in prof %}
 
-                {%if key == 0 %}
-                    <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
-                    <input type="text" id="firstName" style="display: none;" value="{{item.firstName}}&nbsp;{{item.lastName}}">
-                {% endif %}
-                <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" data-name="{{ item.firstName }} {{ item.lastName }}" class="prof-list"
-                    data-order="{{key}}">
                     {%if key == 0 %}
-                        <div class="row align-items-center justify-content-center prof-item" style="border-radius:8px; background-color: #04a9f5; color:#fff">
-                    {% else %}
-                        <div class="row align-items-center justify-content-center prof-item">
+                        <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
+                        <input type="text" id="firstName" style="display: none;" value="{{item.firstName}}&nbsp;{{item.lastName}}">
+                        <input type="text" id="profAddress" style="display: none;" value="{{item.organization.address}}">
                     {% endif %}
-                        <div class="col-auto">
-                            <img class="img-fluid rounded-circle" style="width:80px;"
-                                src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
-                        </div>
-                        <div class="col">
-                            {% if key == 0 %}
-                                <h5 class="prof-title" style="color:#fff">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
-                            {% else %}
-                                <h5 class="prof-title">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
-                            {% endif %}
+                    <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-address="{{item.organization.address}}" data-id="{{item.id}}" data-name="{{ item.firstName }} {{ item.lastName }}" class="prof-list"
+                        data-order="{{key}}">
+                        {%if key == 0 %}
+                            <div class="row align-items-center justify-content-center prof-item" style="border-radius:8px; background-color: #04a9f5; color:#fff">
+                        {% else %}
+                            <div class="row align-items-center justify-content-center prof-item">
+                        {% endif %}
+                            <div class="col-auto">
+                                <img class="img-fluid rounded-circle" style="width:80px;"
+                                    src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
+                            </div>
+                            <div class="col">
+                                {% if key == 0 %}
+                                    <h5 class="prof-title" style="color:#fff">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
+                                {% else %}
+                                    <h5 class="prof-title">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
+                                {% endif %}
 
-                            <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                                <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                            </div>
                         </div>
-                    </div>
-                    <hr>
-                </a>
+                        <hr>
+                    </a>
                 {% endfor%}
             </div>
         </div>

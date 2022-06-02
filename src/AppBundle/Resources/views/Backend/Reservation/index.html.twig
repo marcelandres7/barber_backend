@@ -117,8 +117,10 @@
                 var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
                 var profId = $(this).data('id');
                 var profName = $(this).data('name');
+                var profAddress = $(this).data('address');
                 $("#firstProf").val(profId);
                 $("#profName").html(profName);
+                $("#serv-address").html(profAddress);
                 const data = {
                     p_id: profId,
                     s_id: sidStr,
@@ -246,7 +248,8 @@
             $("#when_datetime").html('');
             $("#form_professional").val(profId);
             $("#profName").html(profName);
-
+            var profAddress = $("#profAddress").val();
+            $("#serv-address").html(profAddress);
             
         });
     </script>
