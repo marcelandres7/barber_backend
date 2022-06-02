@@ -1,23 +1,23 @@
 <div class="row">
     {% for item in service %}
-    <div class="col-xl-12 col-md-12">
-        <div class="card">
-            <div class="card-block">
-                <div class="row align-items-center justify-content-center">
-                    <div class="col-auto">
-                        <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
-                            style="max-width: 70px;">
-                    </div>
-                    <div class="col">
-                        <h6 class="mb-2">{{ item.description }}</h6>
-                        <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
-                        <p>{{ item.duration }} minutos</p>
-                        <div style="display: none;" class="service-ids" data-sid="{{item.menuId}}"></div>
+        <div class="col-xl-12 col-md-12">
+            <div class="card">
+                <div class="card-block">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-auto">
+                            <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
+                                style="max-width: 70px;">
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-2">{{ item.description }}</h6>
+                            <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
+                            <p>{{ item.duration }} minutos</p>
+                            <div style="display: none;" class="service-ids" data-sid="{{item.menuId}}"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     {% endfor %}
 </div>
 
@@ -31,8 +31,9 @@
 
                 {%if key == 0 %}
                     <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
+                    <input type="text" id="firstName" style="display: none;" value="{{item.firstName}}&nbsp;{{item.lastName}}">
                 {% endif %}
-                <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" class="prof-list"
+                <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-id="{{item.id}}" data-name="{{ item.firstName }} {{ item.lastName }}" class="prof-list"
                     data-order="{{key}}">
                     {%if key == 0 %}
                         <div class="row align-items-center justify-content-center prof-item" style="border-radius:8px; background-color: #04a9f5; color:#fff">
@@ -92,7 +93,7 @@
 
 <div class="row">
     <div class="col-sm-12" style="text-align:right;">
-        <button type="button" class="btn btn-primary" title="" data-toggle="modal" data-target="#exampleModalLive"
-                    data-original-title="btn btn-primary">Siguiente</button>
+        <button type="button" class="btn btn-primary" id="btn-next" title="" data-toggle="modal" data-target="#exampleModalLive"
+                    data-original-title="btn btn-primary" disabled>Siguiente</button>
     </div>
 </div>

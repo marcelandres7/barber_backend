@@ -34,6 +34,8 @@
                                         {
                                                 'title': 'Reservación',
                                                 'form': form,
+                                                'service': service,
+                                                'totales': totales,
                                                 'formPath': '@App/Backend/Reservation/form.html.twig'
                                         }
                                 )
@@ -103,9 +105,10 @@
                 };
                 console.log("PROF: ",data);
                 getListHours(data);
-                $("#form_scheduleTo").val('');
+                $("#form_scheduledTo").val('');
                 $("#when_datetime").html('');
                 $("#hour_to").html('');
+                $("#btn-next").prop("disabled", true);
             });
 
             $(".prof-list").on('click', function(){
@@ -113,7 +116,9 @@
                 var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
                 var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
                 var profId = $(this).data('id');
+                var profName = $(this).data('name');
                 $("#firstProf").val(profId);
+                $("#profName").html(profName);
                 const data = {
                     p_id: profId,
                     s_id: sidStr,
@@ -124,9 +129,10 @@
                 $(".prof-title").css({"color":"unset"});
                 $(this).children().css({"border-radius":"8px", "background-color":"#04a9f5", "color":"#fff"});
                 $(this).find("h5.prof-title").css({"color":"#fff"});
-                $("#form_scheduleTo").val('');
+                $("#form_scheduledTo").val('');
                 $("#when_datetime").html('');
                 $("#form_professional").val(profId);
+                $("#btn-next").prop("disabled", true);
 
             });
 
@@ -138,6 +144,14 @@
                     {
                         var clearAfternoon = true;
                         var clearEvening = true;
+
+                        /*$("#morning-title").html("");
+                        $("#afternoon-title").html("");
+                        $("#evening-title").html("");
+                        $("#morning-hour").html("");
+                        $("#afternoon-hour").html("");
+                        $("#evening-hour").html("");*/
+
                         $.each(result.data, function( index, value ) {
                             
                             if (value.momment == "morning") {
@@ -203,10 +217,13 @@
                 let monthW2d    = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
                 let dayW2d      = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
                 let date        = myDate.getFullYear()+'-'+monthW2d+'-'+dayW2d;
-                let fullDT      = date+' '+hStart;
-                
-                $("#form_scheduleTo").val(fullDT);
-                $("#when_datetime").html(fullDT);
+                let fullDTStart = date+' '+hStart;
+                let fullDTEnd = date+' '+hEnd;
+                console.log(fullDTStart);
+                $("#form_scheduledTo").val(fullDTStart);
+                $("#when_datetime").html(fullDTStart);
+                $("#hour_to").html(fullDTEnd);
+                $("#btn-next").removeAttr('disabled');
             });
 
             
@@ -215,6 +232,7 @@
             var monthW2d = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):"0"+(myDate.getMonth()+1);
             var dayW2d = myDate.getDate()>9?myDate.getDate():"0"+myDate.getDate();
             var profId = $("#firstProf").val();
+            var profName = $("#firstName").val();
             const data = {
                 p_id: profId,
                 s_id: sidStr,
@@ -224,10 +242,10 @@
             if (data.p_id && data.s_id) {
                 getListHours(data);
             }
-            $("#form_scheduleTo").val('');  
+            $("#form_scheduledTo").val('');  
             $("#when_datetime").html('');
             $("#form_professional").val(profId);
-
+            $("#profName").html(profName);
 
             
         });

@@ -65,16 +65,14 @@
                             <div class="card-block">
                                 <div class="row">
                                     <div class="col-8">
-                                        <span class="d-block text-muted">Corte de cabello</span>
-                                        <span class="d-block text-muted">Barba</span>
-                                        <span class="d-block text-muted">Depilación de piernas</span>
-                                        <span class="d-block text-muted">Tratamiento de uñas</span>
+                                    {% for item in service %}
+                                        <span class="d-block text-muted">{{item.menuName}}</span>
+                                    {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <span class="d-block">$12,00</span>
-                                        <span class="d-block">$8,00</span>
-                                        <span class="d-block">$18,00</span>
-                                        <span class="d-block">$24,00</span>
+                                    <div class="col-4 text-right">
+                                     {% for item in service %}
+                                        <span class="d-block">{{ item.price }}</span>
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 <hr>
@@ -83,7 +81,7 @@
                                         <p class="d-block text-muted"> <b>Total</b> </p>
                                     </div>
                                     <div class="col-8 text-right">
-                                        <h3 class="f-w-300">$17,400</h3>
+                                        <h3 class="f-w-300">${{ totales.totalPrice }}</h3>
                                     </div>
                                 </div>
                                 <hr>
@@ -92,7 +90,7 @@
                                         <h6 class=" text-muted f-w-300 m-b-0">Profesional</h6>
                                     </div>
                                     <div class="col-7 text-right">
-                                        <h6 class="text-muted">Marcel Granier</h6>
+                                        <h6 class="text-muted" id="profName"></h6>
                                     </div>
                                 </div>
                                 <hr>
@@ -109,7 +107,7 @@
                                         <h6 class=" text-muted f-w-300 m-b-0">Duración</h6>
                                     </div>
                                     <div class="col-8 text-right">
-                                        <h6 class="text-muted">110 minutos</h6>
+                                        <h6 class="text-muted">{{ totales.totalDuration }}</h6>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -117,7 +115,7 @@
                                         <h6 class=" text-muted f-w-300 m-b-0">Hasta</h6>
                                     </div>
                                     <div class="col-8 text-right">
-                                        <h6 class="text-muted" id="hour_to">18:35 PM</h6>
+                                        <h6 class="text-muted" id="hour_to"></h6>
                                     </div>
                                 </div>
                                 <hr>

@@ -8,9 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\Entity\SummaryService;
 use AppBundle\Entity\Client;
-use AppBundle\Form\SummaryServiceType;
 use AppBundle\Repository\EbClosion;
-use DateTime;
 
 /**
  * Reservation controller.
@@ -41,9 +39,6 @@ class ReservationController extends Controller {
      */
     public function GetProfessionalHoursAction(Request $request) {
 
-        //$sumaryService = new SummaryService();
-        //$form = $this->createForm(new SummaryServiceType(), $sumaryService);
-
         $idMenus = $request->get("id");
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
@@ -55,13 +50,19 @@ class ReservationController extends Controller {
             return $this->redirectToRoute("backend_reservation");
         }
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
-        //$serviceData = $em->getRepository('AppBundle:Menus')->findAll();
+        $totalPrice = 0;
+        $totalDuration = 0;
+        $totales = [];
+        foreach ($serviceData as $value) {
+            $totalPrice = $totalPrice + $value->getPrice();
+            $totalDuration = $totalDuration + $value->getDuration();
+        }
+        $totales["totalPrice"] = $totalPrice;
+        $totales["totalDuration"] = $totalDuration;
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
-        //var_dump($idProfMenus[0]['id_profs']);die;
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
 
-        //$defaultData = array('message' => 'Type your message here');
         $form = $this->createFormBuilder()
             ->add('firstName', 'text')
             ->add('lastName', 'text')
@@ -73,18 +74,12 @@ class ReservationController extends Controller {
             ->add('scheduledTo', 'hidden')
             ->add('send', 'submit')
             ->getForm();
-
         $form->handleRequest($request);
-
-        if ($form->isValid()) {
-            // data is an array with "name", "email", and "message" keys
-            $data = $form->getData();
-        }
-
         return $this->render('@App/Backend/Reservation/index.html.twig', array(
             "form" => $form->createView(),
             "permits" => $mp,
             "service" => $serviceData,
+            "totales" => $totales,
             "prof" => $profMenus,
             "day" => $dateNow,
             "view" => "prof_hours"
@@ -115,10 +110,8 @@ class ReservationController extends Controller {
                 $temp["end"] = $dateEnd;
                 $temp["duration"] = $duration;
                 array_push($toExclude, $temp);
-            } 
+            }
         }
-        $dateTime   = new \DateTime();
-        //$dateNow    = $dateTime->format('Y-m-d H:i:s');
         $hours = ["00","01","02","03","04","05","06","07","07","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
         $minutes = ["00","15","30","45"];
         $hm = [];
@@ -132,9 +125,9 @@ class ReservationController extends Controller {
                         if ($timeToVerify >= $valueExclude["start"] &&  $timeToVerify <= $valueExclude["end"]) {
                             $includeFlag = false;
                         }
-                        if ($timeToVerify <= new \DateTime()) {
-                            $includeFlag = false;
-                        }
+                    }
+                    if ($timeToVerify <= new \DateTime()) {
+                        $includeFlag = false;
                     }
                     if ($includeFlag) {
                         array_push($hm, $timeToVerify);
@@ -150,9 +143,9 @@ class ReservationController extends Controller {
                         if ($timeToVerify >= $valueExclude["start"] &&  $timeToVerify <= $valueExclude["end"]) {
                             $includeFlag = false;
                         }
-                        if ($timeToVerify <= new \DateTime()) {
-                            $includeFlag = false;
-                        }
+                    }
+                    if ($timeToVerify <= new \DateTime()) {
+                        $includeFlag = false;
                     }
                     if ($includeFlag) {
                         array_push($hm, $timeToVerify);
