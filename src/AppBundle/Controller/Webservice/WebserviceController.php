@@ -28,6 +28,8 @@ use AppBundle\Entity\Menus;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Product;
 use AppBundle\Entity\Payment;
+use AppBundle\Entity\TurnProfessional;
+
 
 /**
  * Webservice controller.
@@ -39,12 +41,12 @@ class WebserviceController extends Controller{
         $enviroment = $this->container->get('kernel')->getEnvironment();
         $paths = array();
         if($enviroment == "prod"){
-           // $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }else{
-            //$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }
         
@@ -53,6 +55,48 @@ class WebserviceController extends Controller{
     }
 
 
+
+	
+	/**
+     * @Route("/ws/change-status-prof", name="/ws/change-status-prof")
+     */
+    public function changeStatusProf(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		$paths = $this->getProjectPaths();
+		if($data){
+            $status_prof="";
+
+			$em = $this->getDoctrine()->getManager();
+            $list = array();
+
+			$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
+			
+			$professional->setStatus($data->status);
+			$em->persist($professional);
+			$em->flush();
+
+			if($data->status == "ACTIVO"){
+				$newTurn = new TurnProfessional();
+				$newTurn->setProfId($professional->getId());
+				$newTurn->setStatus("DISPONIBLE");
+				$newTurn->setTurnDate(new \DateTime());
+				$em->persist($newTurn);
+				$status_prof="ACTIVO";
+			}else{
+				$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
+				$em->remove($turn);
+				$status_prof="INACTIVO";
+			}
+		
+				$em->flush();
+
+				return new JsonResponse(array('status' => 'success','data' => $status_prof));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
 
 	
 	 /**
@@ -70,6 +114,9 @@ class WebserviceController extends Controller{
 			
 			foreach($data->products as $prod){
 				$product = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $prod->produc_id ));
+
+				$product->setInventoryQuantity($product->getInventoryQuantity()-$prod->quantity);
+				$em->persist($product);
 
 				$NewOrder = new OrderDetail();
 				$NewOrder->setProduct($product);
@@ -305,6 +352,17 @@ class WebserviceController extends Controller{
 								$random="Seleccionado";
 							}
 
+							$orderDetails = $em->getRepository('AppBundle:OrderDetail')->findBy(array("summaryService" => $sreportBarberer['id_summary_service']));
+						
+						$listOrder=[];
+							foreach($orderDetails as $orderdetail){
+								$listOrder[] = array(
+									'order_id'   => $orderdetail->getOrderDetailId(),
+									'quantity' => $orderdetail->getQuantity(),
+									'payment_total' => $orderdetail->getPaymentTotal()
+								);
+							}
+
 										
 					$list[] = array(
 						'summary_service_id'=> $sreportBarberer['id_summary_service'],
@@ -321,7 +379,8 @@ class WebserviceController extends Controller{
 						'services'          => $listProd,
 						'random'            => $random,
 						'gain_factor'       => $sreportBarberer['gain_factor']*100,
-						'amount_point_sale' => $sreportBarberer['amount_point_sale']
+						'amount_point_sale' => $sreportBarberer['amount_point_sale'],
+						'order_datail'      => $listOrder
 						
 					);
 				}
@@ -482,6 +541,7 @@ class WebserviceController extends Controller{
 			$reportRange = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRange($data->date_start,$data->date_end);
 			$reportRangeBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberrange($data->date_start,$data->date_end);
 			$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($data->date_start,$data->date_end);
+			$reportRangeCancel = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRangeCancel($data->date_start,$data->date_end);
 			
 		
 			
@@ -503,8 +563,11 @@ class WebserviceController extends Controller{
 					'amount_product'     => $reportRange[0]['amount_product'],
 					'qty_product'        => $reportRange[0]['qty_product'],
 					'gain_barber'        => $reportRange[0]['gain_barber'],
-					'total_total'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']- $reportRange[0]['amount_point_sale']
-					
+					'total_total'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']+$reportRange[0]['total_products'],
+					'total_neto'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']- $reportRange[0]['amount_point_sale'],
+					'canceled'           => $reportRangeCancel[0]['cancelados'],
+					'deleted'            => $reportRangeCancel[0]['eliminados'],
+					'sub_total'			 => $reportRange[0]['total_payment']
 				);
 			
 
@@ -574,7 +637,7 @@ class WebserviceController extends Controller{
 		if(true){
 
 			$em = $this->getDoctrine()->getManager();
-			
+ 			
 
 			$list  = array();
 			$listReportGeneral = array();
@@ -584,6 +647,7 @@ class WebserviceController extends Controller{
 			$reportToday = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralToday();
 			$reportTodayBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberToday();
 			$reportSaleProductToday = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsToday();
+			$portTodayCanceled = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberTodayCancel();
 		
 			
 				$listReportGeneral = array(
@@ -604,8 +668,11 @@ class WebserviceController extends Controller{
 					'amount_product'     => $reportToday[0]['amount_product'],
 					'qty_product'        => $reportToday[0]['qty_product'],
 					'gain_barber'        => $reportToday[0]['gain_barber'],
-					'total_total'		 => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']- $reportToday[0]['amount_point_sale']
-					
+					'total_total'		 => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']+$reportToday[0]['total_products'],
+					'total_neto'         => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']- $reportToday[0]['amount_point_sale'],
+					'canceled'           => $portTodayCanceled[0]['cancelados'],
+					'deleted'           => $portTodayCanceled[0]['eliminados'],
+					'sub_total'			=> $reportToday[0]['total_payment']
 				);
 			
 
@@ -1410,7 +1477,7 @@ class WebserviceController extends Controller{
 		
 		if(true)
 		{	$list=array();
-			$profesional_menu = $em->getRepository('AppBundle:User')->findBy(array("userRole" => [2,4], "organization" => $organizacion_id ));
+			$profesional_menu = $em->getRepository('AppBundle:User')->findBy(array("userRole" => [2,4], "organization" => $organizacion_id ),array('userOrder'=>'ASC'));
 			
 			foreach($profesional_menu as $prof)
 			{  if($prof->getStatus() != 'ELIMINADO'){
@@ -1501,8 +1568,9 @@ class WebserviceController extends Controller{
 		{   $status="";	
 			$list= array();
 
-			$services_menu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => 2,"isActive" => [0,1] ));
+			$services_menu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => 2,"isActive" => [0,1] ),array('menuOrder'=>'ASC'));
 			
+	
 			foreach($services_menu as $menu)
 			{
 				if($menu->getIsActive()==1){
@@ -1593,7 +1661,7 @@ class WebserviceController extends Controller{
 		$listServ= array();
 		$list  = array();
 	
-		$professional  = $em->getRepository('AppBundle:User')->findBy(array("userRole" => 2 ,"status" => 'ACTIVO'));
+		$professional  = $em->getRepository('AppBundle:User')->findBy(array("userRole" => 2 ,"status" => 'ACTIVO'),array('userOrder'=>'ASC'));
 		$prof_random = $em->getRepository('AppBundle:User')->findOneBy(array("id" => 0 ));
 		
 		$service = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => $prof_random, 'status' => 1));
@@ -1647,7 +1715,7 @@ class WebserviceController extends Controller{
 
         $em = $this->getDoctrine()->getManager();
 		$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 1 ));
-		$mainMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'));
+		$mainMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'),array('menuOrder'=>'ASC'));
 		$paths = $this->getProjectPaths();
 
 		$list  = array();
@@ -1667,7 +1735,7 @@ class WebserviceController extends Controller{
 		}
 
 		$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2 ));
-		$secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'));
+		$secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'),array('menuOrder'=>'ASC'));
 		
 		foreach($secondMenu as $menu)
 		{
@@ -1689,7 +1757,9 @@ class WebserviceController extends Controller{
 		
 		}
 
-		$professional  = $em->getRepository('AppBundle:User')->findBy(array("userRole" => 2 ,"status" => 'ACTIVO'));
+		$professional  = $em->getRepository('AppBundle:User')->findBy(array("userRole" => 2 ,"status" => 'ACTIVO'),array('userOrder'=>'ASC'));
+		// var_dump($professional);
+		// die; 
 		foreach($professional as $prof)
 		{    $listService = array();
 			  $service = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => $prof, 'status' => 1));
@@ -1705,7 +1775,8 @@ class WebserviceController extends Controller{
 				'name'	   => $prof->getFirstName().' '.$prof->getLastName(),
 				'bio'	   => $prof->getBio(),
 				'avatar'   => $paths["uploads_path"].$prof->getAvatarPath(),
-				'services' => $listService
+				'services' => $listService,
+				'order'    => $prof->getUserOrder()
 			);
 		
 		}
@@ -1937,10 +2008,16 @@ class WebserviceController extends Controller{
 				$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
 				$service->setProfessional($professional);
 			}
-			
+
 			$service->setServiceStart(new \DateTime());
 			//$client->setAvatar($avatar);
 			$em->persist($service);
+            //ACTUALIZA TABLA DE TURNO
+			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
+			$turn->setStatus("OCUPADO");
+			$turn->setTurnDate(new \DateTime());
+			$em->persist($turn);
+
 			$em->flush();
        
 			 return new JsonResponse(array('status' => 'success'));									 
@@ -1966,6 +2043,11 @@ class WebserviceController extends Controller{
 			$service->setServiceEnd(new \DateTime());
 			//$client->setAvatar($avatar);
 			$em->persist($service);
+			//ACTUALIZA TABLA DE TURNO
+			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
+			$turn->setStatus("DISPONIBLE");
+			$turn->setTurnDate(new \DateTime());
+			$em->persist($turn);
 			$em->flush();
        
 			 return new JsonResponse(array('status' => 'success'));									 
@@ -3636,7 +3718,7 @@ class WebserviceController extends Controller{
 			$user = $em->getRepository('AppBundle:User')->findOneBy(array(
 				"email" => $user,
 				"password" => $pwd,
-				'status' => 'ACTIVO'
+				'status' => ['ACTIVO','INACTIVO']
 			));
 			
 			if($user)
@@ -3655,7 +3737,8 @@ class WebserviceController extends Controller{
 					  'last_name'  	   => $user->getLastName(),			   	  
 					  'email'      	   => $user->getEmail(),
 					  'rol_id'     	   => $user->getUserRole()->getId(),
-					  'token'          => md5($user->getId()),			   	  			   	  
+					  'token'          => md5($user->getId()),
+					  'status'      	   => $user->getStatus(),			   	  			   	  
 					  'security_code'  => $user->getsecurityCode(),
 					  'organizationId' => $user->getOrganization()->getOrganizationId()
 				);

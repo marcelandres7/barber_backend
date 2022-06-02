@@ -73,7 +73,7 @@ class UserController extends Controller {
         }
 
         $queryUser = $em->getRepository('AppBundle:User')->getList();
-//		var_dump($queryUser);die;
+	//	var_dump($queryUser);die;
         $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
 
         return $this->render('@App/Backend/User/index.html.twig', array(

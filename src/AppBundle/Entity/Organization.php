@@ -195,4 +195,60 @@ class Organization
     public function __toString() {
     	return $this->getName();
     }
+    /**
+     * @var string
+     */
+    private $address;
+
+    /**
+     * @var string
+     */
+    private $passwdApp;
+
+
+    /**
+     * Set address
+     *
+     * @param string $address
+     * @return Organization
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    
+        return $this;
+    }
+
+    /**
+     * Get address
+     *
+     * @return string 
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * Set passwdApp
+     *
+     * @param string $passwdApp
+     * @return Organization
+     */
+    public function setPasswdApp($passwdApp)
+    {
+        $this->passwdApp = $passwdApp;
+    
+        return $this;
+    }
+
+    /**
+     * Get passwdApp
+     *
+     * @return string 
+     */
+    public function getPasswdApp()
+    {
+        return $this->passwdApp;
+    }
 }

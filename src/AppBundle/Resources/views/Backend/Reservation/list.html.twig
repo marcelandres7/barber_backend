@@ -1,3 +1,6 @@
+{% extends '@App/Backend/base.html.twig' %}
+
+{% block body %}
 <div class="card-header">
     <h5>Listado</h5>
     <div class="card-header-right">
@@ -19,23 +22,27 @@
             <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Nombre</th>
-                    <th>Estado</th>
-                    <th>Herramientas</th>
+                    <th>Cliente</th>
+                    <th>Profesional</th>
+                    {# <th>fecha de creación</th> #}
+                    {# <th>Herramientas</th> #}
                 </tr>
             </thead>
             <tbody>
+            {# {{ dump(list) }} #}
                 {% for item in list %}
-                    {#<tr>
-                        <td>{{ item.organizationId }}</td>
-                        <td>{{ item.name }}</td>
-                        <td>
+                    <tr>
+                        <td>{{ item.idSummaryService }}</td>
+                        <td>{{ item.client.name }}</td>
+                        <td>{{ item.professional.firstName }}</td>
+                         {# <td>{{ item.createdAt }}</td> #}
+                        {# <td>
                             {% if item.status == 'ACTIVO'%}
                                 <span class="label bg-c-green f-12 text-white" href="#!">ACTIVO</span>
                             {% else %}
                                 <span class="label bg-c-red f-12 text-white" href="#!">INACTIVO</span>
                             {% endif %}
-                        </td>
+                        </td> 
                         <td>
                             <a class="btn btn-icon btn-rounded theme-bg2 text-white" style="background: linear-gradient(-135deg,#3ebfea 0%,#1de9b6 100%);" href="{{ path('backend_branch', {'id': item.organizationId|md5}) }}" title="Sucursal" data-toggle="tooltip">
                                 <i class="fas fa-square"></i>
@@ -63,12 +70,12 @@
                                 {% endif %}
                             {% endif %}
                         </td>
-                    </tr>#}
+                    </tr> #} 
                 {% endfor %}
-            </tbody>
+          </tbody>
         </table>
     </div>
 </div>
-
+{% endblock %}
 
 
