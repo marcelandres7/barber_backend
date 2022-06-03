@@ -1,24 +1,40 @@
 <div class="row">
-    {% for item in service %}
+    
         <div class="col-xl-12 col-md-12">
             <div class="card">
                 <div class="card-block">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-auto">
-                            <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
-                                style="max-width: 70px;">
-                        </div>
-                        <div class="col">
-                            <h6 class="mb-2">{{ item.description }}</h6>
-                            <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
-                            <p>{{ item.duration }} minutos</p>
-                            <div style="display: none;" class="service-ids" data-sid="{{item.menuId}}"></div>
-                        </div>
+                    <div class="row">
+                        {% set totalPrice = 0 %}
+                        {% set totalTime = 0 %}
+                        {% for item in service %}
+                        {% set totalPrice = totalPrice + item.price %}
+                        {% set totalTime = totalTime + item.duration %}
+                            <div class="col-lg-3">
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col-auto">
+                                        <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
+                                            style="max-width: 70px;">
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-2">{{ item.description }}</h6>
+                                        <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
+                                        <p>{{ item.duration }} minutos</p>
+                                        <div style="display: none;" class="service-ids" data-sid="{{item.menuId}}"></div>
+                                    </div>
+                                </div>
+                                <hr class="divisor-vert-xs" >
+                            </div>
+                        {% endfor %}
+                            <div class="col-lg-3 text-center p-15 total-label">
+                                <h6 class="m-0 p-0">TOTAL</h6>
+                                <h4 class="m-0 p-0">$ {{ totalPrice |number_format(2, ',', '.')}}</h4>
+                                <span class="f-w-300 f-18">{{ totalTime }}&nbsp;minutos</span>
+                            </div>
                     </div>
                 </div>
             </div>
         </div>
-    {% endfor %}
+
 </div>
 
 <div class="row">

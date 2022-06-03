@@ -24,9 +24,10 @@ class SummaryServiceRepository extends EntityRepository
 	}
 
   public function getProfMenus( $idMenus ) {
-    $query = "  SELECT 	  GROUP_CONCAT(mu.user_id) as id_profs  
+    $query = "  SELECT 	  mu.user_id as id_profs  
                 FROM 	    menus_user mu 
-                WHERE  	  mu.menus_id = '$idMenus' ";
+                WHERE  	  FIND_IN_SET(mu.menus_id, '$idMenus')
+                GROUP BY  mu.user_id ";
     $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
 		return $res->fetchAll ();

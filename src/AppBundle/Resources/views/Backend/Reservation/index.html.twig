@@ -79,6 +79,7 @@
         $(document).ready(function () {
 
             var listServices = '';
+            var pathHours = '';
             var sidStr = '';
             $(".service-ids").each(function(index, item){
                 if (sidStr.length == 0) {
@@ -150,12 +151,12 @@
                         var clearAfternoon = true;
                         var clearEvening = true;
 
-                        /*$("#morning-title").html("");
+                        $("#morning-title").html("");
                         $("#afternoon-title").html("");
                         $("#evening-title").html("");
                         $("#morning-hour").html("");
                         $("#afternoon-hour").html("");
-                        $("#evening-hour").html("");*/
+                        $("#evening-hour").html("");
 
                         $.each(result.data, function( index, value ) {
                             
@@ -203,7 +204,38 @@
             $('.ancServ').on('click', function(){
                 const menuId = $(this).attr('data-id');
                 const dataHref = $(this).attr('data-href');
-                window.location = $(this).attr('data-href');
+                if (listServices.length == 0) {
+                    listServices = menuId;
+                    $(this).children().css("background-color","#00bfff");
+                }else{
+                    if (listServices.indexOf(menuId) === -1) {
+                        listServices = listServices+','+menuId;
+                        $(this).children().css("background-color","#00bfff");
+                    }else{
+                        listServices = listServices.replace(menuId,'');
+                        $(this).children().removeAttr('style');
+                    }
+                }
+                if (listServices.indexOf(',,') !== -1) {
+                    listServices = listServices.replace(',,',',');
+                }
+                if (listServices.substring(listServices.length-1) == ',') {
+                    listServices = listServices.slice(0,-1);
+                }
+                if (listServices[0] == ',') {
+                    listServices = listServices.substr(1,listServices.length-1);
+                }
+                $("#listServices").val(listServices);
+                pathHour = $(this).attr('data-href')+"?id="+listServices;
+                console.log(pathHour);
+            });
+            $("#button-clear").on('click', function (e) {
+                e.preventDefault();
+                $(".card-service").removeAttr('style');
+                listServices = '';
+            });
+            $("#button-next").on('click', function () {
+                window.location = pathHour;
             });
 
             $(document).on("click",".hours-btn", function(){

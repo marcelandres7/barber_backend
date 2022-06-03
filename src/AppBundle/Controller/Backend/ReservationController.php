@@ -39,13 +39,22 @@ class ReservationController extends Controller {
      */
     public function GetProfessionalHoursAction(Request $request) {
 
-        $idMenus = $request->get("id");
+        $idMenusStr = $request->get("id");
+        $idMenus = explode(",",$idMenusStr);
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
         $userData = $this->get("session")->get("userData");
         $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
-        $idProfMenus = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getProfMenus( $idMenus );
-        if ($idProfMenus[0]['id_profs'] == null) {
+        $idProfMenus = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getProfMenus( $idMenusStr );
+        $idprofString = '';
+        foreach ($idProfMenus as $value) {
+            if (strlen($idprofString) == 0) {
+                $idprofString = $value['id_profs'];
+            }else{
+                $idprofString = $idprofString.",".$value['id_profs'];
+            }
+        }
+        if ($idprofString == '') {
             $this->addFlash('error_message', 'No hay Profesionales disponibles para este servicio');
             return $this->redirectToRoute("backend_reservation");
         }
@@ -59,7 +68,7 @@ class ReservationController extends Controller {
         }
         $totales["totalPrice"] = $totalPrice;
         $totales["totalDuration"] = $totalDuration;
-        $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idProfMenus[0]['id_profs'])]);
+        $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idprofString)]);
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
 
@@ -95,9 +104,10 @@ class ReservationController extends Controller {
 
         $pId = $request->get("p_id");
         $sId = $request->get("s_id");
+        $sIdArray = explode(",",$sId);
         $dateSearch = $request->get("date");
         $em = $this->getDoctrine()->getManager();
-        $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $sId]);
+        $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $sIdArray]);
         $listBooking = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getListBooking( $pId, $sId, $dateSearch );
         $toExclude = [];
         if ($listBooking && $serviceData) {
@@ -154,7 +164,6 @@ class ReservationController extends Controller {
                 }
             }
         }
-        
         $listHours  = [];
         $dayMomment = "morning";
         foreach ($hm as $value) {

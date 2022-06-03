@@ -206,3 +206,19 @@ input[type=number]::-webkit-outer-spin-button {
 	height:50px;
 	border-radius:100%;
 }
+
+.divisor-vert-xs{
+  display: none;
+}
+
+@media (max-width: 990px) {
+  .divisor-vert-xs{
+    display: block;
+  }
+}
+
+.total-label{
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  padding: 10px;
+}
