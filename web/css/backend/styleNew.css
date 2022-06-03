@@ -196,6 +196,11 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .img-sty{
+  max-width: 180px!important;
+  border-radius: 6px;
+}
+
+.img-sty2{
   max-width: 100px!important;
   border-radius: 6px;
 }
