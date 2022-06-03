@@ -33,7 +33,6 @@ class ReservationController extends Controller {
         ));
     }
 
-
     /**
      * @Route("/backend/get/professional/hours", name="backend_get_profs_hours")
      */
@@ -71,7 +70,6 @@ class ReservationController extends Controller {
         $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idprofString)]);
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
-
         $form = $this->createFormBuilder()
             ->add('firstName', 'text')
             ->add('lastName', 'text')
@@ -129,7 +127,7 @@ class ReservationController extends Controller {
         foreach ($hours as $valH) {
             if (intval($valH)>8 && intval($valH)<12) {
                 foreach ($minutes as $valM) {
-                    $hourMinutes    = $valH.":".$valM;
+                    $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
                     $includeFlag    = true;
                     foreach ($toExclude as $valueExclude) {
