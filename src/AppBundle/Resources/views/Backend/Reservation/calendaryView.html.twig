@@ -1,3 +1,17 @@
+<div class="page-header">
+    <div class="page-block">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-9">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{path('backend_reservation')}}" class="f-22">Servicios</a></li>
+                        <li class="breadcrumb-item active f-22" aria-current="page">Reservación</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     
         <div class="col-xl-12 col-md-12">
@@ -12,8 +26,7 @@
                             <div class="col-lg-3">
                                 <div class="row align-items-center justify-content-center">
                                     <div class="col-auto">
-                                        <img class="img-fluid" src="{{asset('images/dashborad-4.jpg')}}" alt="dashboard-user"
-                                            style="max-width: 70px;">
+                                        <img class="img-fluid img-sty" src="{{ asset('uploads/' ~ item.picturePath) }}" alt="dashboard-user">
                                     </div>
                                     <div class="col">
                                         <h6 class="mb-2">{{ item.description }}</h6>
@@ -66,7 +79,7 @@
                         {% endif %}
                             <div class="col-auto">
                                 <img class="img-fluid rounded-circle" style="width:80px;"
-                                    src="{{asset('images/avatar-2.jpg')}}" alt="dashboard-user">
+                                src="{{ asset('uploads/' ~ item.avatarPath) }}" alt="dashboard-user">
                             </div>
                             <div class="col">
                                 {% if key == 0 %}

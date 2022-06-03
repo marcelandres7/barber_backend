@@ -198,6 +198,10 @@ input[type=number]::-webkit-outer-spin-button {
 	border: 1px solid #ced4da;
 }
 
+.img-sty{
+  max-width: 100px!important;
+  border-radius: 6px;
+}
 
 .avatar_circle {
 	background-size:cover; 
