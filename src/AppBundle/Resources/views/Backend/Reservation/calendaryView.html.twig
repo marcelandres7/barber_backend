@@ -33,9 +33,16 @@
                         <input type="text" id="firstProf" style="display: none;" value="{{item.id}}">
                         <input type="text" id="firstName" style="display: none;" value="{{item.firstName}}&nbsp;{{item.lastName}}">
                         <input type="text" id="profAddress" style="display: none;" value="{{item.organization.address}}">
+                        <input type="text" id="profOrgId" style="display: none;" value="{{item.organization.organizationId}}">
                     {% endif %}
-                    <a href="javascript:;" data-href="{{ path('backend_logout') }}" data-address="{{item.organization.address}}" data-id="{{item.id}}" data-name="{{ item.firstName }} {{ item.lastName }}" class="prof-list"
-                        data-order="{{key}}">
+                    <a  href="javascript:;" 
+                        data-href="{{ path('backend_logout') }}" 
+                        data-orgid="{{ item.organization.organizationId }}" 
+                        data-address="{{item.organization.address}}" 
+                        data-id="{{item.id}}" 
+                        data-name="{{ item.firstName }} {{ item.lastName }}" 
+                        data-order="{{key}}"
+                        class="prof-list">
                         {%if key == 0 %}
                             <div class="row align-items-center justify-content-center prof-item" style="border-radius:8px; background-color: #04a9f5; color:#fff">
                         {% else %}

@@ -72,6 +72,7 @@ class ReservationController extends Controller {
             ->add('services', 'hidden')
             ->add('professional', 'hidden')
             ->add('scheduledTo', 'hidden')
+            ->add('organization', 'hidden')
             ->add('send', 'submit')
             ->getForm();
         $form->handleRequest($request);
@@ -213,6 +214,7 @@ class ReservationController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $clientObj = $em->getRepository('AppBundle:Client')->findOneBy(["email" => $data['email']]);
         $userObj = $em->getRepository('AppBundle:User')->findOneBy(["id" => $data['professional']]);
+        $orgObj = $em->getRepository('AppBundle:Organization')->findOneBy(["organizationId" => $data['organization']]);
         $arrServices = explode(',',$data['services']);
         $totalPrice = 0;
         if (count($arrServices)>0) {
@@ -235,6 +237,7 @@ class ReservationController extends Controller {
         $sumaryServiceObj = new SummaryService();
         $sumaryServiceObj->setClient($clientObj);
         $sumaryServiceObj->setProfessional($userObj);
+        $sumaryServiceObj->setOrganization($orgObj);
         $sumaryServiceObj->setScheduledTo(new \DateTime($data['scheduledTo']));
         $sumaryServiceObj->setTotalPayment($totalPrice);
         $sumaryServiceObj->setServices($data['services']);

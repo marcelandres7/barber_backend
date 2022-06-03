@@ -78,6 +78,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            var listServices = '';
             var sidStr = '';
             $(".service-ids").each(function(index, item){
                 if (sidStr.length == 0) {
@@ -118,6 +119,7 @@
                 var profId = $(this).data('id');
                 var profName = $(this).data('name');
                 var profAddress = $(this).data('address');
+                var profOrgId = $(this).data('orgid');
                 $("#firstProf").val(profId);
                 $("#profName").html(profName);
                 $("#serv-address").html(profAddress);
@@ -134,6 +136,7 @@
                 $("#form_scheduledTo").val('');
                 $("#when_datetime").html('');
                 $("#form_professional").val(profId);
+                $("#form_organization").val(profOrgId);
                 $("#btn-next").prop("disabled", true);
 
             });
@@ -249,7 +252,9 @@
             $("#form_professional").val(profId);
             $("#profName").html(profName);
             var profAddress = $("#profAddress").val();
+            var profOrgId = $("#profOrgId").val();
             $("#serv-address").html(profAddress);
+            $("#form_organization").val(profOrgId);
             
         });
     </script>
