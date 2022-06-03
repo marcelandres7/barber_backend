@@ -1,43 +1,72 @@
-{% extends '@App/Backend/base.html.twig' %}
+{% extends '@App/Backend/base_public.html.twig' %}
 
 {% block body %}
 
-{{ include('@App/Backend/flash_message.html.twig') }}
-{% if permits["wp"] and view == 'prof_hours' %}
-    {{
-        include(
-            '@App/Backend/create_modal_reservation.html.twig',
-                {
-                    'title': 'Reservación',
-                    'form': form,
-                    'service': service,
-                    'totales': totales,
-                    'formPath': '@App/Backend/Reservation/form.html.twig'
-                }
-        )
-    }}
-{% endif %}
-<div class="main-body">
-    <div class="page-wrapper">
-        <div class="row">
-            {{ include('@App/Backend/flash_message.html.twig') }}
-            <div class="col-sm-12">
-                {% if permits["rp"] %}
-                {% if view == 'services' %}
-                {{ include('@App/Backend/Reservation/servicesView.html.twig', { 'list': list }) }}
-                {% endif %}
-                {% if view == 'prof_hours' %}
-                {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof': prof,
-                'day': day }) }}
-                {% endif %}
-                {% endif %}
-            </div>
-            <div class="col-sm-6">
+<div class="row">
+    <div class="container">
 
+        <div class="row container-prop m-b-30 m-l-0 m-r-0 p-b-30">
+            <div class="col-lg-4 m-t-30">
+                <img class="img-hern" src="{{ asset('uploads/hernandez_big.png') }}" alt="dashboard-user">
+            </div>
+            <div class="col-lg-8  m-t-30">
+                <div class="flex-container">
+                    <h2 class="color-title-hern">Hernandez barberia exclusiva</h2>
+                </div>
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-body">
+                {{ include('@App/Backend/flash_message.html.twig') }}
+                {% if permits["wp"] and view == 'prof_hours' %}
+                {{
+                include(
+                '@App/Backend/create_modal_reservation.html.twig',
+                {
+                'title': 'Reservación',
+                'form': form,
+                'service': service,
+                'totales': totales,
+                'formPath': '@App/Backend/Reservation/form.html.twig'
+                }
+                )
+                }}
+                {% endif %}
+                <div class="main-body">
+                    <div class="page-wrapper">
+                        <div class="row">
+                            {{ include('@App/Backend/flash_message.html.twig') }}
+                            <div class="col-sm-12">
+                                {% if permits["rp"] %}
+                                {% if view == 'services' %}
+                                {{ include('@App/Backend/Reservation/servicesView.html.twig', { 'list': list }) }}
+                                {% endif %}
+                                {% if view == 'prof_hours' %}
+                                {{ include('@App/Backend/Reservation/calendaryView.html.twig', { 'service': service, 'prof':
+                                prof,
+                                'day': day }) }}
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-6">
+        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+
+
+
+
     </div>
 </div>
+
 
 {% endblock %}
 {% block extra_scripts %}
