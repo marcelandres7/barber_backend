@@ -14,7 +14,8 @@ class IndexController extends Controller {
      */
     public function indexAction(Request $request) {
         // replace this example code with whatever you need
-         return $this->redirectToRoute("backend_login");
+         //return $this->redirectToRoute("backend_login");
+         return $this->render('@App/index.html.twig');
     }
 
 }
