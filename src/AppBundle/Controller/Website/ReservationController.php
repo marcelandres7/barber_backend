@@ -106,7 +106,8 @@ class ReservationController extends Controller {
                 $dateStart  = new \DateTime($bookingValue["scheduled_to"]);
                 $dateEnd    = new \DateTime($bookingValue["scheduled_to"]);
                 $duration   = $bookingValue["total_duration"];
-                $dateEnd->modify('+'.$duration.' minute');
+                //$dateEnd->modify('+'.$duration.' minute');
+                date_modify($dateEnd, '+'.$duration.' minute');
                 $temp = [];
                 $temp["start"] = $dateStart;
                 $temp["end"] = $dateEnd;
@@ -165,7 +166,9 @@ class ReservationController extends Controller {
                 if ($j == 0) {
                     $pairHour["start"] = $startTest;
                 }else if ($j == 1){
-                    $k1 = $endTest->modify('+'.$serviceData[0]->getDuration().' minute');
+                    //$k1 = $endTest->modify('+'.$serviceData[0]->getDuration().' minute');
+                    date_modify($endTest, '+'.$serviceData[0]->getDuration().' minute');
+                    $k1 = $endTest;
                     $includeFlag = true;
                     foreach ($toExclude as $valueExcl) {
                         if ($k1 >= $valueExcl["start"] &&  $k1 <= $valueExcl["end"]) {
