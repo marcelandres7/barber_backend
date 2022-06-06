@@ -320,3 +320,16 @@ ui-datepicker thead {
   /*filter: dropshadow(color=#fff, offx=1, offy=1);*/
 }
 
+@media (max-width: 460px) {
+  .convert-column-left {
+    width: 100%;
+    padding-bottom: 15px;
+  }
+  .convert-column-right {
+    width: 100%;
+  }
+  .align-cen-460{
+    text-align: center;
+  }
+}
+
