@@ -22,7 +22,7 @@ class ReservationController extends Controller {
     public function indexAction(Request $request) {
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
-        $list = $em->getRepository('AppBundle:Menus')->findBy(["isActive"=>1]);
+        $list = $em->getRepository('AppBundle:Menus')->findBy(["menuType" => [2,4], "isActive"=>1]);
         return $this->render('@App/Website/Reservation/index.html.twig', array(
                     "list" => $list,
                     "view" => "services"
