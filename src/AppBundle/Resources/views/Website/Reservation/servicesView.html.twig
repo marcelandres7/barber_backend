@@ -1,0 +1,46 @@
+<div class="page-header">
+    <div class="page-block">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-9">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#" class="f-22">Servicios</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    {% for item in list %}
+        <div class="col-xl-6 col-md-12">
+            <a href="javascript:;" class="ancServ" data-id={{item.menuId}} data-href="{{ path('get_profs_hours') }}">
+
+                <div class="card card-service" id="card-{{item.menuId}}">
+                    <div class="card-block">
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col-auto">
+                                <img class="img-fluid img-sty" src="{{ asset('uploads/' ~ item.picturePath) }}" alt="dashboard-user"
+                                    style="max-width: 70px;">
+                            </div>
+                            <div class="col">
+                                <h6 class="mb-2">{{ item.description }}</h6>
+                                <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
+                                <p>{{ item.duration }} minutos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+    {% endfor %}
+</div>
+<div class="row">
+    <div class="col-md-6 col-6">
+        <button type="reset" id="button-clear" class="btn btn-rounded btn-danger">Limpiar</button>
+    </div>
+    <div class="col-md-6 col-6">
+        <button id="button-next" type="button" class="btn btn-rounded btn-success float-right">Siguiente</button>
+    </div>
+</div>

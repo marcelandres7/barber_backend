@@ -1,0 +1,294 @@
+{% extends '@App/Website/base_public.html.twig' %}
+
+{% block body %}
+
+<div class="row">
+    <div class="container">
+
+        <div class="row container-prop m-b-30 m-l-0 m-r-0 p-b-30">
+            <div class="col-lg-4 m-t-30">
+                <img class="img-hern" src="{{ asset('uploads/hernandez_big.png') }}" alt="dashboard-user">
+            </div>
+            <div class="col-lg-8  m-t-30">
+                <div class="flex-container">
+                    <h2 class="color-title-hern">Hernandez barberia exclusiva</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {{ include('@App/Website/flash_message.html.twig') }}
+                {% if view == 'prof_hours' %}
+                {{
+                include(
+                '@App/Website/create_modal_reservation.html.twig',
+                {
+                'title': 'Reservación',
+                'form': form,
+                'service': service,
+                'totales': totales,
+                'formPath': '@App/Website/Reservation/form.html.twig'
+                }
+                )
+                }}
+                {% endif %}
+                <div class="main-body">
+                    <div class="page-wrapper">
+                        <div class="row">
+                            {{ include('@App/Website/flash_message.html.twig') }}
+                            <div class="col-sm-12">
+                                {% if view == 'services' %}
+                                {{ include('@App/Website/Reservation/servicesView.html.twig', { 'list': list }) }}
+                                {% endif %}
+                                {% if view == 'prof_hours' %}
+                                {{ include('@App/Website/Reservation/calendaryView.html.twig', { 'service': service, 'prof':
+                                prof,
+                                'day': day }) }}
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-6">
+        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+
+
+
+
+    </div>
+</div>
+
+
+{% endblock %}
+{% block extra_scripts %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var listServices = '';
+        var pathHours = '';
+        var sidStr = '';
+        $(".service-ids").each(function (index, item) {
+            if (sidStr.length == 0) {
+                sidStr = $(item).data('sid');
+            } else {
+                sidStr = sidStr + ',' + $(item).data('sid');
+            }
+        });
+        $("#form_services").val(sidStr);
+
+        $("#calendar").datepicker({
+            minDate: new Date(),
+            firstDay: 1,
+            dayNames: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+            dayNamesMin: ["Do","Lu","Ma","Mi","Ju","Vi","Sá"],
+            monthNames: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+            monthNamesShort: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+        });
+
+        $("#calendar").on('change', function () {
+            //var dateSelected = $(this).val();
+            var myDate = $("#calendar").datepicker("getDate");
+            var monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
+            var dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
+            var profId = $("#firstProf").val();
+            const data = {
+                p_id: profId,
+                s_id: sidStr,
+                date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
+            };
+            console.log("PROF: ", data);
+            getListHours(data);
+            $("#form_scheduledTo").val('');
+            $("#when_datetime").html('');
+            $("#hour_to").html('');
+            $("#btn-next").prop("disabled", true);
+        });
+
+        $(".prof-list").on('click', function () {
+            var myDate = $("#calendar").datepicker("getDate");
+            var monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
+            var dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
+            var profId = $(this).data('id');
+            var profName = $(this).data('name');
+            var profAddress = $(this).data('address');
+            var profOrgId = $(this).data('orgid');
+            $("#firstProf").val(profId);
+            $("#profName").html(profName);
+            $("#serv-address").html(profAddress);
+            const data = {
+                p_id: profId,
+                s_id: sidStr,
+                date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
+            };
+            getListHours(data);
+            $(".prof-item").css({ "border-radius": "unset", "background-color": "unset", "color": "unset" });
+            $(".prof-title").css({ "color": "unset" });
+            $(this).children().css({ "border-radius": "8px", "background-color": "#04a9f5", "color": "#fff" });
+            $(this).find("h5.prof-title").css({ "color": "#fff" });
+            $("#form_scheduledTo").val('');
+            $("#when_datetime").html('');
+            $("#form_professional").val(profId);
+            $("#form_organization").val(profOrgId);
+            $("#btn-next").prop("disabled", true);
+
+        });
+
+        function getListHours(data) {
+            $.ajax({
+                data: data,
+                url: "{{path('get_list_hours_available')}}",
+                success: function (result) {
+                    var clearAfternoon = true;
+                    var clearEvening = true;
+
+                    $("#morning-title").html("");
+                    $("#afternoon-title").html("");
+                    $("#evening-title").html("");
+                    $("#morning-hour").html("");
+                    $("#afternoon-hour").html("");
+                    $("#evening-hour").html("");
+
+                    $.each(result.data, function (index, value) {
+
+                        if (value.momment == "morning") {
+                            $("#morning-title").html("<p>Mañana</p>");
+                        } else if (value.momment == "afternoon") {
+                            $("#afternoon-title").html("<p>Tarde</p>");
+                        } else if (value.momment == "evening") {
+                            $("#evening-title").html("<p>Noche</p>");
+                        }
+
+                        if (value.momment == "morning") {
+                            var prevHtml = "";
+                            if (index == 0) {
+                                $("#morning-hour").html("");
+                            } else {
+                                prevHtml = $("#morning-hour").html();
+                            }
+                            $("#morning-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        } else if (value.momment == "afternoon") {
+                            var prevHtml = "";
+                            if (clearAfternoon) {
+                                clearAfternoon = false;
+                                $("#afternoon-hour").html("");
+                            } else {
+                                prevHtml = $("#afternoon-hour").html();
+                            }
+                            $("#afternoon-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        } else if (value.momment == "evening") {
+                            var prevHtml = "";
+                            if (clearEvening) {
+                                clearEvening = false;
+                                $("#evening-hour").html("");
+                            } else {
+                                prevHtml = $("#evening-hour").html();
+                            }
+                            $("#evening-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        }
+
+                    });
+                }
+            });
+        }
+
+        $('.ancServ').on('click', function () {
+            const menuId = $(this).attr('data-id');
+            const dataHref = $(this).attr('data-href');
+            if (listServices.length == 0) {
+                listServices = menuId;
+                $(this).children().css("background-color", "#00bfff");
+            } else {
+                if (listServices.indexOf(menuId) === -1) {
+                    listServices = listServices + ',' + menuId;
+                    $(this).children().css("background-color", "#00bfff");
+                } else {
+                    listServices = listServices.replace(menuId, '');
+                    $(this).children().removeAttr('style');
+                }
+            }
+            if (listServices.indexOf(',,') !== -1) {
+                listServices = listServices.replace(',,', ',');
+            }
+            if (listServices.substring(listServices.length - 1) == ',') {
+                listServices = listServices.slice(0, -1);
+            }
+            if (listServices[0] == ',') {
+                listServices = listServices.substr(1, listServices.length - 1);
+            }
+            $("#listServices").val(listServices);
+            pathHour = $(this).attr('data-href') + "?id=" + listServices;
+            console.log(pathHour);
+        });
+        $("#button-clear").on('click', function (e) {
+            e.preventDefault();
+            $(".card-service").removeAttr('style');
+            listServices = '';
+        });
+        $("#button-next").on('click', function () {
+            window.location = pathHour;
+        });
+
+        $(document).on("click", ".hours-btn", function () {
+            const idBtn = $(this).attr('id');
+            const hStart = $(this).attr('start');
+            const hEnd = $(this).attr('end');
+            console.log("ID: ", idBtn);
+            console.log("Start: ", hStart);
+            console.log("End: ", hEnd);
+            $(".hours-btn").css("color", "#04a9f5");
+            $(".hours-btn").css("background-color", "#fff");
+            $('#' + idBtn).css("color", "#fff");
+            $('#' + idBtn).css("background-color", "#04a9f5");
+
+            let myDate = $("#calendar").datepicker("getDate");
+            let monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
+            let dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
+            let date = myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d;
+            let fullDTStart = date + ' ' + hStart;
+            let fullDTEnd = date + ' ' + hEnd;
+            console.log(fullDTStart);
+            $("#form_scheduledTo").val(fullDTStart);
+            $("#when_datetime").html(fullDTStart);
+            $("#hour_to").html(fullDTEnd);
+            $("#btn-next").removeAttr('disabled');
+        });
+
+
+
+        var myDate = $("#calendar").datepicker("getDate");
+        var monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
+        var dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
+        var profId = $("#firstProf").val();
+        var profName = $("#firstName").val();
+        const data = {
+            p_id: profId,
+            s_id: sidStr,
+            date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
+        };
+        console.log("data: ", data);
+        if (data.p_id && data.s_id) {
+            getListHours(data);
+        }
+        $("#form_scheduledTo").val('');
+        $("#when_datetime").html('');
+        $("#form_professional").val(profId);
+        $("#profName").html(profName);
+        var profAddress = $("#profAddress").val();
+        var profOrgId = $("#profOrgId").val();
+        $("#serv-address").html(profAddress);
+        $("#form_organization").val(profOrgId);
+
+    });
+</script>
+{% endblock %}
