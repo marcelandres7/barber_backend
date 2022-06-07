@@ -4,7 +4,7 @@
             <div class="col-12">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{path('reservation')}}" class="f-22">Servicios</a></li>
+                        <li class="breadcrumb-item"><a href="{{path('reservation')}}" class="f-22"><i class="fas fa-chevron-left f-18 m-r-5"></i>Servicios</a></li>
                         <li class="breadcrumb-item active f-22" aria-current="page">Reservación</li>
                     </ol>
                 </nav>
@@ -29,7 +29,7 @@
                                         <img class="img-fluid img-sty2" src="{{ asset('uploads/' ~ item.picturePath) }}" alt="dashboard-user">
                                     </div>
                                     <div class="col">
-                                        <h6 class="mb-2">{{ item.description }}</h6>
+                                        <h6 class="mb-2">{{ item.menuName }}</h6>
                                         <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
                                         <p>{{ item.duration }} minutos</p>
                                         <div style="display: none;" class="service-ids" data-sid="{{item.menuId}}"></div>
@@ -89,7 +89,7 @@
                                     <h5 class="prof-title">{{ item.firstName }}&nbsp;{{ item.lastName }}</h5>
                                 {% endif %}
 
-                                <span><i class="fas fa-map-marker-alt f-18 m-r-5"></i> Berlin, Germany</span>
+                                <span>{{ item.bio}}</span>
                             </div>
                         </div>
                         <hr>

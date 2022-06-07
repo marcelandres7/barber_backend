@@ -2,43 +2,6 @@
 <form method="post" action="{{path('reservation_create')}}" id="sForm" class="" autocomplete="false" novalidate>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            {{ form_label(form.firstName, "Nombre") }}
-                            {{form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            {{ form_label(form.lastName, "Apellido") }}
-                            {{form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            {{ form_label(form.email, "Email") }}
-                            {{form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            {{ form_label(form.phone, "Telefono - 04--5555555") }}
-                            {{form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            {{ form_label(form.message, "Comentario") }}
-                            {{form_widget(form.message, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
         <div class="col-md-6 p-t-15">
             <div class="col-md-12">
                 <div class="form-group">
@@ -135,13 +98,45 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-
-
-                    </div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-6 p-t-30">
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.firstName, "Nombre") }}
+                            {{form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.lastName, "Apellido") }}
+                            {{form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.email, "Email") }}
+                            {{form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.phone, "Telefono - 04--5555555") }}
+                            {{form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {{ form_label(form.message, "Comentario") }}
+                            {{form_widget(form.message, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
 
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -149,7 +144,7 @@
             <button type="reset" data-dismiss="modal" class="btn btn-rounded btn-danger">Cancelar</button>
         </div>
         <div class="col-md-6 col-6">
-            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Guardar</button>
+            <button id="button-save" type="submit" class="btn btn-rounded btn-success float-right">Reservar</button>
         </div>
     </div>
     {{ form_widget(form._token) }}

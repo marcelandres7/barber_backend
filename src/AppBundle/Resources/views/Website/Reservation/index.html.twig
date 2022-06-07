@@ -229,11 +229,17 @@
             $("#listServices").val(listServices);
             pathHour = $(this).attr('data-href') + "?id=" + listServices;
             console.log(pathHour);
+            if (listServices.length > 0) {
+                $("#button-next").removeAttr('disabled');
+            } else {
+                $("#button-next").prop("disabled", true);
+            }
         });
         $("#button-clear").on('click', function (e) {
             e.preventDefault();
             $(".card-service").removeAttr('style');
             listServices = '';
+            $("#button-next").prop("disabled", true);
         });
         $("#button-next").on('click', function () {
             window.location = pathHour;
