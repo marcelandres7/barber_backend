@@ -207,6 +207,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .container-prop {
   background-color: #ecf0f1;
+  text-align: center;
 }
 
 .color-title-hern {
@@ -333,3 +334,6 @@ ui-datepicker thead {
   }
 }
 
+.full-w-100 {
+  width: 100%;
+}
