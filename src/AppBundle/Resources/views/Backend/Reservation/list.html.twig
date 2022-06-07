@@ -23,26 +23,32 @@
                 <tr>
                     <th>Id</th>
                     <th>Cliente</th>
-                    <th>Profesional</th>
-                    {# <th>fecha de creación</th> #}
-                    {# <th>Herramientas</th> #}
+                     <th>Teléfono</th>
+                      <th>Correo</th>
+                     <th>fecha de cita</th> 
+                     <th>Profesional</th>
+                     <th>Servicios</th>
+                    <th>Herramientas</th>
                 </tr>
             </thead>
             <tbody>
-            {# {{ dump(list) }} #}
+              {# {{ dump(list) }}   #}
                 {% for item in list %}
                     <tr>
-                        <td>{{ item.idSummaryService }}</td>
-                        <td>{{ item.client.name }}</td>
-                        <td>{{ item.professional.firstName }}</td>
-                         {# <td>{{ item.createdAt }}</td> #}
-                        {# <td>
+                       <td>{{ item.summary_id }}</td>
+                        <td>{{ item.client_name }}</td>
+                        <td>{{ item.client_phone}}</td>
+                        <td>{{ item.client_email}}</td>
+                        <td>{{ item.scheduled.date }}</td>
+                        <td>{{ item.professional }}</td>
+                        <td>{{ item.services }}</td>
+                         {# <td>
                             {% if item.status == 'ACTIVO'%}
                                 <span class="label bg-c-green f-12 text-white" href="#!">ACTIVO</span>
                             {% else %}
                                 <span class="label bg-c-red f-12 text-white" href="#!">INACTIVO</span>
                             {% endif %}
-                        </td> 
+                        </td> #} 
                         <td>
                             <a class="btn btn-icon btn-rounded theme-bg2 text-white" style="background: linear-gradient(-135deg,#3ebfea 0%,#1de9b6 100%);" href="{{ path('backend_branch', {'id': item.organizationId|md5}) }}" title="Sucursal" data-toggle="tooltip">
                                 <i class="fas fa-square"></i>
@@ -54,7 +60,7 @@
                             {% endif %}
 
                             {% if permits["dp"] %}
-                                {% if item.status == 'ACTIVO'%}
+                                {# {% if item.status == 'ACTIVO'%} #}
                                     <span  title="Inactivar organización" data-toggle="tooltip">
                                         <a id="btn-delete" class="btn btn-icon btn-rounded btn-danger text-white sweet-multiple"
                                            data-href="{{
@@ -62,15 +68,15 @@
                                                                     'backend_organization_delete',
                                                                     {'organizationId': item.organizationId|md5}
                                                     )}}"
-                                           data-name="{{ item.name }}"
+                                           {# data-name="{{ item.name }}" #}
                                            href="javascript:;">
                                             <i class="feather icon-trash-2"></i>
                                         </a>
                                     </span>
-                                {% endif %}
+                                {# {% endif %} #}
                             {% endif %}
                         </td>
-                    </tr> #} 
+                    </tr> 
                 {% endfor %}
           </tbody>
         </table>
