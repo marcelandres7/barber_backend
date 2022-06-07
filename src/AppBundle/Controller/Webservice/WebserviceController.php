@@ -29,7 +29,7 @@ use AppBundle\Entity\User;
 use AppBundle\Entity\Product;
 use AppBundle\Entity\Payment;
 use AppBundle\Entity\TurnProfessional;
-
+use AppBundle\Repository\TurnProfessionalRepository;
 
 /**
  * Webservice controller.
@@ -55,7 +55,42 @@ class WebserviceController extends Controller{
     }
 
 
+	
+    /**
+     * @Route("/ws/get-refresh-turn", name="/ws/get-refresh-turn")
+     */
+    public function getRefreshTurn(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
 
+			$em = $this->getDoctrine()->getManager();
+            $list = array();
+
+			
+			$turns = $em->getRepository('AppBundle:TurnProfessional')->listTurnProfessional($data->organization_id);
+         $pos=1;
+			foreach($turns as $turn){
+				
+			
+				$list[] = array(
+					'position'   => $pos++,
+					'turn_id'     => $turn['turn_id'],
+					'prof_name'     => $turn['prof_name'],
+					'status'	   => $turn['status'],
+					'turn_date'	  => $turn['turn_date']
+				  );
+				}
+		
+				$em->flush();
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
 	
 	/**
      * @Route("/ws/change-status-prof", name="/ws/change-status-prof")
@@ -79,8 +114,10 @@ class WebserviceController extends Controller{
 			if($data->status == "ACTIVO"){
 				$newTurn = new TurnProfessional();
 				$newTurn->setProfId($professional->getId());
-				$newTurn->setStatus("DISPONIBLE");
+				$newTurn->setStatus("Disponible");
+				$newTurn->setOrganizationId($professional->getOrganization()->getOrganizationId());
 				$newTurn->setTurnDate(new \DateTime());
+
 				$em->persist($newTurn);
 				$status_prof="ACTIVO";
 			}else{
@@ -1735,7 +1772,8 @@ class WebserviceController extends Controller{
 		}
 
 		$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2 ));
-		$secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'),array('menuOrder'=>'ASC'));
+		// $secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'),array('menuOrder'=>'ASC'));
+		$secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3] ,"isActive" => '1'),array('menuOrder'=>'ASC'));
 		
 		foreach($secondMenu as $menu)
 		{
@@ -2014,7 +2052,7 @@ class WebserviceController extends Controller{
 			$em->persist($service);
             //ACTUALIZA TABLA DE TURNO
 			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			$turn->setStatus("OCUPADO");
+			$turn->setStatus("Ocupado");
 			$turn->setTurnDate(new \DateTime());
 			$em->persist($turn);
 
@@ -2045,7 +2083,7 @@ class WebserviceController extends Controller{
 			$em->persist($service);
 			//ACTUALIZA TABLA DE TURNO
 			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			$turn->setStatus("DISPONIBLE");
+			$turn->setStatus("Disponible");
 			$turn->setTurnDate(new \DateTime());
 			$em->persist($turn);
 			$em->flush();
@@ -2257,6 +2295,7 @@ class WebserviceController extends Controller{
             $listPending=array();
             $listComplete=array();
 			$listPayout=array();
+			$listBooking=array();
 			
 		$profesionales = $em->getRepository('AppBundle:User')->findBy(array("status" => 'ACTIVO',"userRole" => 2));
 		foreach($profesionales as $prof){
@@ -2282,7 +2321,7 @@ class WebserviceController extends Controller{
         $clientPending = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,1);
         $clientComplete = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,3);
         $clientPayout = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,5);
-
+		$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
         
         foreach($clientPending as $pending){
             $listProd=array();
@@ -2393,13 +2432,46 @@ class WebserviceController extends Controller{
 
         }
 
+		foreach($clientBooking as $booking){
+            $listProd=array();
+
+            $prods=explode(",", $booking['products']);
+					
+				foreach($prods as $prod){
+					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+	
+					$listProd[] = array(
+						'product_id'   => $product->getMenuId(),
+						'product_name' => $product->getMenuName(),
+						'product_menu_price' => $product->getPrice()
+					);
+				}
+            
+            	$listBooking[] = array(
+                    'service_id'    	=> $booking['service_id'],
+                    'client_id'     	=> $booking['client_id'],
+                    'client_name'   	=> $booking['client_name'],
+                    'avatar'	    	=> $paths["uploads_path"].$booking['avatar'],
+                    'products'      	=> $listProd,
+                    'service_date'  	=> $booking['service_date'],
+                    'professional_id'	=> $booking['professional_id'],
+                    'professional_name' => $booking['professional_name'],
+                    'total'  			=> $booking['total'],
+                    'start'  			=> $booking['service_start'],
+                    'end'    			=> $booking['service_end'],
+					'schedulet'         => $booking['scheduled_to']
+                );
+
+        }
+
 	
 		$listClient = array(
 			'pending'       => $listPending,
 			'complete'      => $listComplete,
 			'payout'        => $listPayout,
 			'method_pay'    => $listMethodPay,
-			'profesionales' => $listProfesionales
+			'profesionales' => $listProfesionales,
+			'booking'       => $listBooking
 		  );
        
 			 return new JsonResponse(array('status' => 'success', 'data' => $listClient));									 

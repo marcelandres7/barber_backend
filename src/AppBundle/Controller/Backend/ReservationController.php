@@ -25,7 +25,7 @@ class ReservationController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $userData = $this->get("session")->get("userData");
         $list = $em->getRepository('AppBundle:Menus')->findBy(["isActive"=>1]);
-        $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
+        $mp = 1;//EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
         return $this->render('@App/Backend/Reservation/index.html.twig', array(
                     "permits" => $mp,
                     "list" => $list,
@@ -43,7 +43,7 @@ class ReservationController extends Controller {
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
         $userData = $this->get("session")->get("userData");
-        $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
+        $mp = 1;//EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
         $idProfMenus = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getProfMenus( $idMenusStr );
         $idprofString = '';
         foreach ($idProfMenus as $value) {
@@ -253,6 +253,60 @@ class ReservationController extends Controller {
         $em->flush();
         $this->addFlash('success_message', $this->getParameter('exito'));
         return $this->redirectToRoute('backend_reservation');
+    }
+
+     /**
+     * @Route("/backend/listreservation", name="backend_listreservation")
+     */
+    public function listReservationAction(Request $request) {
+        $this->get("session")->set("module_id", $this->moduleId);
+        $em = $this->getDoctrine()->getManager();
+        $userData = $this->get("session")->get("userData");
+        
+        $listReservation = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->findBy(["status" => 6]);;
+        $list=array();
+      // var_dump($listReservation);
+       //die;
+
+       foreach($listReservation as $reserva)
+	    {   
+            $services="";
+            $prods=explode(",", $reserva->getServices());
+                    foreach($prods as $prod){
+                        $product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+                        
+                        $listProd[] = array(
+                            'product_id'   => $product->getMenuId(),
+                            'product_name' => $product->getMenuName(),
+                            'price' => $product->getPrice()
+                        );
+
+                        $services=$services." ".$product->getMenuName()." ";
+                    }
+
+					$list[] = array(
+						'summary_id'  => $reserva->getIdSummaryService(),
+					//	'client_name'	      => $reserva->getMenuName(),
+						'client_id'	  => $reserva->getClient()->getClientId(),
+						'client_name' => $reserva->getClient()->getName(),
+						'client_phone'=> $reserva->getClient()->getPhone(),
+						'client_email'=> $reserva->getClient()->getEmail(),
+						'scheduled'   => $reserva->getScheduledTo(),
+						// 'imagen_path' =>  $paths["uploads_path"].$menu->getPicturePath(),
+						'professional' => $reserva->getProfessional()->getFirstName()." ".$reserva->getProfessional()->getLastName(),
+						'services'       => $services,
+						 'organizationId' => $reserva->getOrganization()->getOrganizationId()
+					);
+		}	
+
+        // print_r($list);die;
+
+        $mp = EbClosion::getModulePermission($this->moduleId, $this->get("session")->get("userModules"));
+
+        return $this->render('@App/Backend/Reservation/list.html.twig', array(
+                    "list" => $list,
+                    "permits" => $mp
+        ));
     }
 
 }
