@@ -166,8 +166,11 @@ class ReservationController extends Controller {
                 if ($j == 0) {
                     $pairHour["start"] = $startTest;
                 }else if ($j == 1){
-                    $k1 = $endTest->modify('+'.$serviceData[0]->getDuration().' minute');
-                    //date_modify($endTest, '+'.$serviceData[0]->getDuration().' minute');
+                    $totalDuration = 0;
+                    foreach ($serviceData as $SDkey => $SDvalue) {
+                        $totalDuration = $totalDuration + $SDvalue->getDuration();
+                    }
+                    $endTest->modify('+'.$totalDuration.' minute');
                     $k1 = $endTest;
                     $includeFlag = true;
                     foreach ($toExclude as $valueExcl) {
