@@ -206,6 +206,8 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .container-prop {
+  min-height: 250px;
+  align-items: center;
   background-color: #ecf0f1;
   text-align: center;
 }
@@ -221,7 +223,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .img-hern {
-  max-width: 150px;
+  max-width: 210px;
   border-radius: 50%;
 }
 
@@ -336,4 +338,23 @@ ui-datepicker thead {
 
 .full-w-100 {
   width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .ccl-sty{
+    min-width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .ccr-sty{
+    min-width: 100%;
+    text-align: center;
+  }  
+}
+
+@media (max-width: 350px) {
+  .img-sty{
+    max-width: 185px!important;
+  }
 }

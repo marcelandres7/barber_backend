@@ -16,11 +16,11 @@
                 <div class="card card-service" id="card-{{item.menuId}}">
                     <div class="card-block">
                         <div class="row align-items-center justify-content-center align-cen-460">
-                            <div class="col-auto convert-column-left">
+                            <div class="col-auto convert-column-left ccl-sty">
                                 <img class="img-fluid img-sty" src="{{ asset('uploads/' ~ item.picturePath) }}" alt="dashboard-user"
                                     style="max-width: 70px;">
                             </div>
-                            <div class="col convert-column-right">
+                            <div class="col convert-column-right ccr-sty">
                                 <h6 class="mb-2">{{ item.menuName }}</h6>
                                 <h6 class="m-b-0">Bs. {{ item.price |number_format(2, ',', '.') }}</h6>
                                 <p>{{ item.duration }} minutos</p>
