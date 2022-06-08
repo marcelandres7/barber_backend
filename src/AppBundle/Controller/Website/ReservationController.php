@@ -66,7 +66,6 @@ class ReservationController extends Controller {
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
         $form = $this->createFormBuilder()
             ->add('firstName', 'text')
-            ->add('lastName', 'text')
             ->add('email', 'email')
             ->add('phone', 'text')
             ->add('message', 'textarea')
@@ -230,7 +229,7 @@ class ReservationController extends Controller {
         $statusObj = $em->getRepository('AppBundle:Status')->findOneBy(["statusId" => 6]);
         if (!$clientObj) {
             $clientObj = new Client();
-            $clientObj->setName($data['firstName'].' '.$data['lastName']);
+            $clientObj->setName($data['firstName']);
             $clientObj->setEmail($data['email']);
             $clientObj->setPhone($data['phone']);
             $clientObj->setRegister(0);
@@ -246,9 +245,10 @@ class ReservationController extends Controller {
         $sumaryServiceObj->setTotalPayment($totalPrice);
         $sumaryServiceObj->setServices($data['services']);
         $sumaryServiceObj->setStatus($statusObj);
+        $sumaryServiceObj->setCreatedAt(new \DateTime());
         $em->persist($sumaryServiceObj);
         $em->flush();
-        $this->addFlash('success_message', $this->getParameter('exito'));
+        $this->addFlash('success_message', $this->getParameter('exito_mensaje_contacto'));
         return $this->redirectToRoute('reservation');
     }
 
