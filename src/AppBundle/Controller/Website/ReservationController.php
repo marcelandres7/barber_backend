@@ -118,7 +118,7 @@ class ReservationController extends Controller {
         $minutes = ["00","15","30","45"];
         $hm = [];
         foreach ($hours as $valH) {
-            if (intval($valH)>8 && intval($valH)<12) {
+            if (intval($valH)>9 && intval($valH)<12) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
