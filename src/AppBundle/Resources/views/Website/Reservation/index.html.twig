@@ -157,46 +157,50 @@
                     $("#morning-hour").html("");
                     $("#afternoon-hour").html("");
                     $("#evening-hour").html("");
-
-                    $.each(result.data, function (index, value) {
-
-                        if (value.momment == "morning") {
-                            $("#morning-title").html("<p>Mañana</p>");
-                        } else if (value.momment == "afternoon") {
-                            $("#afternoon-title").html("<p>Tarde</p>");
-                        } else if (value.momment == "evening") {
-                            $("#evening-title").html("<p>Noche</p>");
-                        }
-
-                        if (value.momment == "morning") {
-                            var prevHtml = "";
-                            if (index == 0) {
-                                $("#morning-hour").html("");
-                            } else {
-                                prevHtml = $("#morning-hour").html();
+                    console.log("result.data.length: ",result.data);
+                    if (result.data.length!==0) {
+                        $("#hour-empty").html("");
+                        $.each(result.data, function (index, value) {
+                            console.log("value: ", value);
+                            if (value.momment == "morning") {
+                                $("#morning-title").html("<p>Mañana</p>");
+                            } else if (value.momment == "afternoon") {
+                                $("#afternoon-title").html("<p>Tarde</p>");
+                            } else if (value.momment == "evening") {
+                                $("#evening-title").html("<p>Noche</p>");
                             }
-                            $("#morning-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
-                        } else if (value.momment == "afternoon") {
-                            var prevHtml = "";
-                            if (clearAfternoon) {
-                                clearAfternoon = false;
-                                $("#afternoon-hour").html("");
-                            } else {
-                                prevHtml = $("#afternoon-hour").html();
-                            }
-                            $("#afternoon-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
-                        } else if (value.momment == "evening") {
-                            var prevHtml = "";
-                            if (clearEvening) {
-                                clearEvening = false;
-                                $("#evening-hour").html("");
-                            } else {
-                                prevHtml = $("#evening-hour").html();
-                            }
-                            $("#evening-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
-                        }
 
-                    });
+                            if (value.momment == "morning") {
+                                var prevHtml = "";
+                                if (index == 0) {
+                                    $("#morning-hour").html("");
+                                } else {
+                                    prevHtml = $("#morning-hour").html();
+                                }
+                                $("#morning-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                            } else if (value.momment == "afternoon") {
+                                var prevHtml = "";
+                                if (clearAfternoon) {
+                                    clearAfternoon = false;
+                                    $("#afternoon-hour").html("");
+                                } else {
+                                    prevHtml = $("#afternoon-hour").html();
+                                }
+                                $("#afternoon-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                            } else if (value.momment == "evening") {
+                                var prevHtml = "";
+                                if (clearEvening) {
+                                    clearEvening = false;
+                                    $("#evening-hour").html("");
+                                } else {
+                                    prevHtml = $("#evening-hour").html();
+                                }
+                                $("#evening-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                            }
+                        });
+                    }else{
+                        $("#hour-empty").html("<br><h4>No hay horas disponibles</h4><br><p>Es posible que el profesional tenga todas sus horas ya reservadas o que ya son mas de las 10:00 de la noche.<br> Por favor busca el siguiente día en el calendario para hacer una nueva reservación.</p>");
+                    }
                 }
             });
         }

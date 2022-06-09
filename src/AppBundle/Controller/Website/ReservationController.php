@@ -137,7 +137,7 @@ class ReservationController extends Controller {
                 }
             }
             
-            if (intval($valH)>=14 && intval($valH)<20) {
+            if (intval($valH)>=14 && intval($valH)<=22) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
