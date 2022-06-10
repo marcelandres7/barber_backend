@@ -100,13 +100,13 @@ class ReservationController extends Controller {
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $sIdArray]);
         $listBooking = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getListBooking( $pId, $sId, $dateSearch );
         $toExclude = [];
+        $lastHourOfDay = 22;
         if ($listBooking && $serviceData) {
             foreach ($listBooking as $bookingValue) {
                 $dateStart  = new \DateTime($bookingValue["scheduled_to"]);
                 $dateEnd    = new \DateTime($bookingValue["scheduled_to"]);
                 $duration   = $bookingValue["total_duration"];
                 $dateEnd->modify('+'.$duration.' minute');
-                //date_modify($dateEnd, '+'.$duration.' minute');
                 $temp = [];
                 $temp["start"] = $dateStart;
                 $temp["end"] = $dateEnd;
@@ -136,8 +136,7 @@ class ReservationController extends Controller {
                     }
                 }
             }
-            
-            if (intval($valH)>=14 && intval($valH)<22) {
+            if (intval($valH)>=14 && intval($valH)<$lastHourOfDay) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
@@ -171,16 +170,19 @@ class ReservationController extends Controller {
                         $totalDuration = $totalDuration + $SDvalue->getDuration();
                     }
                     $endTest->modify('+'.$totalDuration.' minute');
-                    $k1 = $endTest;
                     $includeFlag = true;
                     foreach ($toExclude as $valueExcl) {
-                        if ($k1 >= $valueExcl["start"] &&  $k1 <= $valueExcl["end"]) {
+                        if ($endTest >= $valueExcl["start"] &&  $endTest <= $valueExcl["end"]) {
                             $includeFlag = false;
                         }
                     }
+                    $stringTime = $dateSearch.' '.$lastHourOfDay.':00:00';
+                    if ( new \DateTime($stringTime) < $endTest ) {
+                        $includeFlag = false;
+                    }
                     if ($includeFlag) {
-                        $k1 = $k1->format('H:i');
-                        $pairHour["end"] = $k1;
+                        $endTest = $endTest->format('H:i');
+                        $pairHour["end"] = $endTest;
                     }else{
                         $pairHour["end"] = 'exclude';
                     }
