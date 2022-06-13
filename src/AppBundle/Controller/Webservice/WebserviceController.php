@@ -2231,12 +2231,12 @@ class WebserviceController extends Controller{
 			$em->persist($service);
             //ACTUALIZA TABLA DE TURNO
 			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			$turn->setStatus("Ocupado");
-			$turn->setTurnDate(new \DateTime());
-			$em->persist($turn);
-
-			$em->flush();
-       
+			if($turn){	
+			    $turn->setStatus("Ocupado");
+				$turn->setTurnDate(new \DateTime());
+				$em->persist($turn);
+				$em->flush();
+             }
 			 return new JsonResponse(array('status' => 'success'));									 
 		 }
 		
