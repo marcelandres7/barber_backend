@@ -54,6 +54,151 @@ class WebserviceController extends Controller{
         
     }
 
+	
+		/**
+     * @Route("/ws/set-confirmed-arrived", name="/ws/set-confirmed-arrived")
+     */
+    public function setConfirmedArrived(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+			
+            
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
+            $status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 1));
+			$service->setStatus($status);
+			$em->persist($service);
+			$em->flush();
+
+				return new JsonResponse(array('status' => 'success'));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	}
+
+	/**
+     * @Route("/ws/set-reserve-cancel", name="/ws/set-reserve-cancel")
+     */
+    public function setReserveCancel(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $listBooking= array();
+
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->reserve));
+            $status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 4));
+			$service->setStatus($status);
+			$em->persist($service);
+			$em->flush();
+
+			$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
+			foreach($clientBooking as $booking){
+				$listProd=array();
+	
+				$prods=explode(",", $booking['products']);
+						
+					foreach($prods as $prod){
+						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		
+						$listProd[] = array(
+							'product_id'   => $product->getMenuId(),
+							'product_name' => $product->getMenuName(),
+							'product_menu_price' => $product->getPrice()
+						);
+					}
+				
+					$listBooking[] = array(
+						'service_id'    	=> $booking['service_id'],
+						'client_id'     	=> $booking['client_id'],
+						'client_name'   	=> $booking['client_name'],
+						// 'avatar'	    	=> $paths["uploads_path"].$booking['avatar'],
+						'products'      	=> $listProd,
+						'service_date'  	=> $booking['service_date'],
+						'professional_id'	=> $booking['professional_id'],
+						'professional_name' => $booking['professional_name'],
+						'total'  			=> $booking['total'],
+						'start'  			=> $booking['service_start'],
+						'end'    			=> $booking['service_end'],
+						'schedulet'         => $booking['scheduled_to'],
+						'phone'				=> $booking['phone'],
+						'email'             => $booking['email'],
+						'organization_id'   => $booking['organization_id']
+					);
+	
+			}
+				return new JsonResponse(array('status' => 'success','data'=>$listBooking));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	}
+
+	
+	/**
+     * @Route("/ws/set-reserve-confirm", name="/ws/set-reserve-confirm")
+     */
+    public function setReserveConfirm(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		$listBooking= array();
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+			$listBooking= array();
+            
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->reserve));
+            $status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 7));
+			$service->setStatus($status);
+			$em->persist($service);
+			$em->flush();
+
+			$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
+			foreach($clientBooking as $booking){
+				$listProd=array();
+	
+				$prods=explode(",", $booking['products']);
+						
+					foreach($prods as $prod){
+						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		
+						$listProd[] = array(
+							'product_id'   => $product->getMenuId(),
+							'product_name' => $product->getMenuName(),
+							'product_menu_price' => $product->getPrice()
+						);
+					}
+				
+					$listBooking[] = array(
+						'service_id'    	=> $booking['service_id'],
+						'client_id'     	=> $booking['client_id'],
+						'client_name'   	=> $booking['client_name'],
+						// 'avatar'	    	=> $paths["uploads_path"].$booking['avatar'],
+						'products'      	=> $listProd,
+						'service_date'  	=> $booking['service_date'],
+						'professional_id'	=> $booking['professional_id'],
+						'professional_name' => $booking['professional_name'],
+						'total'  			=> $booking['total'],
+						'start'  			=> $booking['service_start'],
+						'end'    			=> $booking['service_end'],
+						'schedulet'         => $booking['scheduled_to'],
+						'phone'				=> $booking['phone'],
+						'email'             => $booking['email'],
+						'organization_id'   => $booking['organization_id']
+					);
+				}
+
+				return new JsonResponse(array('status' => 'success','data'=>$listBooking));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	}
 
 	
     /**
@@ -83,7 +228,7 @@ class WebserviceController extends Controller{
 				  );
 				}
 		
-				$em->flush();
+				
 
 				return new JsonResponse(array('status' => 'success','data'=>$list));
 		    }else{
@@ -1967,13 +2112,14 @@ class WebserviceController extends Controller{
 			$em = $this->getDoctrine()->getManager();
 			$paths = $this->getProjectPaths();
 
-			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => 1));
+			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,7]), array('idSummaryService'=>'ASC'));
 			
 			
 			$list  = array();
 			$listProd = array();
 			$listProdMenu = array();
-
+			$lisReserve= array();
+			$lisReserveToday = array();
 
 			$productMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => 2));
 			foreach($productMenu as $prodM){
@@ -1993,7 +2139,7 @@ class WebserviceController extends Controller{
 				$prods=explode(",", $serv->getServices());
 				
 				
-				
+				$today = new \DateTime("now");	
 				foreach($prods as $prod){
 					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 					
@@ -2004,26 +2150,59 @@ class WebserviceController extends Controller{
 					);
 				}
 				
-					        
-	           
-				
-				$list[] = array(
-					'service_id'    => $serv->getIdSummaryService(),
-					'client_id'     => $client->getClientId(),
-					'client_name'   => $client->getName(),
-					'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
-					'products'      => $listProd,
-					'service_date'  => $serv->getCreatedAt(),
-					'random'        => $serv->getRandom(),
-					'date_start'    => $serv->getServiceStart(),
-					'date_end'      => $serv->getServiceEnd(),
-					'products_menu' =>$listProdMenu
+
+				if( $serv->getStatus()->getStatusId() == 1 ){
+					$list[] = array(
+						'service_id'    => $serv->getIdSummaryService(),
+						'client_id'     => $client->getClientId(),
+						'client_name'   => $client->getName(),
+						'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
+						'products'      => $listProd,
+						'service_date'  => $serv->getCreatedAt(),
+						'random'        => $serv->getRandom(),
+						'date_start'    => $serv->getServiceStart(),
+						'date_end'      => $serv->getServiceEnd(),
+						'products_menu' => $listProdMenu,
+						'schedulet'     => $serv->getScheduledTo(),
+						'status_id'		=> $serv->getStatus()->getStatusId()
+					);
+				}elseif(date_format($serv->getScheduledTo(),"Y-m-d") == date_format($today,"Y-m-d")){
 					
-				);
+					$lisReserveToday[] = array(
+						'service_id'    => $serv->getIdSummaryService(),
+						'client_id'     => $client->getClientId(),
+						'client_name'   => $client->getName(),
+						'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
+						'products'      => $listProd,
+						'service_date'  => $serv->getCreatedAt(),
+						'random'        => $serv->getRandom(),
+						'date_start'    => $serv->getServiceStart(),
+						'date_end'      => $serv->getServiceEnd(),
+						'schedulet'     => $serv->getScheduledTo(),
+						'status_id'		=> $serv->getStatus()->getStatusId()	
+					);
+				}else{
+					$lisReserve[] = array(
+						'service_id'    => $serv->getIdSummaryService(),
+						'client_id'     => $client->getClientId(),
+						'client_name'   => $client->getName(),
+						'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
+						'products'      => $listProd,
+						'service_date'  => $serv->getCreatedAt(),
+						'random'        => $serv->getRandom(),
+						'date_start'    => $serv->getServiceStart(),
+						'date_end'      => $serv->getServiceEnd(),
+						'schedulet'     => $serv->getScheduledTo(),
+						'status_id'		=> $serv->getStatus()->getStatusId()	
+					);
+					
+				}
+
 			}
 
+				
 			
-			return new JsonResponse(array('data' => $list));
+			return new JsonResponse(array('status'=>"success",'data' => $list, 'reserve'=>$lisReserve,'reserve_today'=>$lisReserveToday));
 	  }
 	  return new JsonResponse(array('data' => "error"));
 	}
@@ -2322,6 +2501,8 @@ class WebserviceController extends Controller{
         $clientComplete = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,3);
         $clientPayout = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,5);
 		$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
+		$ReserveAll = $em->getRepository('AppBundle:SummaryService')->getListReserveConfirm($data->organization_id,'1,7',"all");
+		$ReserveToday = $em->getRepository('AppBundle:SummaryService')->getListReserveConfirm($data->organization_id,'1,7',"today");
         
         foreach($clientPending as $pending){
             $listProd=array();
@@ -2359,7 +2540,10 @@ class WebserviceController extends Controller{
                     'professional_name' => $pending['professional_name'],
                     'total'  			=> $pending['total'],
                     'start'  			=> $pending['service_start'],
-                    'end'    			=> $pending['service_end']
+                    'end'    			=> $pending['service_end'],
+					'schedulet'         => $pending['scheduled_to'],
+					'organization_id'   => $pending['organization_id'],
+					'status_id'			=> $pending['status_id']
                 );
 
         }
@@ -2390,7 +2574,10 @@ class WebserviceController extends Controller{
                     'professional_name' => $complete['professional_name'],
                     'total'  			=> $complete['total'],
                     'start'  			=> $complete['service_start'],
-                    'end'    			=> $complete['service_end']
+                    'end'    			=> $complete['service_end'],
+					'schedulet'         => $complete['scheduled_to'],
+					'organization_id'   => $complete['organization_id'],
+					'status_id'			=> $complete['status_id']
                 );
 
         }
@@ -2427,7 +2614,10 @@ class WebserviceController extends Controller{
 					'method_pay_name'   => $payout['method_pay_name'],
 					'method_pay_percent'=> $payout['percent'],
 					'discount_pointsale'=> $payout['discount_pointsale'],
-					'tips'			    => $payout['tips']
+					'tips'			    => $payout['tips'],
+					'schedulet'         => $payout['scheduled_to'],
+					'organization_id'   => $payout['organization_id'],
+					'status_id'			=> $payout['status_id']
                 );
 
         }
@@ -2459,11 +2649,86 @@ class WebserviceController extends Controller{
                     'total'  			=> $booking['total'],
                     'start'  			=> $booking['service_start'],
                     'end'    			=> $booking['service_end'],
-					'schedulet'         => $booking['scheduled_to']
+					'schedulet'         => $booking['scheduled_to'],
+					'phone'				=> $booking['phone'],
+					'email'             => $booking['email'],
+					'organization_id'   => $booking['organization_id'],
+					'status_id'			=> $booking['status_id']
                 );
-
         }
 
+		$listReservegAll=array();
+		foreach($ReserveAll as $bookingAll){
+            $listProd=array();
+
+            $prods=explode(",", $bookingAll['products']);
+					
+				foreach($prods as $prod){
+					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+	
+					$listProd[] = array(
+						'product_id'   => $product->getMenuId(),
+						'product_name' => $product->getMenuName(),
+						'product_menu_price' => $product->getPrice()
+					);
+				}
+            
+            	$listReservegAll[] = array(
+                    'service_id'    	=> $bookingAll['service_id'],
+                    'client_id'     	=> $bookingAll['client_id'],
+                    'client_name'   	=> $bookingAll['client_name'],
+                    'avatar'	    	=> $paths["uploads_path"].$bookingAll['avatar'],
+                    'products'      	=> $listProd,
+                    'service_date'  	=> $bookingAll['service_date'],
+                    'professional_id'	=> $bookingAll['professional_id'],
+                    'professional_name' => $bookingAll['professional_name'],
+                    'total'  			=> $bookingAll['total'],
+                    'start'  			=> $bookingAll['service_start'],
+                    'end'    			=> $bookingAll['service_end'],
+					'schedulet'         => $bookingAll['scheduled_to'],
+					'phone'				=> $bookingAll['phone'],
+					'email'             => $bookingAll['email'],
+					'organization_id'   => $bookingAll['organization_id'],
+					'status_id'			=> $bookingAll['status_id']
+                );
+        }
+
+		$listReservegToday=array();
+		foreach($ReserveToday as $bookingToday){
+            $listProd=array();
+
+            $prods=explode(",", $bookingToday['products']);
+					
+				foreach($prods as $prod){
+					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+	
+					$listProd[] = array(
+						'product_id'   => $product->getMenuId(),
+						'product_name' => $product->getMenuName(),
+						'product_menu_price' => $product->getPrice()
+					);
+				}
+            
+            	$listReservegToday[] = array(
+                    'service_id'    	=> $bookingToday['service_id'],
+                    'client_id'     	=> $bookingToday['client_id'],
+                    'client_name'   	=> $bookingToday['client_name'],
+                    'avatar'	    	=> $paths["uploads_path"].$bookingToday['avatar'],
+                    'products'      	=> $listProd,
+                    'service_date'  	=> $bookingToday['service_date'],
+                    'professional_id'	=> $bookingToday['professional_id'],
+                    'professional_name' => $bookingToday['professional_name'],
+                    'total'  			=> $bookingToday['total'],
+                    'start'  			=> $bookingToday['service_start'],
+                    'end'    			=> $bookingToday['service_end'],
+					'schedulet'         => $bookingToday['scheduled_to'],
+					'phone'				=> $bookingToday['phone'],
+					'email'             => $bookingToday['email'],
+					'organization_id'   => $bookingToday['organization_id'],
+					'status_id'			=> $bookingToday['status_id']
+                );
+        }
+	
 	
 		$listClient = array(
 			'pending'       => $listPending,
@@ -2471,7 +2736,9 @@ class WebserviceController extends Controller{
 			'payout'        => $listPayout,
 			'method_pay'    => $listMethodPay,
 			'profesionales' => $listProfesionales,
-			'booking'       => $listBooking
+			'booking'       => $listBooking,
+			'reserves_all'  => $listReservegAll,
+			'reserves_today'=> $listReservegToday
 		  );
        
 			 return new JsonResponse(array('status' => 'success', 'data' => $listClient));									 

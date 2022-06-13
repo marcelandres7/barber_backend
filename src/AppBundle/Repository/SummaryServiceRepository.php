@@ -436,22 +436,60 @@ class SummaryServiceRepository extends EntityRepository
 
   
 		$query = "SELECT ss.id_summary_service as service_id, ss.status_id, ss.client_id, c.name as client_name , c.avatar, 
-                      ss.services as products, ss.created_at as service_date, u.id as professional_id, 
+                      c.phone, c.email,ss.services as products, ss.created_at as service_date, u.id as professional_id, 
                       concat(u.first_name,' ',u.last_name) as professional_name, ss.total_payment as total,
                       ss.service_start , ss.service_end , ss.tips, ss.method_payment,mp.name as method_pay_name, mp.percent,
-                      ss.total_payment*mp.percent as discount_pointsale, ss.tips
+                      ss.total_payment*mp.percent as discount_pointsale, ss.tips, ss.scheduled_to, ss.organization_id
                   FROM summary_service ss  
             INNER JOIN user u ON ss.professional_id = u.id
             INNER JOIN client c ON ss.client_id = c.client_id
              LEFT JOIN method_payment mp ON ss.method_payment = mp.method_payment_id
                  WHERE ss.organization_id = $organization
-                   AND status_id = $status 
+                   AND status_id = $status
 	           	";
-     if($status == 5) {
-      $query .= "and DATE_FORMAT(ss.service_end, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')
-                 ORDER BY 1 desc";
-      }
+      
+      if($status == 6) {
+        $query .= " AND scheduled_to is not null";
+        } // else{
+      //   $query .= " AND scheduled_to is null";
+      // }
+
+      if($status == 5) {
+        $query .= " AND DATE_FORMAT(ss.service_end, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')
+                  ORDER BY 1 desc";
+        }
+
+    
          
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+	    	$res->execute ();
+
+	    	return $res->fetchAll ();
+	}
+
+
+  public function getListReserveConfirm($organization,$status,$option) {
+
+  
+		$query = "SELECT ss.id_summary_service as service_id, ss.status_id, ss.client_id, c.name as client_name , c.avatar, 
+                      c.phone, c.email,ss.services as products, ss.created_at as service_date, u.id as professional_id, 
+                      concat(u.first_name,' ',u.last_name) as professional_name, ss.total_payment as total,
+                      ss.service_start , ss.service_end , ss.tips, ss.method_payment,mp.name as method_pay_name, mp.percent,
+                      ss.total_payment*mp.percent as discount_pointsale, ss.tips, ss.scheduled_to, ss.organization_id
+                  FROM summary_service ss  
+                  INNER JOIN user u ON ss.professional_id = u.id
+                  INNER JOIN client c ON ss.client_id = c.client_id
+                  LEFT JOIN method_payment mp ON ss.method_payment = mp.method_payment_id
+                  WHERE ss.organization_id = $organization
+                  AND status_id in ($status)
+                  AND scheduled_to is not null 
+	           	";
+      if($option == "today") {
+       $query .= " AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')=DATE_FORMAT(now(), '%Y-%m-%d')";
+       }
+
+       $query .= " ORDER BY scheduled_to ASC";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 	    	$res->execute ();
