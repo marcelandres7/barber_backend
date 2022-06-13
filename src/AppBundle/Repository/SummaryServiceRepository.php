@@ -491,7 +491,7 @@ class SummaryServiceRepository extends EntityRepository
        }
 
        if($option == "all") {
-        $query .= "AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')>=DATE_FORMAT(now(), '%Y-%m-%d')";
+        $query .= "AND DATE_FORMAT(scheduled_to, '%Y-%m-%d') > DATE_FORMAT(now(), '%Y-%m-%d')";
         }
 
        $query .= " ORDER BY scheduled_to ASC";
