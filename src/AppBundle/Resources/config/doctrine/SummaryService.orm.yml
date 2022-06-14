@@ -65,6 +65,7 @@ AppBundle\Entity\SummaryService:
             nullable: true
             length: 45
             fixed: false
+            column: random
         color:
             type: string
             nullable: true
