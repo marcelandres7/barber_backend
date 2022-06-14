@@ -2,21 +2,24 @@
 
 {% block body %}
 
-<div class="row">
+<div class="row back-barber">
     <div class="container">
 
-        <div class="row container-prop m-b-30 m-l-0 m-r-0 p-b-30">
+        <div class="row container-prop m-b-30 m-l-0 m-r-0 p-b-30 m-t-30 back-header">
             <div class="col-lg-4 m-t-15">
                 <img class="img-hern" src="{{ asset('uploads/hernandez_big.png') }}" alt="dashboard-user">
             </div>
             <div class="col-lg-8  m-t-15">
-                <div class="">
-                    <h2 class="color-title-hern">Hernandez barberia exclusiva</h2>
+                <div class="text-left">
+                    <h2 class="color-title-hern">Hernandez</h2>
+                </div>
+                <div class="text-left">
+                    <h2 class="color-title-hern">Barberia Exclusiva</h2>
                 </div>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card back-card">
             <div class="card-body">
                 {{ include('@App/Website/flash_message.html.twig') }}
                 {% if view == 'prof_hours' %}
@@ -133,7 +136,7 @@
             $(".prof-item").css({ "border-radius": "unset", "background-color": "unset", "color": "unset" });
             $(".prof-title").css({ "color": "unset" });
             $(".no-color-line").css({"background-color": "unset"});
-            $(this).children().css({ "border-radius": "8px", "background-color": "#04a9f5", "color": "#fff" });
+            $(this).children().css({ "border-radius": "8px", "background-color": "#f08080", "color": "#fff" });
             $(this).find("p.prof-title").css({ "color": "#fff" });
             $("#form_scheduledTo").val('');
             $("#when_datetime").html('');
@@ -210,11 +213,11 @@
             const dataHref = $(this).attr('data-href');
             if (listServices.length == 0) {
                 listServices = menuId;
-                $(this).children().css("background-color", "#00bfff");
+                $(this).children().css("background-color", "#f08080");//#f08080
             } else {
                 if (listServices.indexOf(menuId) === -1) {
                     listServices = listServices + ',' + menuId;
-                    $(this).children().css("background-color", "#00bfff");
+                    $(this).children().css("background-color", "#f08080");
                 } else {
                     listServices = listServices.replace(menuId, '');
                     $(this).children().removeAttr('style');
@@ -255,10 +258,10 @@
             console.log("ID: ", idBtn);
             console.log("Start: ", hStart);
             console.log("End: ", hEnd);
-            $(".hours-btn").css("color", "#04a9f5");
+            $(".hours-btn").css("color", "#f08080");
             $(".hours-btn").css("background-color", "#fff");
             $('#' + idBtn).css("color", "#fff");
-            $('#' + idBtn).css("background-color", "#04a9f5");
+            $('#' + idBtn).css("background-color", "#f08080");
 
             let myDate = $("#calendar").datepicker("getDate");
             let monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);

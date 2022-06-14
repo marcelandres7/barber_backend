@@ -213,7 +213,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .color-title-hern {
-  color: #34495e;
+  color: #f4c22b;
 }
 
 .flex-container {
@@ -276,7 +276,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .ui-datepicker-header {
-  background: #04a9f5!important;
+  background: #f08080!important;
   color: #ffffff!important;
   font-family:'Times New Roman'!important;
   border-width: 1px 0 0 0!important;
@@ -326,6 +326,29 @@ ui-datepicker thead {
   /*color: #ffffff;*/
   /*text-shadow: 1px 1px 0px #fff;*/
   /*filter: dropshadow(color=#fff, offx=1, offy=1);*/
+}
+
+.back-barber {
+  background-image: url('/barber/web/uploads/background_barber.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.back-header {
+  background: transparent;
+}
+
+.back-card {
+  background: transparent;
+}
+
+.card-serv {
+  background-color: #fafad2;
+  border-radius: 10px;
+  opacity: 0.97;
+}
+.text-serv-w {
+  color: white;
 }
 
 @media (max-width: 460px) {

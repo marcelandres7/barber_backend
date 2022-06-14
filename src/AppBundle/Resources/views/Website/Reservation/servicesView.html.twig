@@ -2,8 +2,8 @@
     <div class="page-block">
         <div class="row text-center">
             <div class="col-xs-12 text-center full-w-100">
-                <h3>Servicios de Barbería</h3>
-                <p>Puede seleccionar más de un servicio. El botón siguiente le permitirá escoger al profesional que lo atenderá y el horario que se adapte a su tiempo.</p>
+                <h3 class="text-serv-w">Servicios de Barbería</h3>
+                <p class="text-serv-w">Puede seleccionar más de un servicio. El botón siguiente le permitirá escoger al profesional que lo atenderá y el horario que se adapte a su tiempo.</p>
             </div>
         </div>
     </div>
@@ -13,7 +13,7 @@
         <div class="col-md-6">
             <a href="javascript:;" class="ancServ" data-id={{item.menuId}} data-href="{{ path('get_profs_hours') }}">
 
-                <div class="card card-service" id="card-{{item.menuId}}">
+                <div class="card card-service card-serv" id="card-{{item.menuId}}">
                     <div class="card-block">
                         <div class="row align-items-center justify-content-center align-cen-460">
                             <div class="col-auto convert-column-left ccl-sty">
