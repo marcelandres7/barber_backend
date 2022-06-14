@@ -35,6 +35,7 @@ AppBundle\Entity\Client:
             nullable: true
             length: 1000
             fixed: false
+            column: avatar
         register:
             type: integer
             nullable: false
