@@ -2262,11 +2262,12 @@ class WebserviceController extends Controller{
 			$em->persist($service);
 			//ACTUALIZA TABLA DE TURNO
 			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			$turn->setStatus("Disponible");
-			$turn->setTurnDate(new \DateTime());
-			$em->persist($turn);
-			$em->flush();
-       
+			if($turn){
+				$turn->setStatus("Disponible");
+				$turn->setTurnDate(new \DateTime());
+				$em->persist($turn);
+				$em->flush();
+     		 }
 			 return new JsonResponse(array('status' => 'success'));									 
 		 }
 		
@@ -2289,6 +2290,13 @@ class WebserviceController extends Controller{
 			$service->setStatus($status );
 			//$service->setServiceEnd(new \DateTime());
 			//$client->setAvatar($avatar);
+			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
+			if($turn){
+				$turn->setStatus("Disponible");
+				$turn->setTurnDate(new \DateTime());
+				$em->persist($turn);
+				$em->flush();
+     		 }
 			$em->persist($service);
 			$em->flush();
        
