@@ -450,7 +450,8 @@ class SummaryServiceRepository extends EntityRepository
       
       if($status == 6) {
         $query .= " AND scheduled_to is not null
-                    AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')>=DATE_FORMAT(now(), '%Y-%m-%d')";
+                    AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')>=DATE_FORMAT(now(), '%Y-%m-%d')
+                    ORDER BY scheduled_to ASC";
         } // else{
       //   $query .= " AND scheduled_to is null";
       // }
