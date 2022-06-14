@@ -1750,7 +1750,7 @@ class WebserviceController extends Controller{
 		{   $status="";	
 			$list= array();
 
-			$services_menu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => 2,"isActive" => [0,1] ),array('menuOrder'=>'ASC'));
+			$services_menu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4],"isActive" => [0,1] ),array('menuOrder'=>'ASC'));
 			
 	
 			foreach($services_menu as $menu)
