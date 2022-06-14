@@ -331,7 +331,7 @@ class WebserviceController extends Controller{
 
 			// $organization = $em->getRepository('AppBundle:Organization')->findOneBy(array("organizationId" =>$data->organization_id));
 			$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2 ));
-		    $mainMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'));
+		    $mainMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4] ,"isActive" => '1'));
 			
 			if($mainMenu){
 				$list = array();
