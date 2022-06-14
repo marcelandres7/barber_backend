@@ -239,6 +239,7 @@ class ReservationController extends Controller {
             $clientObj->setRegister(0);
             $clientObj->setPromotion(0);
             $clientObj->setCreatedAt(new \DateTime());
+            $clientObj->setAvatar("icons-user.png");
             $em->persist($clientObj);
         }
         $sumaryServiceObj = new SummaryService();
@@ -247,8 +248,10 @@ class ReservationController extends Controller {
         $sumaryServiceObj->setOrganization($orgObj);
         $sumaryServiceObj->setScheduledTo(new \DateTime($data['scheduledTo']));
         $sumaryServiceObj->setTotalPayment($totalPrice);
+        $sumaryServiceObj->setTotalPayment($totalPrice);
         $sumaryServiceObj->setServices($data['services']);
         $sumaryServiceObj->setStatus($statusObj);
+        $sumaryServiceObj->setRandom("n");
         $em->persist($sumaryServiceObj);
         $em->flush();
         $this->addFlash('success_message', $this->getParameter('exito'));
