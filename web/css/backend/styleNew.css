@@ -329,7 +329,8 @@ ui-datepicker thead {
 }
 
 .back-barber {
-  background-image: url('/barber/web/uploads/background_barber.png');
+  /*background-image: url('/barber/web/uploads/background_barber.png');*/
+  background-image: url('../../uploads/background_barber.png');
   background-repeat: no-repeat;
   background-size: cover;
 }
