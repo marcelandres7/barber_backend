@@ -1564,6 +1564,7 @@ class WebserviceController extends Controller{
 
 			//$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2));
 			$menuClass = $em->getRepository('AppBundle:MenuClass')->findOneBy(array("menuClassId" => $data->classMenuSelected));
+	//		$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => $data->menu_type));
 			$menu = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $data->menu_id));
 
 			if($data->isActive == true){
@@ -1579,7 +1580,7 @@ class WebserviceController extends Controller{
 			$menu->setDescription($data->description);
 			$menu->setIsActive($active);
 			$menu->setMenuClass($menuClass);
-			//$menu->setMenuType($menuType);
+	//		$menu->setMenuType($menuType);
 			$menu->setCreatedAt(new \DateTime());
 			$menu->setMenuOrder($data->position);
 			$em->persist($menu);
@@ -1767,6 +1768,7 @@ class WebserviceController extends Controller{
 					'menu_id'         => $menu->getMenuId(),
 					'menu_name'	      => $menu-> getMenuName(),
 					'class_menu_id'   => $menu->getMenuClass()->getMenuClassId(),
+					'menu_type'		  => $menu->getMenuType()->getMenuTypeId(),
 					'class_menu_name' => $menu->getMenuClass()->getMenuClassName(),
 					'picture_path'    => $paths["uploads_path"].$menu->getPicturePath(),
 					'price'           => $menu->getPrice(),
@@ -3033,7 +3035,7 @@ class WebserviceController extends Controller{
 		{	$listProfessional = array();
 			$paths = $this->getProjectPaths();
 			
-			$professional = $em->getRepository('AppBundle:User')->findBy(array("organization" => $data->organization_id,"userRole"=>2 ,"status" => "ACTIVO"));
+			$professional = $em->getRepository('AppBundle:User')->findBy(array("organization" => $data->organization_id,"userRole"=>2 ,"status" => ["ACTIVO","INACTIVO"]));
 			//$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 5));
 			
 			foreach($professional as $listProf){
