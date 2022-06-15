@@ -266,8 +266,11 @@ class WebserviceController extends Controller{
 				$em->persist($newTurn);
 				$status_prof="ACTIVO";
 			}else{
-				$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-				$em->remove($turn);
+				$turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id));
+				foreach($turns as $turn){
+					$em->remove($turn);
+				}
+				
 				$status_prof="INACTIVO";
 			}
 		
@@ -2230,12 +2233,21 @@ class WebserviceController extends Controller{
 			//$client->setAvatar($avatar);
 			$em->persist($service);
             //ACTUALIZA TABLA DE TURNO
-			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			if($turn){	
-			    $turn->setStatus("Ocupado");
-				$turn->setTurnDate(new \DateTime());
-				$em->persist($turn);
+			$turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id),array('turnDate' => 'desc'));
+			$first=true;
+			if($turns){	
+				foreach($turns as $turn){
+					if($first){
+						$turn->setStatus("Ocupado");
+						$turn->setTurnDate(new \DateTime());
+						$em->persist($turn);
+						$first=false;
+					}else{
+						$em->remove($turn);
+					}
+				}
 				$em->flush();
+
              }
 			 return new JsonResponse(array('status' => 'success'));									 
 		 }
@@ -2261,11 +2273,19 @@ class WebserviceController extends Controller{
 			//$client->setAvatar($avatar);
 			$em->persist($service);
 			//ACTUALIZA TABLA DE TURNO
-			$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
-			if($turn){
-				$turn->setStatus("Disponible");
-				$turn->setTurnDate(new \DateTime());
-				$em->persist($turn);
+			$turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id),array('turnDate' => 'desc'));
+			$first=true;
+			if($turns){	
+				foreach($turns as $turn){
+					if($first){
+						$turn->setStatus("Disponible");
+						$turn->setTurnDate(new \DateTime());
+						$em->persist($turn);
+						$first=false;
+					}else{
+						$em->remove($turn);
+					}
+				}
 				$em->flush();
      		 }
 			 return new JsonResponse(array('status' => 'success'));									 
