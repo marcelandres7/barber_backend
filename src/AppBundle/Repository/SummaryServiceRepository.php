@@ -53,7 +53,7 @@ class SummaryServiceRepository extends EntityRepository
 
     public function reportDetailDay($prof_id, $created_date) {
 		$query = "
-        SELECT c.name as client_name,ss.id_summary_service,ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used, ss.service_end,ss.services,ss.random
+        SELECT c.name as client_name,ss.id_summary_service,ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used, ss.service_end as created_at,ss.services,ss.random
          FROM summary_service ss, client c
         WHERE ss.professional_id = $prof_id
           AND ss.client_id = c.client_id
