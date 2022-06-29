@@ -35,13 +35,13 @@ class SummaryServiceRepository extends EntityRepository
 
 	public function reportDay($prof_id) {
 		$query = "
-        SELECT Date_format(created_at,'%Y-%m-%d') created_date, count(1) attended_client,sum(1+(length(services)-length(replace(services,',','')))) as service_count, 
+        SELECT Date_format(service_end,'%Y-%m-%d') created_date, count(1) attended_client,sum(1+(length(services)-length(replace(services,',','')))) as service_count, 
                sum(total_payment) generated_total, sum(IF(random='n',1,0)) selected_count,sum(IF(random='y',1,0)) random_count, 
                payout_barber,payout_date,GROUP_CONCAT(id_summary_service) services_id   
          FROM summary_service
         WHERE professional_id = $prof_id
           AND status_id in (3,5)
-       GROUP BY date_format(created_at,'%Y-%m-%d')
+       GROUP BY date_format(service_end,'%Y-%m-%d')
        ORDER BY 1 desc limit 31 ;
 		";
 
@@ -53,12 +53,12 @@ class SummaryServiceRepository extends EntityRepository
 
     public function reportDetailDay($prof_id, $created_date) {
 		$query = "
-        SELECT c.name as client_name,ss.id_summary_service,ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used, ss.created_at,ss.services,ss.random
+        SELECT c.name as client_name,ss.id_summary_service,ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used, ss.service_end as created_at,ss.services,ss.random
          FROM summary_service ss, client c
         WHERE ss.professional_id = $prof_id
           AND ss.client_id = c.client_id
           AND  status_id in (3,5)
-          AND   date_format(ss.created_at,'%Y-%m-%d')='$created_date'
+          AND   date_format(ss.service_end,'%Y-%m-%d')='$created_date'
 		";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
@@ -502,6 +502,58 @@ class SummaryServiceRepository extends EntityRepository
 
 	    	return $res->fetchAll ();
 	}
+
+  public function getReserveAgenda($organization,$status,$professional) {
+
+  
+		$query = "SELECT count(1) as quantity,DATE_FORMAT(scheduled_to, '%Y-%m-%d') as scheduled 
+                FROM summary_service
+               WHERE status_id=$status
+               AND  organization_id = $organization
+	           	";
+      if($professional) {
+       $query .= " AND professional_id=$professional";
+       }
+
+       $query .= " GROUP BY  DATE_FORMAT(scheduled_to, '%Y-%m-%d') 
+                   ORDER BY scheduled_to ASC";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+	    	$res->execute ();
+
+	    	return $res->fetchAll ();
+	}
+
+  public function getReserveAgendaDetail($organization,$status,$professional,$schedule_date) {
+
+  
+		$query = "SELECT ss.id_summary_service as service_id, ss.status_id, ss.client_id, c.name as client_name , c.avatar, 
+                      c.phone, c.email,ss.services as products, ss.created_at as service_date, u.id as professional_id, 
+                      concat(u.first_name,' ',u.last_name) as professional_name, ss.total_payment as total,
+                      ss.service_start , ss.service_end , ss.tips, ss.method_payment,mp.name as method_pay_name, mp.percent,
+                      ss.total_payment*mp.percent as discount_pointsale, ss.tips, ss.scheduled_to, ss.organization_id
+                  FROM summary_service ss  
+                  INNER JOIN user u ON ss.professional_id = u.id
+                  INNER JOIN client c ON ss.client_id = c.client_id
+                  LEFT JOIN method_payment mp ON ss.method_payment = mp.method_payment_id
+                  WHERE ss.organization_id = $organization
+                  AND status_id in ($status)
+                  AND scheduled_to is not null 
+                  AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')=DATE_FORMAT('$schedule_date', '%Y-%m-%d')
+	           	";
+      if($professional) {
+       $query .= " AND professional_id=$professional";
+       }
+
+       $query .= "ORDER BY scheduled_to ASC";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+	    	$res->execute ();
+
+	    	return $res->fetchAll ();
+	}
+
+
 
   public function reportSaleProductsToday() {
 
