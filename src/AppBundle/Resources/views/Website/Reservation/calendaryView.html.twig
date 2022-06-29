@@ -89,7 +89,7 @@
                                     <p class="prof-title">{{ item.firstName|title }}&nbsp;{{ item.lastName|title }}</p>
                                 {% endif %}
 
-                                <span>{{ item.bio|title }}</span>
+                                <span class="prof-atrib">{{ item.bio|title }}</span>
                             </div>
                         </div>
                         <hr class="no-color-line">
@@ -115,13 +115,13 @@
         <div class="card card-serv" style="max-height:500px; overflow-y:scroll;">
             <div class="card-body text-center">
                 <div id="hour-reserve">
-                    <div id="morning-title"></div>
+                    <div id="morning-title" class="title-hours"></div>
                     <div id="morning-hour"></div>
                     <br>
-                    <div id="afternoon-title"></div>
+                    <div id="afternoon-title" class="title-hours"></div>
                     <div id="afternoon-hour"></div>
                     <br>
-                    <div id="evening-title"></div>
+                    <div id="evening-title" class="title-hours"></div>
                     <div id="evening-hour"></div>
                 </div>
                 <div id="hour-empty"></div>

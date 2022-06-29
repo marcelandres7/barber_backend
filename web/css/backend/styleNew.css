@@ -22,7 +22,14 @@
     object-fit: contain;
     transition: all .3s ease;
   }
-
+  
+  .loader-barber {
+    height: 50vh;
+    width: 100vw;
+    justify-content: center;
+    align-items: center;
+  }
+  
   label.error {
     color: #cb2e1b;
   }
@@ -328,6 +335,10 @@ ui-datepicker thead {
   /*filter: dropshadow(color=#fff, offx=1, offy=1);*/
 }
 
+.ui-state-default ui-state-active {
+  background-color: #f07070;
+}
+
 .back-barber {
   /*background-image: url('/barber/web/uploads/background_barber.png');*/
   background-image: url('../../uploads/background_barber.png');
@@ -352,6 +363,38 @@ ui-datepicker thead {
   color: white;
 }
 
+.text-order-horiz {
+  text-align: left;
+}
+
+.prof-title {
+  color: #888;
+}
+
+.hours-btn {
+  border-color: #888;
+  color: #666;
+}
+
+.hours-btn:hover {
+  background-color: #f08080;
+  border-color: #f07070;
+}
+
+.title-hours {
+  color: #888;
+  font-weight: 700;
+}
+
+.prof-atrib {
+  color: #888;
+}
+
+@media (max-width: 992px) {
+  .text-order-horiz {
+    text-align: center;
+  }
+}
 @media (max-width: 460px) {
   .convert-column-left {
     width: 100%;
