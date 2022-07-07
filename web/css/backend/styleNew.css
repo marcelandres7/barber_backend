@@ -22,7 +22,9 @@
     object-fit: contain;
     transition: all .3s ease;
   }
-  
+  .show-calendary {
+    width: 100%;
+  }
   .loader-barber {
     height: 50vh;
     width: 100vw;
