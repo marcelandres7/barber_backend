@@ -30,6 +30,8 @@ use AppBundle\Entity\Product;
 use AppBundle\Entity\Payment;
 use AppBundle\Entity\TurnProfessional;
 use AppBundle\Repository\TurnProfessionalRepository;
+use AppBundle\Entity\MenusUser;
+use AppBundle\Entity\ProfessionalReservation;
 
 /**
  * Webservice controller.
@@ -41,12 +43,12 @@ class WebserviceController extends Controller{
         $enviroment = $this->container->get('kernel')->getEnvironment();
         $paths = array();
         if($enviroment == "prod"){
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+            //$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }else{
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+           // $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }
         
@@ -55,7 +57,385 @@ class WebserviceController extends Controller{
     }
 
 	
+	
 		/**
+     * @Route("/ws/set-delete-notavailable", name="/ws/set-delete-notavailable")
+     */
+    public function setDeleteNotAvailable(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+			$pos=0;
+			$em = $this->getDoctrine()->getManager();
+            $agendaList = array();
+
+			$date_created = new \DateTime($data->created_at);
+			$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
+			$summaServices = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => $data->prof_id,"status" => 8, "createdAt" => $date_created));
+			$profReserve = $em->getRepository('AppBundle:ProfessionalReservation')->findBy(array("professionalId" => $data->prof_id, "createdAt" => $date_created));
+			
+			// var_dump($summaServices);
+			// die;
+			foreach($summaServices as $notReserve){
+				$em->remove($notReserve);
+			}
+
+			foreach($profReserve as $reserve){
+				$em->remove($reserve);
+			}
+
+			$em->flush();
+		
+			
+			/////////////////////////
+			
+			if($data->rol_id == 1 || $data->rol_id == 5){
+				$professional="";
+				$data->prof_id="";
+			}
+				$reserveNoAvailable = $em->getRepository('AppBundle:SummaryService')->listReserveNotAvailable($data->prof_id);
+				
+					foreach($reserveNoAvailable as $agenda){
+					
+			
+						$agendaList[] = array(
+							'position'         => $pos++,
+							'professional_id'  => $agenda['professional_id'],
+							'professional_name'=> $agenda['professional_name'],
+							'scheduled_from'   => $agenda['scheduled_from'],
+							'scheduled_to'     => $agenda['scheduled_to'],
+							'duration'         => $agenda['duration'],
+							'created_at'       => $agenda['created_at'],
+						);
+
+					}
+		    
+				
+
+				return new JsonResponse(array('status' => 'success','data' => $agendaList, 'professionals' => ""));
+		    }else{
+				// echo "Entre en ERROR";
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	/**
+     * @Route("/ws/set-create-notavailable", name="/ws/set-create-notavailable")
+     */
+    public function setCreateNotAvailable(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $agendaList = array();
+			$pos=1;
+			$duration=0;
+			$profId="";
+
+			if($data->prof_id == 1 || $data->prof_id == 3){
+				$profId = $data->prof_selected;
+			}else{
+				$profId = $data->prof_id;
+			}
+
+			if($profId == 'all_prof'){
+				$professional = $em->getRepository('AppBundle:User')->findBy(array("status" => ["ACTIVO","INACTIVO"],"userRole" => 2));
+			}else{
+				$professional = $em->getRepository('AppBundle:User')->findBy(array("id" => $profId));
+			}
+			////// Evaluar horas ////
+			$start = new \DateTime($data->date_start);
+            $end = new \DateTime($data->date_end);
+            $diff = $start->diff($end);
+		
+			// echo $diff->days ;
+			
+			$scheduled_from = $data->date_start; 
+			$scheduled_to = $data->date_end; 
+			
+			$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 8));
+			$client = $em->getRepository('AppBundle:Client')->findOneBy(array("clientId" => 1));
+			$created_at = new \DateTime();
+
+			foreach($professional as $prof){
+				if($prof->getId() > 0){
+					for ( $i = 0; $i <= $diff->days; $i++ ){
+
+						$scheduled=date("Y-m-d",strtotime($scheduled_from."+ $i days"));
+						$scheduled_to =date("Y-m-d",strtotime($scheduled_from."+ $i days"));
+						if($data->allTime){
+						//	echo "PASE TODO EL DIA $i";
+							$scheduled=$scheduled." 10:00:00";
+							$scheduled_to=$scheduled_to." 22:00:00";
+							$duration=12*60;
+						}else{
+							$scheduled=$scheduled." ".$data->start_hour.":00:00";
+							$scheduled_to=$scheduled_to." ".$data->end_hour.":00:00";
+
+							$duration=($data->end_hour*1 - $data->start_hour*1)*60;
+						}
+
+						
+							$notAvailableNew = new SummaryService();
+							$notAvailableNew->setScheduledTo(new \DateTime($scheduled));
+							$notAvailableNew->setProfessional($prof);
+							$notAvailableNew->setServices(1);
+							$notAvailableNew->setStatus($status);
+							$notAvailableNew->setClient($client);
+							$notAvailableNew->setOrganization($prof->getOrganization());
+							$notAvailableNew->setCreatedAt($created_at);
+							$em->persist($notAvailableNew);
+							$em->flush();
+
+							$professionalReserseNew = new ProfessionalReservation();
+							$professionalReserseNew->setSummaryServiceId($notAvailableNew->getIdSummaryService());
+							$professionalReserseNew->setProfessionalId($prof->getId());
+							$professionalReserseNew->setScheduledFrom(new \DateTime($scheduled));
+							$professionalReserseNew->setScheduledTo(new \DateTime($scheduled_to));
+							$professionalReserseNew->setHoursQuantity($duration/60);
+							$professionalReserseNew->setDuration($duration);
+							$professionalReserseNew->setCreatedAt($created_at);
+							$em->persist($professionalReserseNew);
+							$em->flush();
+					}
+				}
+			}
+
+			/////////////////////////
+			
+			if($data->prof_id == 1 || $data->prof_id == 3){
+				$professional="";
+				$data->prof_id="";
+			}
+				$reserveNoAvailable = $em->getRepository('AppBundle:SummaryService')->listReserveNotAvailable($data->prof_id);
+				
+					foreach($reserveNoAvailable as $agenda){
+					
+			
+						$agendaList[] = array(
+							'position'         => $pos++,
+							'professional_id'  => $agenda['professional_id'],
+							'professional_name'=> $agenda['professional_name'],
+							'scheduled_from'   => $agenda['scheduled_from'],
+							'scheduled_to'     => $agenda['scheduled_to'],
+							'duration'         => $agenda['duration'],
+							'created_at'       => $agenda['created_at'],
+						);
+
+					}
+		    
+				
+
+				return new JsonResponse(array('status' => 'success','data' => $agendaList, 'professionals' => ""));
+		    }else{
+				// echo "Entre en ERROR";
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	/**
+     * @Route("/ws/get-reserve-not-available", name="/ws/get-reserve-not-available")
+     */
+    public function getReserveNotAvailable(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $agendaList = array();
+			$agendaDetail = array();
+			$total_agenda=0;
+			$pos=1;
+			$listProfessional=[];
+
+			$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
+			$prof_id=$professional->getId();
+
+			if($data->prof_id == 1 || $data->prof_id == 3){
+				$prof_id="";
+				$professional = $em->getRepository('AppBundle:User')->findBy(array("status" => ["ACTIVO","INACTIVO"],"userRole" => 2));
+				
+				foreach($professional as $prof){
+					if($prof->getId() > 0){
+						$listProfessional[] = array(
+							'professional_id'  => $prof->getId(),
+							'professional_name'=> $prof->getFirstName()." ". $prof->getLastName()
+						);
+			    	}
+				}
+			}
+				$reserveNoAvailable = $em->getRepository('AppBundle:SummaryService')->listReserveNotAvailable($prof_id);
+				
+				
+					foreach($reserveNoAvailable as $agenda){
+					
+						$agendaList[] = array(
+							'position'         => $pos++,
+							'professional_id'  => $agenda['professional_id'],
+							'professional_name'=> $agenda['professional_name'],
+							'scheduled_from'   => $agenda['scheduled_from'],
+							'scheduled_to'     => $agenda['scheduled_to'],
+							'duration'         => $agenda['duration'],
+							'created_at'       => $agenda['created_at']
+							
+						);
+
+					}
+		    
+				$confgPage = array(
+					'professionals' => $listProfessional,
+					'list_hours_start' => [10,11,12,13,14,15,16,17,18,19,20,21],
+					'list_hours_end' => [10,11,12,13,14,15,16,17,18,19,20,21,22]
+			
+				);
+
+				return new JsonResponse(array('status' => 'success','data'=>$agendaList, 'conf_page' => $confgPage));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
+
+	 /**
+     * @Route("/ws/get-agenda-reserve", name="/ws/get-agenda-reserve")
+     */
+    public function getAgendaReserve(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $agendaList = array();
+			$agendaDetail = array();
+			$total_agenda=0;
+			$total_pending=0;
+			$pos=1;
+
+			$agendas = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'7',$data->prof_id);
+			$agendasPending = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'6',$data->prof_id);
+
+			foreach($agendas as $agenda){
+				$agendaDetail = array();
+				$listProd= array();
+				$total_agenda = $total_agenda + $agenda['quantity'];
+
+				  $agendasDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'7',$data->prof_id,$agenda['scheduled']);
+
+					foreach($agendasDetail as $detail){
+						$listProd= [];
+						$prods=explode(",", $detail['products']);
+						
+						foreach($prods as $prod){
+							$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+			
+							$listProd[] = array(
+								'product_id'   => $product->getMenuId(),
+								'product_name' => $product->getMenuName(),
+								'product_menu_price' => $product->getPrice(),
+							);
+						}
+
+						$agendaDetail[] = array(
+							'service_id'    	=> $detail['service_id'],
+							'client_id'     	=> $detail['client_id'],
+							'client_name'   	=> $detail['client_name'],
+							 'status_id'	    => $detail['status_id'],
+							'products'      	=> $listProd,
+							'service_date'  	=> $detail['service_date'],
+							'professional_id'	=> $detail['professional_id'],
+							'professional_name' => $detail['professional_name'],
+							'total'  			=> $detail['total'],
+							'start'  			=> $detail['service_start'],
+							'end'    			=> $detail['service_end'],
+							'schedulet'         => $detail['scheduled_to'],
+							'phone'				=> $detail['phone'],
+							'email'             => $detail['email'],
+							'organization_id'   => $detail['organization_id'],
+						);
+					}
+
+				  $agendaList[] = array(
+					'position'     => $pos++,
+					'quantity'     => $agenda['quantity'],
+					'scheduled'    => $agenda['scheduled'],
+					'status_id'    => $agenda['status_id'],
+					'detail_agenda'=> $agendaDetail,
+					'viewDetail'        => false
+				  );
+
+			}
+
+
+			$pendingList=array();
+			foreach($agendasPending as $pending){
+				$agendaDetail = array();
+				$listProd= array();
+				$total_pending = $total_pending + $pending['quantity'];
+
+				  $pendingDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'6',$data->prof_id,$pending['scheduled']);
+
+					foreach($pendingDetail as $detail){
+						$listProd=[];
+						$prods=explode(",", $detail['products']);
+						
+						foreach($prods as $prod){
+							$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+			
+							$listProd[] = array(
+								'product_id'   => $product->getMenuId(),
+								'product_name' => $product->getMenuName(),
+								'product_menu_price' => $product->getPrice(),
+							);
+						}
+
+						$agendaDetail[] = array(
+							'service_id'    	=> $detail['service_id'],
+							'client_id'     	=> $detail['client_id'],
+							'client_name'   	=> $detail['client_name'],
+							'status_id'	        => $detail['status_id'],
+							'products'      	=> $listProd,
+							'service_date'  	=> $detail['service_date'],
+							'professional_id'	=> $detail['professional_id'],
+							'professional_name' => $detail['professional_name'],
+							'total'  			=> $detail['total'],
+							'start'  			=> $detail['service_start'],
+							'end'    			=> $detail['service_end'],
+							'schedulet'         => $detail['scheduled_to'],
+							'phone'				=> $detail['phone'],
+							'email'             => $detail['email'],
+							'organization_id'   => $detail['organization_id'],
+						);
+					}
+
+				  $pendingList[] = array(
+					'position'     => $pos++,
+					'quantity'     => $pending['quantity'],
+					'scheduled'    => $pending['scheduled'],
+					'status_id'    => $pending['status_id'],
+					'detail_agenda'=> $agendaDetail,
+					'viewDetail'   => false
+				  );
+
+			}
+		
+				
+
+				return new JsonResponse(array('status' => 'success','data'=>$agendaList,'total'=>$total_agenda, 'data_pending' => $pendingList, 'total_pending'=>$total_pending));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
+	/**
      * @Route("/ws/set-confirmed-arrived", name="/ws/set-confirmed-arrived")
      */
     public function setConfirmedArrived(Request $request)
@@ -98,45 +478,129 @@ class WebserviceController extends Controller{
 			$em->persist($service);
 			$em->flush();
 
-			$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
-			foreach($clientBooking as $booking){
-				$listProd=array();
-	
-				$prods=explode(",", $booking['products']);
-						
+		// LISTAR RESERVAS 
+		$em = $this->getDoctrine()->getManager();
+		$agendaList = array();
+		$agendaDetail = array();
+		$total_agenda=0;
+		$total_pending=0;
+		$pos=1;
+		$prof_id="";
+
+		$agendas = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'7',$prof_id);
+		$agendasPending = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'6',$prof_id);
+
+		foreach($agendas as $agenda){
+			$agendaDetail = array();
+			$listProd= array();
+			$total_agenda = $total_agenda + $agenda['quantity'];
+
+			  $agendasDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'7',$prof_id,$agenda['scheduled']);
+
+				foreach($agendasDetail as $detail){
+
+					$prods=explode(",", $detail['products']);
+					
 					foreach($prods as $prod){
 						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 		
 						$listProd[] = array(
 							'product_id'   => $product->getMenuId(),
 							'product_name' => $product->getMenuName(),
-							'product_menu_price' => $product->getPrice()
+							'product_menu_price' => $product->getPrice(),
 						);
 					}
-				
-					$listBooking[] = array(
-						'service_id'    	=> $booking['service_id'],
-						'client_id'     	=> $booking['client_id'],
-						'client_name'   	=> $booking['client_name'],
-						// 'avatar'	    	=> $paths["uploads_path"].$booking['avatar'],
+
+					$agendaDetail[] = array(
+						'service_id'    	=> $detail['service_id'],
+						'client_id'     	=> $detail['client_id'],
+						'client_name'   	=> $detail['client_name'],
+						 'status_id'	    => $detail['status_id'],
 						'products'      	=> $listProd,
-						'service_date'  	=> $booking['service_date'],
-						'professional_id'	=> $booking['professional_id'],
-						'professional_name' => $booking['professional_name'],
-						'total'  			=> $booking['total'],
-						'start'  			=> $booking['service_start'],
-						'end'    			=> $booking['service_end'],
-						'schedulet'         => $booking['scheduled_to'],
-						'phone'				=> $booking['phone'],
-						'email'             => $booking['email'],
-						'organization_id'   => $booking['organization_id']
+						'service_date'  	=> $detail['service_date'],
+						'professional_id'	=> $detail['professional_id'],
+						'professional_name' => $detail['professional_name'],
+						'total'  			=> $detail['total'],
+						'start'  			=> $detail['service_start'],
+						'end'    			=> $detail['service_end'],
+						'schedulet'         => $detail['scheduled_to'],
+						'phone'				=> $detail['phone'],
+						'email'             => $detail['email'],
+						'organization_id'   => $detail['organization_id'],
 					);
+				}
+
+			  $agendaList[] = array(
+				'position'     => $pos++,
+				'quantity'     => $agenda['quantity'],
+				'scheduled'    => $agenda['scheduled'],
+				'status_id'    => $agenda['status_id'],
+				'detail_agenda'=> $agendaDetail,
+				'viewDetail'        => false
+			  );
+
+		}
+
+
+		$pendingList=array();
+		foreach($agendasPending as $pending){
+			$agendaDetail = array();
+			$listProd= array();
+			$total_pending = $total_pending + $pending['quantity'];
+
+			  $pendingDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'6',$prof_id,$pending['scheduled']);
+
+				foreach($pendingDetail as $detail){
+
+					$prods=explode(",", $detail['products']);
+					
+					foreach($prods as $prod){
+						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		
+						$listProd[] = array(
+							'product_id'   => $product->getMenuId(),
+							'product_name' => $product->getMenuName(),
+							'product_menu_price' => $product->getPrice(),
+						);
+					}
+
+					$agendaDetail[] = array(
+						'service_id'    	=> $detail['service_id'],
+						'client_id'     	=> $detail['client_id'],
+						'client_name'   	=> $detail['client_name'],
+						'status_id'	        => $detail['status_id'],
+						'products'      	=> $listProd,
+						'service_date'  	=> $detail['service_date'],
+						'professional_id'	=> $detail['professional_id'],
+						'professional_name' => $detail['professional_name'],
+						'total'  			=> $detail['total'],
+						'start'  			=> $detail['service_start'],
+						'end'    			=> $detail['service_end'],
+						'schedulet'         => $detail['scheduled_to'],
+						'phone'				=> $detail['phone'],
+						'email'             => $detail['email'],
+						'organization_id'   => $detail['organization_id'],
+					);
+				}
+
+			  $pendingList[] = array(
+				'position'     => $pos++,
+				'quantity'     => $pending['quantity'],
+				'scheduled'    => $pending['scheduled'],
+				'status_id'    => $pending['status_id'],
+				'detail_agenda'=> $agendaDetail,
+				'viewDetail'   => false
+			  );
+
+		}
 	
-			}
-				return new JsonResponse(array('status' => 'success','data'=>$listBooking));
-		    }else{
-				return new JsonResponse(array('status' => 'error'));
-			}		
+			
+
+			return new JsonResponse(array('status' => 'success','data'=>$agendaList,'total'=>$total_agenda, 'data_pending' => $pendingList, 'total_pending'=>$total_pending));
+		}else{
+			return new JsonResponse(array('status' => 'error'));
+		}		
+		
 	}
 
 	
@@ -159,45 +623,166 @@ class WebserviceController extends Controller{
 			$em->persist($service);
 			$em->flush();
 
-			$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
-			foreach($clientBooking as $booking){
-				$listProd=array();
+			// $clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
+			// foreach($clientBooking as $booking){
+			// 	$listProd=array();
 	
-				$prods=explode(",", $booking['products']);
+			// 	$prods=explode(",", $booking['products']);
 						
+			// 		foreach($prods as $prod){
+			// 			$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		
+			// 			$listProd[] = array(
+			// 				'product_id'   => $product->getMenuId(),
+			// 				'product_name' => $product->getMenuName(),
+			// 				'product_menu_price' => $product->getPrice()
+			// 			);
+			// 		}
+				
+			// 		$listBooking[] = array(
+			// 			'service_id'    	=> $booking['service_id'],
+			// 			'client_id'     	=> $booking['client_id'],
+			// 			'client_name'   	=> $booking['client_name'],
+			// 			'products'      	=> $listProd,
+			// 			'service_date'  	=> $booking['service_date'],
+			// 			'professional_id'	=> $booking['professional_id'],
+			// 			'professional_name' => $booking['professional_name'],
+			// 			'total'  			=> $booking['total'],
+			// 			'start'  			=> $booking['service_start'],
+			// 			'end'    			=> $booking['service_end'],
+			// 			'schedulet'         => $booking['scheduled_to'],
+			// 			'phone'				=> $booking['phone'],
+			// 			'email'             => $booking['email'],
+			// 			'organization_id'   => $booking['organization_id']
+			// 		);
+			// 	}
+
+			// 	return new JsonResponse(array('status' => 'success','data'=>$listBooking));
+		    // }else{
+			// 	return new JsonResponse(array('status' => 'error'));
+			// }	
+			
+			$em = $this->getDoctrine()->getManager();
+		$agendaList = array();
+		$agendaDetail = array();
+		$total_agenda=0;
+		$total_pending=0;
+		$pos=1;
+		$prof_id="";
+
+		$agendas = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'7',$prof_id);
+		$agendasPending = $em->getRepository('AppBundle:SummaryService')->getReserveAgenda($data->organization_id,'6',$prof_id);
+
+		foreach($agendas as $agenda){
+			$agendaDetail = array();
+			$listProd= array();
+			$total_agenda = $total_agenda + $agenda['quantity'];
+
+			  $agendasDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'7',$prof_id,$agenda['scheduled']);
+
+				foreach($agendasDetail as $detail){
+
+					$prods=explode(",", $detail['products']);
+					
 					foreach($prods as $prod){
 						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 		
 						$listProd[] = array(
 							'product_id'   => $product->getMenuId(),
 							'product_name' => $product->getMenuName(),
-							'product_menu_price' => $product->getPrice()
+							'product_menu_price' => $product->getPrice(),
 						);
 					}
-				
-					$listBooking[] = array(
-						'service_id'    	=> $booking['service_id'],
-						'client_id'     	=> $booking['client_id'],
-						'client_name'   	=> $booking['client_name'],
-						// 'avatar'	    	=> $paths["uploads_path"].$booking['avatar'],
+
+					$agendaDetail[] = array(
+						'service_id'    	=> $detail['service_id'],
+						'client_id'     	=> $detail['client_id'],
+						'client_name'   	=> $detail['client_name'],
+						 'status_id'	    => $detail['status_id'],
 						'products'      	=> $listProd,
-						'service_date'  	=> $booking['service_date'],
-						'professional_id'	=> $booking['professional_id'],
-						'professional_name' => $booking['professional_name'],
-						'total'  			=> $booking['total'],
-						'start'  			=> $booking['service_start'],
-						'end'    			=> $booking['service_end'],
-						'schedulet'         => $booking['scheduled_to'],
-						'phone'				=> $booking['phone'],
-						'email'             => $booking['email'],
-						'organization_id'   => $booking['organization_id']
+						'service_date'  	=> $detail['service_date'],
+						'professional_id'	=> $detail['professional_id'],
+						'professional_name' => $detail['professional_name'],
+						'total'  			=> $detail['total'],
+						'start'  			=> $detail['service_start'],
+						'end'    			=> $detail['service_end'],
+						'schedulet'         => $detail['scheduled_to'],
+						'phone'				=> $detail['phone'],
+						'email'             => $detail['email'],
+						'organization_id'   => $detail['organization_id'],
 					);
 				}
 
-				return new JsonResponse(array('status' => 'success','data'=>$listBooking));
-		    }else{
-				return new JsonResponse(array('status' => 'error'));
-			}		
+			  $agendaList[] = array(
+				'position'     => $pos++,
+				'quantity'     => $agenda['quantity'],
+				'scheduled'    => $agenda['scheduled'],
+				'status_id'    => $agenda['status_id'],
+				'detail_agenda'=> $agendaDetail,
+				'viewDetail'        => false
+			  );
+
+		}
+
+
+		$pendingList=array();
+		foreach($agendasPending as $pending){
+			$agendaDetail = array();
+			$listProd= array();
+			$total_pending = $total_pending + $pending['quantity'];
+
+			  $pendingDetail = $em->getRepository('AppBundle:SummaryService')->getReserveAgendaDetail($data->organization_id,'6',$prof_id,$pending['scheduled']);
+
+				foreach($pendingDetail as $detail){
+
+					$prods=explode(",", $detail['products']);
+					
+					foreach($prods as $prod){
+						$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		
+						$listProd[] = array(
+							'product_id'   => $product->getMenuId(),
+							'product_name' => $product->getMenuName(),
+							'product_menu_price' => $product->getPrice(),
+						);
+					}
+
+					$agendaDetail[] = array(
+						'service_id'    	=> $detail['service_id'],
+						'client_id'     	=> $detail['client_id'],
+						'client_name'   	=> $detail['client_name'],
+						'status_id'	        => $detail['status_id'],
+						'products'      	=> $listProd,
+						'service_date'  	=> $detail['service_date'],
+						'professional_id'	=> $detail['professional_id'],
+						'professional_name' => $detail['professional_name'],
+						'total'  			=> $detail['total'],
+						'start'  			=> $detail['service_start'],
+						'end'    			=> $detail['service_end'],
+						'schedulet'         => $detail['scheduled_to'],
+						'phone'				=> $detail['phone'],
+						'email'             => $detail['email'],
+						'organization_id'   => $detail['organization_id'],
+					);
+				}
+
+			  $pendingList[] = array(
+				'position'     => $pos++,
+				'quantity'     => $pending['quantity'],
+				'scheduled'    => $pending['scheduled'],
+				'status_id'    => $pending['status_id'],
+				'detail_agenda'=> $agendaDetail,
+				'viewDetail'   => false
+			  );
+
+		}
+	
+			
+
+			return new JsonResponse(array('status' => 'success','data'=>$agendaList,'total'=>$total_agenda, 'data_pending' => $pendingList, 'total_pending'=>$total_pending));
+		}else{
+			return new JsonResponse(array('status' => 'error'));
+		}		
 	}
 
 	
@@ -324,7 +909,7 @@ class WebserviceController extends Controller{
 	/**
      * @Route("/ws/get-service-menu", name="/ws/get-service-menu")
      */
-    public function getServiceMnu(Request $request)
+    public function getServiceMenu(Request $request)
     {
 		$data = json_decode(file_get_contents("php://input"));
 		$paths = $this->getProjectPaths();
@@ -1562,14 +2147,39 @@ class WebserviceController extends Controller{
 				file_put_contents($new, $decoded);
 			}
 
-			//$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2));
+			
+			$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => $data->type));
 			$menuClass = $em->getRepository('AppBundle:MenuClass')->findOneBy(array("menuClassId" => $data->classMenuSelected));
-	//		$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => $data->menu_type));
 			$menu = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $data->menu_id));
 
 			if($data->isActive == true){
 				$active=1;
 			}
+
+			foreach($data->service_prof as $servProf)
+			{   
+				
+				$menusUser = $em->getRepository('AppBundle:MenusUser')->findOneBy(array("menus" => $menu,"user"=>$servProf->prof_id));
+				
+
+				if(  is_null($menusUser) && $servProf->status_service ){
+					$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $servProf->prof_id));
+				
+					$menuUserNew = new MenusUser();
+					$menuUserNew->setMenus($menu);
+					$menuUserNew->setUser($user);
+					$menuUserNew->setStatus(1);
+					$menuUserNew->setCreatedAt(new \DateTime());
+					$em->persist($menuUserNew);
+				}elseif(!$servProf->status_service && $menusUser){
+					
+					$em->remove($menusUser);
+				  }
+				  
+
+				  $em->flush();
+			}
+			
 
 			
 			$menu->setMenuName($data->name);
@@ -1580,7 +2190,8 @@ class WebserviceController extends Controller{
 			$menu->setDescription($data->description);
 			$menu->setIsActive($active);
 			$menu->setMenuClass($menuClass);
-	//		$menu->setMenuType($menuType);
+			$menu->setDuration($data->duration);
+			$menu->setMenuType($menuType);
 			$menu->setCreatedAt(new \DateTime());
 			$menu->setMenuOrder($data->position);
 			$em->persist($menu);
@@ -1713,7 +2324,7 @@ class WebserviceController extends Controller{
 			$decoded = base64_decode($base64);
 			file_put_contents($new, $decoded);
 
-			$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2));
+			$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => $data->type));
 			$menuClass = $em->getRepository('AppBundle:MenuClass')->findOneBy(array("menuClassId" => $data->classMenuSelected));
 			
 			if($data->isActive == true){
@@ -1726,13 +2337,30 @@ class WebserviceController extends Controller{
 			$menuNew->setPrice($data->price);
 			$menuNew->setDescription($data->description);
 			$menuNew->setIsActive($active);
+			$menuNew->setDuration($data->duration);
 			$menuNew->setMenuClass($menuClass);
 			$menuNew->setMenuType($menuType);
 			$menuNew->setCreatedAt(new \DateTime());
 			$menuNew->setMenuOrder($data->position);
 			$em->persist($menuNew);
 			$em->flush();
-				
+
+
+			foreach($data->service_prof as $servProf)
+			{   
+				//$menu = $em->getRepository('AppBundle:MenusUser')->findOneBy(array("menus" => $menuNew,"user"=>));
+				$user = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $servProf->prof_id));
+				if($servProf->status_service){
+					$menuUserNew = new MenusUser();
+					$menuUserNew->setMenus($menuNew);
+					$menuUserNew->setUser($user);
+					$menuUserNew->setStatus(1);
+					$menuUserNew->setCreatedAt(new \DateTime());
+					$em->persist($menuUserNew);
+				}
+			}
+			$em->flush();
+
 			 return new JsonResponse(array('status' => 'success'));									 
 		 }
 		
@@ -1753,17 +2381,42 @@ class WebserviceController extends Controller{
 		if(true)
 		{   $status="";	
 			$list= array();
+			$listProfessional=array();
 
 			$services_menu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4],"isActive" => [0,1] ),array('menuOrder'=>'ASC'));
-			
+			$professionals = $em->getRepository('AppBundle:User')->findBy(array("userRole" => 2,"status" => ['ACTIVO','INACTIVO'] ));
+
+			foreach($professionals as $prof)
+			{ 
+				if($prof->getId() > 0){
+					$listProfessional[] = array(
+					'status_service' =>boolval(false),
+					'professional'   =>$prof->getFirstName(),
+					'prof_id'        =>$prof->getId()
+					);
+		    	}
+			}
 	
 			foreach($services_menu as $menu)
-			{
+			{   $listSer=array();
+
+			  	$listProfServ=$em->getRepository('AppBundle:Menus')->getListProfServi(1,$menu->getMenuId());
+				
+				 foreach($listProfServ as $profSer)
+				 { 
+				 	$listSer[] = array(
+						'status_service' =>boolval($profSer['status_service']),
+						'professional'   =>$profSer['professional'],
+						'prof_id'        =>$profSer['prof_id']
+				     );
+				 }
+
 				if($menu->getIsActive()==1){
 					$status="Activo";
 				}else{
 					$status="Inactivo";
 				}
+
 				$list[] = array(
 					'menu_id'         => $menu->getMenuId(),
 					'menu_name'	      => $menu-> getMenuName(),
@@ -1774,7 +2427,9 @@ class WebserviceController extends Controller{
 					'price'           => $menu->getPrice(),
 					'order_menu'      => $menu->getMenuOrder(),
 					'is_active'       => $status,
-					'description'     => $menu->getDescription()
+					'description'     => $menu->getDescription(),
+					'duration'        => $menu->getDuration(),
+					'service_prof'    =>$listSer
 				);
 			}
 
@@ -1793,7 +2448,7 @@ class WebserviceController extends Controller{
 				// }
 
        
-			 return new JsonResponse(array('status' => 'success', "data" => $list, "data2" => $listClass));									 
+			 return new JsonResponse(array('status' => 'success', "data" => $list, "data2" => $listClass, 'professionals' => $listProfessional));									 
 		 }
 		
 		 return new JsonResponse(array('status' => 'error'));
@@ -2117,13 +2772,13 @@ class WebserviceController extends Controller{
 			$em = $this->getDoctrine()->getManager();
 			$paths = $this->getProjectPaths();
 
-			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,7]), array('idSummaryService'=>'ASC'));
-			
+			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,2,6,7]), array('idSummaryService'=>'ASC'));
+			$reservePending =$em->getRepository('AppBundle:SummaryService')->reservePending($user->id);
 			
 			$list  = array();
 			$listProd = array();
 			$listProdMenu = array();
-			$lisReserve= array();
+			$lisForApproveReserveToday= array();
 			$lisReserveToday = array();
 
 			$productMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4]));
@@ -2138,7 +2793,7 @@ class WebserviceController extends Controller{
 
 
 			foreach($clientService as $serv)
-			{  $listProd = NULL;
+			{  $listProd = [];
 				$client = $em->getRepository('AppBundle:Client')->findOneBy(array("clientId" => $serv->getClient()));
 				
 				$prods=explode(",", $serv->getServices());
@@ -2156,7 +2811,7 @@ class WebserviceController extends Controller{
 				}
 				
 
-				if( $serv->getStatus()->getStatusId() == 1 ){
+				if( $serv->getStatus()->getStatusId() == 1 ||  $serv->getStatus()->getStatusId() == 2){
 					$list[] = array(
 						'service_id'    => $serv->getIdSummaryService(),
 						'client_id'     => $client->getClientId(),
@@ -2171,12 +2826,13 @@ class WebserviceController extends Controller{
 						'schedulet'     => $serv->getScheduledTo(),
 						'status_id'		=> $serv->getStatus()->getStatusId()
 					);
-				}elseif(date_format($serv->getScheduledTo(),"Y-m-d") == date_format($today,"Y-m-d")){
+				}elseif( $serv->getScheduledTo() && $serv->getStatus()->getStatusId() == 7 && date_format($serv->getScheduledTo(),"Y-m-d") == date_format($today,"Y-m-d")){
 					
 					$lisReserveToday[] = array(
 						'service_id'    => $serv->getIdSummaryService(),
 						'client_id'     => $client->getClientId(),
 						'client_name'   => $client->getName(),
+						'client_phone'  => $client->getPhone(),
 						'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
 						'products'      => $listProd,
 						'service_date'  => $serv->getCreatedAt(),
@@ -2186,11 +2842,12 @@ class WebserviceController extends Controller{
 						'schedulet'     => $serv->getScheduledTo(),
 						'status_id'		=> $serv->getStatus()->getStatusId()	
 					);
-				}else{
-					$lisReserve[] = array(
+				}elseif( $serv->getScheduledTo() && $serv->getStatus()->getStatusId() == 6 && date_format($serv->getScheduledTo(),"Y-m-d") == date_format($today,"Y-m-d")){
+					$lisForApproveReserveToday[] = array(
 						'service_id'    => $serv->getIdSummaryService(),
 						'client_id'     => $client->getClientId(),
 						'client_name'   => $client->getName(),
+						'client_phone'  => $client->getPhone(),
 						'avatar'	    => $paths["uploads_path"].$client->getAvatar(),
 						'products'      => $listProd,
 						'service_date'  => $serv->getCreatedAt(),
@@ -2205,9 +2862,15 @@ class WebserviceController extends Controller{
 
 			}
 
+			$listReserve = array(
+				'reserve_for_approve'=>$lisForApproveReserveToday,
+				'reserve_today'=>$lisReserveToday,
+				'reserve_pending' =>$reservePending[0]['pending']*1,
+				'reserve_confirm' =>$reservePending[0]['confirm']*1
+			);
 				
 			
-			return new JsonResponse(array('status'=>"success",'data' => $list, 'reserve'=>$lisReserve,'reserve_today'=>$lisReserveToday));
+			return new JsonResponse(array('status'=>"success",'data' => $list, 'reserve'=>$lisForApproveReserveToday,'reserve_today'=>$lisReserveToday, 'reserve_list' => $listReserve));
 	  }
 	  return new JsonResponse(array('data' => "error"));
 	}
@@ -2224,7 +2887,7 @@ class WebserviceController extends Controller{
 		if($data)
 		{	
 			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
-			//$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 2));
+			$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 2));
 			
 			if($data->random == "y"){
 				$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
@@ -2232,11 +2895,14 @@ class WebserviceController extends Controller{
 			}
 
 			$service->setServiceStart(new \DateTime());
-			//$client->setAvatar($avatar);
+			$service->setStatus($status);
 			$em->persist($service);
+			$em->flush();
             //ACTUALIZA TABLA DE TURNO
+			
 			$turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id),array('turnDate' => 'desc'));
 			$first=true;
+
 			if($turns){	
 				foreach($turns as $turn){
 					if($first){
@@ -2248,7 +2914,7 @@ class WebserviceController extends Controller{
 						$em->remove($turn);
 					}
 				}
-				$em->flush();
+			$em->flush();
 
              }
 			 return new JsonResponse(array('status' => 'success'));									 
@@ -2274,6 +2940,7 @@ class WebserviceController extends Controller{
 			$service->setServiceEnd(new \DateTime());
 			//$client->setAvatar($avatar);
 			$em->persist($service);
+			$em->flush();
 			//ACTUALIZA TABLA DE TURNO
 			$turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id),array('turnDate' => 'desc'));
 			$first=true;
@@ -2529,7 +3196,7 @@ class WebserviceController extends Controller{
 		}
 
 
-        $clientPending = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,1);
+        $clientPending = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,'1,2');
         $clientComplete = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,3);
         $clientPayout = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,5);
 		$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
@@ -2689,41 +3356,41 @@ class WebserviceController extends Controller{
                 );
         }
 
-		$listReservegAll=array();
-		foreach($ReserveAll as $bookingAll){
-            $listProd=array();
+		// $listReservegAll=array();
+		// foreach($ReserveAll as $bookingAll){
+        //     $listProd=array();
 
-            $prods=explode(",", $bookingAll['products']);
+        //     $prods=explode(",", $bookingAll['products']);
 					
-				foreach($prods as $prod){
-					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+		// 		foreach($prods as $prod){
+		// 			$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 	
-					$listProd[] = array(
-						'product_id'   => $product->getMenuId(),
-						'product_name' => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
-					);
-				}
+		// 			$listProd[] = array(
+		// 				'product_id'   => $product->getMenuId(),
+		// 				'product_name' => $product->getMenuName(),
+		// 				'product_menu_price' => $product->getPrice()
+		// 			);
+		// 		}
             
-            	$listReservegAll[] = array(
-                    'service_id'    	=> $bookingAll['service_id'],
-                    'client_id'     	=> $bookingAll['client_id'],
-                    'client_name'   	=> $bookingAll['client_name'],
-                    'avatar'	    	=> $paths["uploads_path"].$bookingAll['avatar'],
-                    'products'      	=> $listProd,
-                    'service_date'  	=> $bookingAll['service_date'],
-                    'professional_id'	=> $bookingAll['professional_id'],
-                    'professional_name' => $bookingAll['professional_name'],
-                    'total'  			=> $bookingAll['total'],
-                    'start'  			=> $bookingAll['service_start'],
-                    'end'    			=> $bookingAll['service_end'],
-					'schedulet'         => $bookingAll['scheduled_to'],
-					'phone'				=> $bookingAll['phone'],
-					'email'             => $bookingAll['email'],
-					'organization_id'   => $bookingAll['organization_id'],
-					'status_id'			=> $bookingAll['status_id']
-                );
-        }
+        //     	$listReservegAll[] = array(
+        //             'service_id'    	=> $bookingAll['service_id'],
+        //             'client_id'     	=> $bookingAll['client_id'],
+        //             'client_name'   	=> $bookingAll['client_name'],
+        //             'avatar'	    	=> $paths["uploads_path"].$bookingAll['avatar'],
+        //             'products'      	=> $listProd,
+        //             'service_date'  	=> $bookingAll['service_date'],
+        //             'professional_id'	=> $bookingAll['professional_id'],
+        //             'professional_name' => $bookingAll['professional_name'],
+        //             'total'  			=> $bookingAll['total'],
+        //             'start'  			=> $bookingAll['service_start'],
+        //             'end'    			=> $bookingAll['service_end'],
+		// 			'schedulet'         => $bookingAll['scheduled_to'],
+		// 			'phone'				=> $bookingAll['phone'],
+		// 			'email'             => $bookingAll['email'],
+		// 			'organization_id'   => $bookingAll['organization_id'],
+		// 			'status_id'			=> $bookingAll['status_id']
+        //         );
+        // }
 
 		$listReservegToday=array();
 		foreach($ReserveToday as $bookingToday){
@@ -2769,7 +3436,7 @@ class WebserviceController extends Controller{
 			'method_pay'    => $listMethodPay,
 			'profesionales' => $listProfesionales,
 			'booking'       => $listBooking,
-			'reserves_all'  => $listReservegAll,
+			'reserves_all'  => count($ReserveAll)+count($ReserveToday),//$listReservegAll,
 			'reserves_today'=> $listReservegToday
 		  );
        

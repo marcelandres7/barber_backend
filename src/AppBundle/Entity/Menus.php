@@ -54,7 +54,10 @@ class Menus
      */
     private $createdBy;
 
-
+    public function __toString()
+    {
+	    return $this->menuName;
+    }
 
     /**
      * Get menuId

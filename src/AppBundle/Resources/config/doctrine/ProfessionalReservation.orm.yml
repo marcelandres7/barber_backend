@@ -1,0 +1,45 @@
+AppBundle\Entity\ProfessionalReservation:
+    type: entity
+    table: professional_reservation
+    id:
+        professionalReservationId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: professional_reservation_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        summaryServiceId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: summary_service_id
+        professionalId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: professional_id
+        scheduledFrom:
+            type: datetime
+            nullable: true
+            column: scheduled_from
+        scheduledTo:
+            type: datetime
+            nullable: true
+            column: scheduled_to
+        hoursQuantity:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: hours_quantity
+        duration:
+            type: integer
+            nullable: true
+            unsigned: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    lifecycleCallbacks: {  }

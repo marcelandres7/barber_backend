@@ -224,6 +224,8 @@ class ReservationController extends Controller {
         $orgObj = $em->getRepository('AppBundle:Organization')->findOneBy(["organizationId" => $data['organization']]);
         $arrServices = explode(',',$data['services']);
         $totalPrice = 0;
+        $random="n";
+        $avartar="icons-user.png";
         if (count($arrServices)>0) {
             foreach ($arrServices as $value) {
                 $serviceObj = $em->getRepository('AppBundle:Menus')->findOneBy(["menuId" => $value]);
@@ -233,17 +235,18 @@ class ReservationController extends Controller {
         $statusObj = $em->getRepository('AppBundle:Status')->findOneBy(["statusId" => 6]);
         if (!$clientObj) {
             $clientObj = new Client();
+            $clientObj->setAvatar($avartar);
             $clientObj->setName($data['firstName'].' '.$data['lastName']);
             $clientObj->setEmail($data['email']);
             $clientObj->setPhone($data['phone']);
             $clientObj->setRegister(0);
             $clientObj->setPromotion(0);
             $clientObj->setCreatedAt(new \DateTime());
-            $clientObj->setAvatar("icons-user.png");
             $em->persist($clientObj);
         }
         $sumaryServiceObj = new SummaryService();
         $sumaryServiceObj->setClient($clientObj);
+        $sumaryServiceObj->setRandom($random);
         $sumaryServiceObj->setProfessional($userObj);
         $sumaryServiceObj->setOrganization($orgObj);
         $sumaryServiceObj->setScheduledTo(new \DateTime($data['scheduledTo']));
@@ -251,7 +254,6 @@ class ReservationController extends Controller {
         $sumaryServiceObj->setTotalPayment($totalPrice);
         $sumaryServiceObj->setServices($data['services']);
         $sumaryServiceObj->setStatus($statusObj);
-        $sumaryServiceObj->setRandom("n");
         $em->persist($sumaryServiceObj);
         $em->flush();
         $this->addFlash('success_message', $this->getParameter('exito'));

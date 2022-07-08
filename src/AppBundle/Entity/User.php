@@ -173,12 +173,6 @@ class User implements UserInterface, \Serializable
         return $this->bio;
     }
 
-
-
-
-
-
-
     /**
      * Set lastName
      *

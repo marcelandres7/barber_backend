@@ -12,12 +12,22 @@ class SummaryServiceRepository extends EntityRepository
     $dateStart    = $dateSearch." 00:00:00";
     $dateEnd      = $dateSearch." 23:59:59";
 		$query = "  SELECT 	  	ss.id_summary_service , ss.scheduled_to , ss.professional_id, ss.status_id , ss.services,
+                ((	  SELECT 		SUM(m.duration) 
+                    FROM 		  menus m
+                    WHERE 		FIND_IN_SET(m.menu_id,ss.services)) + IFNULL((select pr.duration from professional_reservation pr where pr.summary_service_id=ss.id_summary_service ),0))  AS total_duration
+                FROM 	      summary_service ss 
+                WHERE 	  	ss.professional_id = $pId
+                AND         ss.status_id not in (4,5)
+                AND 	      (scheduled_to BETWEEN '$dateStart' AND '$dateEnd') 
+                UNION
+	              SELECT 	  	ss.id_summary_service , created_at as 'scheduled_to' , ss.professional_id, ss.status_id , ss.services,
                 (	  SELECT 		SUM(m.duration) 
                     FROM 		  menus m
                     WHERE 		FIND_IN_SET(m.menu_id,ss.services) ) AS total_duration
                 FROM 	      summary_service ss 
                 WHERE 	  	ss.professional_id = $pId
-                AND 	      (scheduled_to BETWEEN '$dateStart' AND '$dateEnd') ";
+                 AND         ss.status_id not in (4,5)
+                AND 	      (created_at BETWEEN '$dateStart' AND '$dateEnd') ";
     $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
 		return $res->fetchAll ();
@@ -445,7 +455,7 @@ class SummaryServiceRepository extends EntityRepository
             INNER JOIN client c ON ss.client_id = c.client_id
              LEFT JOIN method_payment mp ON ss.method_payment = mp.method_payment_id
                  WHERE ss.organization_id = $organization
-                   AND status_id = $status
+                   AND status_id in ($status)
 	           	";
       
       if($status == 6) {
@@ -506,16 +516,17 @@ class SummaryServiceRepository extends EntityRepository
   public function getReserveAgenda($organization,$status,$professional) {
 
   
-		$query = "SELECT count(1) as quantity,DATE_FORMAT(scheduled_to, '%Y-%m-%d') as scheduled 
+		$query = "SELECT count(1) as quantity,status_id,DATE_FORMAT(scheduled_to, '%Y-%m-%d') as scheduled 
                 FROM summary_service
-               WHERE status_id=$status
+               WHERE status_id in ($status)
                AND  organization_id = $organization
+               AND DATE_FORMAT(scheduled_to, '%Y-%m-%d') >= DATE_FORMAT(now(), '%Y-%m-%d')
 	           	";
       if($professional) {
        $query .= " AND professional_id=$professional";
        }
 
-       $query .= " GROUP BY  DATE_FORMAT(scheduled_to, '%Y-%m-%d') 
+       $query .= " GROUP BY  status_id,DATE_FORMAT(scheduled_to, '%Y-%m-%d') 
                    ORDER BY scheduled_to ASC";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
@@ -545,7 +556,7 @@ class SummaryServiceRepository extends EntityRepository
        $query .= " AND professional_id=$professional";
        }
 
-       $query .= "ORDER BY scheduled_to ASC";
+       $query .= " ORDER BY scheduled_to ASC";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 	    	$res->execute ();
@@ -661,6 +672,46 @@ class SummaryServiceRepository extends EntityRepository
                              AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
                              AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')) as result
 		        ";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+
+  public function listReserveNotAvailable($professional) {
+
+		$query = "
+              SELECT p.professional_id,concat(u.first_name,' ',u.last_name) as professional_name ,min(p.summary_service_id) as summary_service_id,min(p.scheduled_from)as scheduled_from,max(p.scheduled_to) as scheduled_to,sum(p.hours_quantity) duration,min(p.created_at) as created_at
+                FROM professional_reservation p, user u
+               WHERE   date_format(p.scheduled_to,'%Y-%m-%d') >= date_format(now(),'%Y-%m-%d')
+                 AND p.professional_id=u.id
+		        ";
+        
+          if($professional) {
+		      	$query .= "AND p.professional_id ='$professional'";
+	        	}
+
+            $query .= "GROUP BY p.professional_id,p.created_at
+                       ORDER BY p.professional_reservation_id";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reservePending($professional) {
+
+		$query = "
+            SELECT  sum(IF(status_id=6,1,0)) as pending, sum(IF(status_id=7,1,0)) as confirm
+            FROM emda_prlm.summary_service
+            WHERE status_id in (6,7)
+            AND professional_id=$professional
+            AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')>=DATE_FORMAT(now(), '%Y-%m-%d')
+		        ";
+        
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
