@@ -706,7 +706,7 @@ class SummaryServiceRepository extends EntityRepository
 
 		$query = "
             SELECT  sum(IF(status_id=6,1,0)) as pending, sum(IF(status_id=7,1,0)) as confirm
-            FROM emda_prlm.summary_service
+            FROM summary_service
             WHERE status_id in (6,7)
             AND professional_id=$professional
             AND DATE_FORMAT(scheduled_to, '%Y-%m-%d')>=DATE_FORMAT(now(), '%Y-%m-%d')
