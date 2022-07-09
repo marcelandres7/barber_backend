@@ -43,11 +43,11 @@ class WebserviceController extends Controller{
         $enviroment = $this->container->get('kernel')->getEnvironment();
         $paths = array();
         if($enviroment == "prod"){
-            //$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }else{
-           // $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
 			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }
