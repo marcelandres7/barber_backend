@@ -48,7 +48,7 @@ class WebserviceController extends Controller{
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }else{
             $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			 $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
 			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
         }
         
