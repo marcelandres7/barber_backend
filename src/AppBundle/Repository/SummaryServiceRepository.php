@@ -12,9 +12,9 @@ class SummaryServiceRepository extends EntityRepository
     $dateStart    = $dateSearch." 00:00:00";
     $dateEnd      = $dateSearch." 23:59:59";
 		$query = "  SELECT 	  	ss.id_summary_service , ss.scheduled_to , ss.professional_id, ss.status_id , ss.services,
-                ((	  SELECT 		SUM(m.duration) 
+                (IFNULL((	  SELECT 		SUM(m.duration) 
                     FROM 		  menus m
-                    WHERE 		FIND_IN_SET(m.menu_id,ss.services)) + IFNULL((select pr.duration from professional_reservation pr where pr.summary_service_id=ss.id_summary_service ),0))  AS total_duration
+                    WHERE 		FIND_IN_SET(m.menu_id,ss.services)),0) + IFNULL((select pr.duration from professional_reservation pr where pr.summary_service_id=ss.id_summary_service ),0))  AS total_duration
                 FROM 	      summary_service ss 
                 WHERE 	  	ss.professional_id = $pId
                 AND         ss.status_id not in (4,5)
