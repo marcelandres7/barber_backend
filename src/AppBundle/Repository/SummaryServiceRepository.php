@@ -21,12 +21,13 @@ class SummaryServiceRepository extends EntityRepository
                 AND 	      (scheduled_to BETWEEN '$dateStart' AND '$dateEnd') 
                 UNION
 	              SELECT 	  	ss.id_summary_service , created_at as 'scheduled_to' , ss.professional_id, ss.status_id , ss.services,
-                (	  SELECT 		SUM(m.duration) 
-                    FROM 		  menus m
-                    WHERE 		FIND_IN_SET(m.menu_id,ss.services) ) AS total_duration
-                FROM 	      summary_service ss 
-                WHERE 	  	ss.professional_id = $pId
+                            (	  SELECT 		SUM(m.duration) 
+                                FROM 		  menus m
+                                WHERE 		FIND_IN_SET(m.menu_id,ss.services) ) AS total_duration
+                 FROM 	      summary_service ss 
+                WHERE 	  	 ss.professional_id = $pId
                  AND         ss.status_id not in (4,5)
+                 AND         ss.services <> 1
                 AND 	      (created_at BETWEEN '$dateStart' AND '$dateEnd') ";
     $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
