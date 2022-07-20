@@ -220,6 +220,14 @@ class ReservationController extends Controller {
     public function CreateReservationAction(Request $request){
         $data = $request->get('form');
         $em = $this->getDoctrine()->getManager();
+        $scheduledTo=new \DateTime($data['scheduledTo']);
+        $summaryServiceObj = $em->getRepository('AppBundle:SummaryService')->findBy(["professional" => $data['professional'],"scheduledTo" =>$scheduledTo]);
+
+        If($summaryServiceObj){
+            $this->addFlash('error_message', "La hora seleccionada ha sido ocupada, disculpe");
+            return  $this->redirectToRoute('reservation');
+        }
+
         $clientObj = $em->getRepository('AppBundle:Client')->findOneBy(["email" => $data['email']]);
         $userObj = $em->getRepository('AppBundle:User')->findOneBy(["id" => $data['professional']]);
         $orgObj = $em->getRepository('AppBundle:Organization')->findOneBy(["organizationId" => $data['organization']]);

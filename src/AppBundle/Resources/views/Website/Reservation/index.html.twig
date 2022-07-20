@@ -91,14 +91,22 @@
         });
         $("#form_services").val(sidStr);
 
+         function addDaysToDate(date, days){
+            var res = new Date(date);
+            res.setDate(res.getDate() + days);
+            return res;
+         }
+
         $("#calendar").datepicker({
-            minDate: new Date(),
+            minDate: new Date(addDaysToDate(new Date(), 1)),
             firstDay: 1,
             dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
             dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"],
             monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
             monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
         });
+
+       
 
         $("#calendar").on('change', function () {
             //var dateSelected = $(this).val();
