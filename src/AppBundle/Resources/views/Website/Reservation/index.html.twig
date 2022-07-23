@@ -75,13 +75,15 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+<script src="{{ asset('bundles/dattaAble/assets/plugins/sweetalert/js/sweetalert.min.js') }}"></script>
 <script type="text/javascript">
     $(document).ready(function () {
 
         var listServices = '';
         var pathHours = '';
         var sidStr = '';
+        var data = {};
         $(".service-ids").each(function (index, item) {
             if (sidStr.length == 0) {
                 sidStr = $(item).data('sid');
@@ -114,12 +116,12 @@
             var monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
             var dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
             var profId = $("#firstProf").val();
-            const data = {
+            data = {
                 p_id: profId,
                 s_id: sidStr,
                 date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
             };
-            console.log("PROF: ", data);
+            //console.log("PROF: ", data);
             getListHours(data);
             $("#form_scheduledTo").val('');
             $("#when_datetime").html('');
@@ -138,7 +140,7 @@
             $("#firstProf").val(profId);
             $("#profName").html(profName);
             $("#serv-address").html(profAddress);
-            const data = {
+            data = {
                 p_id: profId,
                 s_id: sidStr,
                 date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
@@ -157,70 +159,76 @@
 
         });
 
-        function getListHours(data) {
-            $.ajax({
+
+        
+
+        async function getListHours(data) {
+            const result = await $.ajax({
                 data: data,
                 url: "{{path('get_list_hours_available')}}",
-                success: function (result) {
-                    var clearAfternoon = true;
-                    var clearEvening = true;
+                type: 'POST',
+            })
+            if (result) {
+                var clearAfternoon = true;
+                var clearEvening = true;
+                $("#morning-title").html("");
+                $("#afternoon-title").html("");
+                $("#evening-title").html("");
+                $("#morning-hour").html("");
+                $("#afternoon-hour").html("");
+                $("#evening-hour").html("");
+                /*console.log("result.data.length: ", result.data);*/
+                if (result.data.length !== 0) {
+                    $("#hour-empty").html("");
+                    $.each(result.data, function (index, value) {
+                        //console.log("value: ", value);
+                        if (value.momment == "morning") {
+                            $("#morning-title").html("<p>Mañana</p>");
+                        } else if (value.momment == "afternoon") {
+                            $("#afternoon-title").html("<p>Tarde</p>");
+                        } else if (value.momment == "evening") {
+                            $("#evening-title").html("<p>Noche</p>");
+                        }
 
-                    $("#morning-title").html("");
-                    $("#afternoon-title").html("");
-                    $("#evening-title").html("");
-                    $("#morning-hour").html("");
-                    $("#afternoon-hour").html("");
-                    $("#evening-hour").html("");
-                    console.log("result.data.length: ", result.data);
-                    if (result.data.length !== 0) {
-                        $("#hour-empty").html("");
-                        $.each(result.data, function (index, value) {
-                            console.log("value: ", value);
-                            if (value.momment == "morning") {
-                                $("#morning-title").html("<p>Mañana</p>");
-                            } else if (value.momment == "afternoon") {
-                                $("#afternoon-title").html("<p>Tarde</p>");
-                            } else if (value.momment == "evening") {
-                                $("#evening-title").html("<p>Noche</p>");
+                        if (value.momment == "morning") {
+                            var prevHtml = "";
+                            if (index == 0) {
+                                $("#morning-hour").html("");
+                            } else {
+                                prevHtml = $("#morning-hour").html();
                             }
-
-                            if (value.momment == "morning") {
-                                var prevHtml = "";
-                                if (index == 0) {
-                                    $("#morning-hour").html("");
-                                } else {
-                                    prevHtml = $("#morning-hour").html();
-                                }
-                                $("#morning-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
-                            } else if (value.momment == "afternoon") {
-                                var prevHtml = "";
-                                if (clearAfternoon) {
-                                    clearAfternoon = false;
-                                    $("#afternoon-hour").html("");
-                                } else {
-                                    prevHtml = $("#afternoon-hour").html();
-                                }
-                                $("#afternoon-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
-                            } else if (value.momment == "evening") {
-                                var prevHtml = "";
-                                if (clearEvening) {
-                                    clearEvening = false;
-                                    $("#evening-hour").html("");
-                                } else {
-                                    prevHtml = $("#evening-hour").html();
-                                }
-                                $("#evening-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                            $("#morning-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        } else if (value.momment == "afternoon") {
+                            var prevHtml = "";
+                            if (clearAfternoon) {
+                                clearAfternoon = false;
+                                $("#afternoon-hour").html("");
+                            } else {
+                                prevHtml = $("#afternoon-hour").html();
                             }
-                        });
-                    } else {
-                        $("#hour-empty").html("<br><h4>No hay horas disponibles</h4><br><p>Es posible que el profesional tenga todas sus horas ya reservadas o que ya son mas de las 10:00 de la noche.<br> Por favor busca el siguiente día en el calendario para hacer una nueva reservación.</p>");
-                    }
-
-                    $(".show-calendary").removeClass("invisible");
-                    $(".loader-barber").addClass("invisible");
-                    $(".loader-barber").removeClass("loader-barber");
+                            $("#afternoon-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        } else if (value.momment == "evening") {
+                            var prevHtml = "";
+                            if (clearEvening) {
+                                clearEvening = false;
+                                $("#evening-hour").html("");
+                            } else {
+                                prevHtml = $("#evening-hour").html();
+                            }
+                            $("#evening-hour").html(prevHtml + "<button type='button' class='btn btn-outline-primary btn-sm hours-btn' id=" + value.uid + " start=" + value.start + " end=" + value.end + ">" + value.start + " - " + value.end + "</button>");
+                        }
+                    });     
+                } else {
+                    $("#hour-empty").html("<br><h4>No hay horas disponibles</h4><br><p>Es posible que el profesional tenga todas sus horas ya reservadas o que ya son mas de las 10:00 de la noche.<br> Por favor busca el siguiente día en el calendario para hacer una nueva reservación.</p>");
                 }
-            });
+                $("#btn-next").prop("disabled", true);
+                $(".show-calendary").removeClass("invisible");
+                $(".loader-barber").addClass("invisible");
+                $(".loader-barber").removeClass("loader-barber");
+            }else {
+                $("#hour-empty").html("<br><h4>No hay horas disponibles</h4><br><p>Es posible que el profesional tenga todas sus horas ya reservadas o que ya son mas de las 10:00 de la noche.<br> Por favor busca el siguiente día en el calendario para hacer una nueva reservación.</p>");
+            }
+            return result.data;
         }
 
         $('.ancServ').on('click', function () {
@@ -249,7 +257,7 @@
             }
             $("#listServices").val(listServices);
             pathHour = $(this).attr('data-href') + "?id=" + listServices;
-            console.log(pathHour);
+            //console.log(pathHour);
             if (listServices.length > 0) {
                 $("#button-next").removeAttr('disabled');
             } else {
@@ -270,9 +278,9 @@
             const idBtn = $(this).attr('id');
             const hStart = $(this).attr('start');
             const hEnd = $(this).attr('end');
-            console.log("ID: ", idBtn);
-            console.log("Start: ", hStart);
-            console.log("End: ", hEnd);
+            //console.log("ID: ", idBtn);
+            //console.log("Start: ", hStart);
+            //console.log("End: ", hEnd);
             $(".hours-btn").css("color", "#666");
             $(".hours-btn").css("background-color", "#fff");
             $('#' + idBtn).css("color", "#fff");
@@ -284,26 +292,24 @@
             let date = myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d;
             let fullDTStart = date + ' ' + hStart;
             let fullDTEnd = date + ' ' + hEnd;
-            console.log(fullDTStart);
+            //console.log(fullDTStart);
             $("#form_scheduledTo").val(fullDTStart);
             $("#when_datetime").html(fullDTStart);
             $("#hour_to").html(fullDTEnd);
             $("#btn-next").removeAttr('disabled');
         });
 
-
-
         var myDate = $("#calendar").datepicker("getDate");
         var monthW2d = (myDate.getMonth() + 1) > 9 ? (myDate.getMonth() + 1) : "0" + (myDate.getMonth() + 1);
         var dayW2d = myDate.getDate() > 9 ? myDate.getDate() : "0" + myDate.getDate();
         var profId = $("#firstProf").val();
         var profName = $("#firstName").val();
-        const data = {
+        data = {
             p_id: profId,
             s_id: sidStr,
             date: myDate.getFullYear() + '-' + monthW2d + '-' + dayW2d,
         };
-        console.log("data: ", data);
+        //console.log("data: ", data);
         if (data.p_id && data.s_id) {
             getListHours(data);
         }
@@ -315,7 +321,60 @@
         var profOrgId = $("#profOrgId").val();
         $("#serv-address").html(profAddress);
         $("#form_organization").val(profOrgId);
-
+        $(".btn-update-hours").on('click', function(){
+            //console.log("Actualizar: ", data);
+            if (data.p_id && data.s_id) {
+                getListHours(data);
+            }
+        });
+        setInterval(() => {
+            //console.log("Actualizar: ", data);
+            if (data.p_id && data.s_id) {
+                getListHours(data);
+            }
+        }, 60000);
+        $("#sForm").validate({
+            rules: {
+                'form[firstName]': { required: true },
+                'form[lastName]': { required: true },
+                'form[email]': { required: true},
+                'form[phone]': { required: true},
+                'form[message]': { required: false}
+            },
+            messages: {
+                'form[firstName]': { required: "Campo requerido"},
+                'form[lastName]': { required: "Campo requerido"},
+                'form[email]': { required: "Campo requerido", 'form[email]': "Formato:  nombrecorreo@dominio.abc" },
+                'form[phone]': { required: "Campo requerido", 'form[phone]': "Formato:  nombrecorreo@dominio.abc" }
+            },
+            submitHandler: function (form) {
+                        var saveButton = document.getElementById("button-save");
+                        var validateForm = document.getElementById("sForm");
+                        var elements = validateForm.elements;
+                        let dhRes = '';
+                        for (var i = 0, len = elements.length; i < len; ++i) {
+                            if (elements[i]['id'] === 'form_scheduledTo') {
+                                dhRes = elements[i]['value'];
+                            }
+                        }
+                        //console.log("data: ", data);
+                        if (data.p_id && data.s_id) {
+                            getListHours(data).then((resultData) => {
+                                let flagAvail = false;
+                                for (let [k,v] of Object.entries(resultData)) {
+                                    if (v.start === dhRes.substring(11)) {
+                                        flagAvail = true;
+                                    }
+                                }
+                                if (!flagAvail) {
+                                    swal("Hora de reserva no disponible", "La hora que está intentando reservar ya no está disponible. Por favor regrese a la lista de horas de reserva y elija una hora distinta.", "info");
+                                }else{
+                                    document.getElementById("sForm").submit();
+                                }
+                            })
+                        }
+                    }
+        });
     });
 </script>
 {% endblock %}

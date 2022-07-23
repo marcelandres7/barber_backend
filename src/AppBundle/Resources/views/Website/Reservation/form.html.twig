@@ -143,22 +143,3 @@
     </div>
     {{ form_widget(form._token) }}
 </form>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
-<script>
-    $("#sForm").validate({
-        rules: {
-            'form[firstName]': { required: true },
-            'form[lastName]': { required: true },
-            'form[email]': { required: true},
-            'form[phone]': { required: true},
-            'form[message]': { required: false}
-        },
-        messages: {
-            'form[firstName]': { required: "Campo requerido"},
-            'form[lastName]': { required: "Campo requerido"},
-            'form[email]': { required: "Campo requerido", 'form[email]': "Formato:  nombrecorreo@dominio.abc" },
-            'form[phone]': { required: "Campo requerido", 'form[phone]': "Formato:  nombrecorreo@dominio.abc" }
-        }
-    });
-</script>
