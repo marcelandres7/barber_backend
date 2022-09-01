@@ -1,6 +1,7 @@
 AppBundle\Entity\OrderDetail:
     type: entity
     table: order_detail
+    repositoryClass: AppBundle\Repository\OrderDetailRepository
     indexes:
         summary2servicesummary_idx:
             columns:
@@ -36,6 +37,16 @@ AppBundle\Entity\OrderDetail:
             nullable: true
             length: 45
             fixed: false
+        discount:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+        clientId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: client_id
         createdAt:
             type: datetime
             nullable: true

@@ -220,4 +220,60 @@ class OrderDetail
     {
         return $this->summaryService;
     }
+    /**
+     * @var string
+     */
+    private $discount;
+
+    /**
+     * @var integer
+     */
+    private $clientId;
+
+
+    /**
+     * Set discount
+     *
+     * @param string $discount
+     * @return OrderDetail
+     */
+    public function setDiscount($discount)
+    {
+        $this->discount = $discount;
+    
+        return $this;
+    }
+
+    /**
+     * Get discount
+     *
+     * @return string 
+     */
+    public function getDiscount()
+    {
+        return $this->discount;
+    }
+
+    /**
+     * Set clientId
+     *
+     * @param integer $clientId
+     * @return OrderDetail
+     */
+    public function setClientId($clientId)
+    {
+        $this->clientId = $clientId;
+    
+        return $this;
+    }
+
+    /**
+     * Get clientId
+     *
+     * @return integer 
+     */
+    public function getClientId()
+    {
+        return $this->clientId;
+    }
 }

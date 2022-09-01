@@ -58,7 +58,151 @@ class WebserviceController extends Controller{
 
 	
 	
-		/**
+	/**
+     * @Route("/ws/set-update-product-client", name="/ws/set-update-product-client")
+     */
+    public function setUpdateProductClient(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+			
+			$product=$data->product;
+			$em = $this->getDoctrine()->getManager();
+
+			//$summaServices = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("professional" => $data->prof_id,"status" => 8, "createdAt" => $date_created));
+			$orderDetail = $em->getRepository('AppBundle:OrderDetail')->findOneBy(array("summaryService" => $data->service_id,"product"=>$product->product_id));
+			
+			if($orderDetail){
+				$em->remove($orderDetail);
+				// var_dump($summaServices);
+				// die;
+				$em->flush();	
+		     }
+
+				return new JsonResponse(array('status' => 'success'));
+		    }else{
+				// echo "Entre en ERROR";
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	/**
+     * @Route("/ws/get-cart-client", name="/ws/get-cart-client")
+     */
+    public function getCartClient(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $cartList = array();
+			
+
+				$productsCart = $em->getRepository('AppBundle:OrderDetail')->getProductCart($data->service_id);
+				
+				
+					foreach($productsCart as $cart){
+					
+						$cartList[] = array(
+							
+							'product_id'   => $cart['product_id'],
+							'product_name' => $cart['product_name'],
+							'price' 	   => $cart['price'],
+							'item_qty'     => $cart['quantity'],
+							'total'=> $cart['payment_total']
+							
+						);
+
+					}
+		    
+
+				return new JsonResponse(array('status' => 'success','data'=>$cartList));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	/**
+     * @Route("/ws/get-client-pending", name="/ws/get-client-pending")
+     */
+    public function getClientPending(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $agendaList = array();
+			
+
+				$clientPending = $em->getRepository('AppBundle:SummaryService')->clientPending($data->organization_id);
+				
+				
+					foreach($clientPending as $client){
+						$cartList=array();
+						$listServices=array();
+
+						$productsCart = $em->getRepository('AppBundle:OrderDetail')->getProductCart($client['service_id']);
+	
+						foreach($productsCart as $cart){
+							$cartList[] = array(	
+								'product_id'   => $cart['product_id'],
+								'product_name' => $cart['product_name'],
+								'price' 	   => $cart['price'],
+								'item_qty'     => $cart['quantity'],
+								'total'        => $cart['payment_total']
+							);
+						}	
+
+
+						$services=explode(",", $client['services']);
+			
+						if( !empty($services[0]) ){
+			
+							foreach($services as $service){
+								$serv = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $service));
+			
+								$listServices[] = array(
+									'service_id'         => $serv->getMenuId(),
+									'service_name'       => $serv->getMenuName(),
+									'service_price' => $serv->getPrice()
+								);
+							}
+						}	
+					
+						$clientList[] = array(
+							
+							'service_id'  		=> $client['service_id'],
+							'client_name' 		=> $client['client_name'],
+							'client_id' 		=> $client['client_id'],
+							'professional_id'   => $client['professional_id'],
+							'professional_name' => $client['professional_name'],
+							'status_id'         => $client['status_id'],
+							'status_name'       => $client['status_name'],
+							'total'       		=> $client['total'],
+							'created_at'       	=> $client['created_at'],
+							'scheduled_to'      => $client['scheduled_to'],
+							'cart'              => $cartList,
+							'services'          => $listServices
+							
+						);
+
+					}
+		    
+
+				return new JsonResponse(array('status' => 'success','data'=>$clientList));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+
+	/**
      * @Route("/ws/set-delete-notavailable", name="/ws/set-delete-notavailable")
      */
     public function setDeleteNotAvailable(Request $request)
@@ -875,25 +1019,76 @@ class WebserviceController extends Controller{
     public function setProductsCart(Request $request)
     {
 		$data = json_decode(file_get_contents("php://input"));
-		$paths = $this->getProjectPaths();
+		
 		if($data){
 
+			$clientBack=$data->client_back;
 			$em = $this->getDoctrine()->getManager();
             $list = array();
+			$client_temp='';
+			$sumaryService=array();
+			$orderDetail=array();
+
+			if( $clientBack->client_id == ""){
+				$client = $em->getRepository('AppBundle:Client')->findOneBy(array("phone" => $data->client_phone,"register" => 1));
+		    }else{
+				$client = $em->getRepository('AppBundle:Client')->findOneBy(array("clientId" => $clientBack->client_id));
+
+				$sumaryService = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $clientBack->service_id));
+			}
+
+
+			if($client){
+				$client_temp=$client->getClientId();
+
+			 }else{
+				$clientNew = new Client();
+				$clientNew->setName($data->client_name);
+				$clientNew->setPhone($data->client_phone);
+				$clientNew->setEmail($data->client_email);
+				$clientNew->setRegister(1);
+				$clientNew->setPromotion(0);
+				$clientNew->setCreatedAt(new \DateTime());
+				$em->persist($clientNew);
+				$em->flush();
+				$client_temp=$clientNew->getClientId();
+			}		
+
 
 			
 			foreach($data->products as $prod){
-				$product = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $prod->produc_id ));
+				$product = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $prod->product_id ));
 
 				$product->setInventoryQuantity($product->getInventoryQuantity()-$prod->quantity);
 				$em->persist($product);
 
-				$NewOrder = new OrderDetail();
-				$NewOrder->setProduct($product);
-				$NewOrder->setQuantity($prod->quantity);
-				$NewOrder->setPaymentTotal($prod->total);
-				$NewOrder->setCreatedAt(new \DateTime());
-				$em->persist($NewOrder);
+				
+
+					if($sumaryService){
+						$orderDetail = $em->getRepository('AppBundle:OrderDetail')->findOneBy(array("summaryService" => $sumaryService,"product"=>$prod->product_id));
+					}
+
+					if($orderDetail){
+						$orderDetail->setQuantity($orderDetail->getQuantity()+$prod->quantity);
+						$orderDetail->setPaymentTotal($orderDetail->getPaymentTotal()+$prod->total);
+						$em->persist($orderDetail);
+					}
+						else{
+
+						$NewOrder = new OrderDetail();
+						$NewOrder->setProduct($product);
+						$NewOrder->setQuantity($prod->quantity);
+						$NewOrder->setPaymentTotal($prod->total);
+						$NewOrder->setCreatedAt(new \DateTime());
+						$NewOrder->setClientId($client_temp);
+						$NewOrder->setStatus(1);
+						$NewOrder->setDiscount(str_replace("%","",$prod->discount)*1);
+						if($sumaryService){
+							$NewOrder->setSummaryService($sumaryService);
+						}
+						
+						$em->persist($NewOrder);
+					}
 				
 				}
 		
@@ -2086,6 +2281,7 @@ class WebserviceController extends Controller{
 			$profesional= $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
 			// $em->remove($profesional);
 			$profesional->setStatus('ELIMINADO');
+			$profesional->setEmail("DEL_".$profesional->getEmail());
 			$em->persist($profesional);
             $em->flush();
 			
@@ -2473,7 +2669,7 @@ class WebserviceController extends Controller{
 			foreach($products as $prod)
 			{
 				$list[] = array(
-					'produc_id'   => $prod->getProductId(),
+					'product_id'   => $prod->getProductId(),
 					'product_name'=> $prod-> getProductName(),
 					'price'	      => $prod->getPrice(),
 					'description' => $prod->getDescription(),
@@ -2481,7 +2677,10 @@ class WebserviceController extends Controller{
 					'item_qty'    => 0,
 					'exists_qty'  => $prod->getInventoryQuantity(),
 					'is_active'   => $prod->getIsActive(),
-					'quantity'    => 0
+					'quantity'    => 0,
+					'discount'    => 0,
+					'list_percent'=> array('10','20','30','40','50'),
+					'otherPercent' => ""
 				);
 			}
        
@@ -2717,9 +2916,9 @@ class WebserviceController extends Controller{
 			$organization = $em->getRepository('AppBundle:Organization')->findOneBy(array("organizationId" => 1));
 			$client = $em->getRepository('AppBundle:Client')->findOneBy(array("clientId" => $client_temp));
 
-			if($client){
-				true;
-			}
+			// if($client){
+			// 	true;
+			// }
 
 			
 			$products='';    	
@@ -3175,7 +3374,7 @@ class WebserviceController extends Controller{
 			$listPayout=array();
 			$listBooking=array();
 			
-		$profesionales = $em->getRepository('AppBundle:User')->findBy(array("status" => 'ACTIVO',"userRole" => 2));
+		$profesionales = $em->getRepository('AppBundle:User')->findBy(array("status" => ['ACTIVO','INACTIVO'],"userRole" => 2));
 		foreach($profesionales as $prof){
 			
 			$listProfesionales[] = array(
@@ -3209,14 +3408,14 @@ class WebserviceController extends Controller{
             $prods=explode(",", $pending['products']);
 			
 			//Corregir cuando el campo services viene vacio
-			if( empty($prods[0]) ){
+			if( !empty($prods[0]) ){
 		
-				$prods[0]=18;	
-				$summaServices = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $pending['service_id']));
-				$summaServices->setServices(18);
-				$em->persist($summaServices);
-			    $em->flush();
-			}
+				// $prods[0]=18;	
+				// $summaServices = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $pending['service_id']));
+				// $summaServices->setServices(18);
+				// $em->persist($summaServices);
+			    // $em->flush();
+			
 
 				foreach($prods as $prod){
 					$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
@@ -3244,6 +3443,8 @@ class WebserviceController extends Controller{
 					'organization_id'   => $pending['organization_id'],
 					'status_id'			=> $pending['status_id']
                 );
+			
+			}
 
         }
 
@@ -3666,18 +3867,28 @@ class WebserviceController extends Controller{
 					if($product){
 							
 						foreach($product as $prod){
-							$OneProduct = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $prod->produc_id));
+							$OneProduct = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $prod->product_id));
 							
 							$OneProduct->setInventoryQuantity($OneProduct->getInventoryQuantity()-$prod->item_qty);
 							
-							$order = new OrderDetail();
-							$order->setQuantity($prod->item_qty);
-							$order->setPaymentTotal($prod->total);			
-							$order->setStatus(1);		
-							$order->setCreatedAt(new \DateTime());	
-							$order->setProduct($OneProduct);
-							$order->setSummaryService($service);			 			
-							$em->persist($order);
+							$orderDetail = $em->getRepository('AppBundle:OrderDetail')->findOneBy(array("summaryService" => $data->service_id,"product"=>$prod->product_id));
+							
+							if($orderDetail){
+								$orderDetail->setQuantity($prod->item_qty);
+								$orderDetail->setPaymentTotal($prod->total);
+								$em->persist($orderDetail);	
+							}
+							else{
+								$order = new OrderDetail();
+								$order->setQuantity($prod->item_qty);
+								$order->setPaymentTotal($prod->total);			
+								$order->setStatus(1);		
+								$order->setCreatedAt(new \DateTime());	
+								$order->setProduct($OneProduct);
+								$order->setSummaryService($service);
+								$order->setClientId($service->getClient()->getClientId());	 			
+								$em->persist($order);
+						    }
 							$em->flush();			
 						}
 					}

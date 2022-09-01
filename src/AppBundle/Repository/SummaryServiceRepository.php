@@ -44,6 +44,26 @@ class SummaryServiceRepository extends EntityRepository
 		return $res->fetchAll ();
 	}
 
+  public function clientPending($organization_id) {
+		$query = "
+                SELECT ss.id_summary_service as service_id,ss.client_id,c.name as client_name,ss.professional_id,
+                       concat(u.first_name,' ',u.last_name) as professional_name,ss.status_id,s.name as status_name,
+                       ss.total_payment as total,ss.created_at,ss.scheduled_to,ss.services
+                  FROM summary_service ss ,client c, user u,status s
+                 WHERE ss.status_id in (1,2,3)
+                   AND ss.organization_id=$organization_id
+                   AND ss.client_id=c.client_id
+                   AND u.id=ss.professional_id
+                   AND s.status_id=ss.status_id
+              ORDER BY status_name";
+
+    $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+
 	public function reportDay($prof_id) {
 		$query = "
         SELECT Date_format(service_end,'%Y-%m-%d') created_date, count(1) attended_client,sum(1+(length(services)-length(replace(services,',','')))) as service_count, 
