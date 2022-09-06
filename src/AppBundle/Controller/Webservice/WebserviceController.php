@@ -137,6 +137,7 @@ class WebserviceController extends Controller{
 
 			$em = $this->getDoctrine()->getManager();
             $agendaList = array();
+			$clientList = array();
 			
 
 				$clientPending = $em->getRepository('AppBundle:SummaryService')->clientPending($data->organization_id);
