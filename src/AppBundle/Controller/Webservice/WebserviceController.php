@@ -107,12 +107,12 @@ class WebserviceController extends Controller{
 					foreach($productsCart as $cart){
 					
 						$cartList[] = array(
-							
 							'product_id'   => $cart['product_id'],
 							'product_name' => $cart['product_name'],
 							'price' 	   => $cart['price'],
 							'item_qty'     => $cart['quantity'],
-							'total'=> $cart['payment_total']
+							'discount'     => $cart['discount']*1,
+							'total'		   => $cart['payment_total'],
 							
 						);
 

@@ -11,7 +11,7 @@ class OrderDetailRepository extends EntityRepository
 		
 		
 		$query = "
-				SELECT p.product_id, p.product_name, p.price,od.quantity,od.payment_total
+				SELECT p.product_id, p.product_name, p.price,od.quantity,od.payment_total, od.discount
 				  FROM order_detail od,product p
 				 WHERE summary_service_id= $service_id
 				   AND p.product_id= od.product_id
