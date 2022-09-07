@@ -2671,6 +2671,7 @@ class WebserviceController extends Controller{
 			{
 				$list[] = array(
 					'product_id'   => $prod->getProductId(),
+					'produc_id'   => $prod->getProductId(),
 					'product_name'=> $prod-> getProductName(),
 					'price'	      => $prod->getPrice(),
 					'description' => $prod->getDescription(),
