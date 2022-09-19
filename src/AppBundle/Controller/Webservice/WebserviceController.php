@@ -937,7 +937,8 @@ class WebserviceController extends Controller{
     public function getRefreshTurn(Request $request)
     {
 		$data = json_decode(file_get_contents("php://input"));
-		
+		$professional=array();
+
 		if($data){
 
 			$em = $this->getDoctrine()->getManager();
@@ -945,18 +946,24 @@ class WebserviceController extends Controller{
 
 			
 			$turns = $em->getRepository('AppBundle:TurnProfessional')->listTurnProfessional($data->organization_id);
-         $pos=1;
+            $pos=1;
 			foreach($turns as $turn){
 				
+				$professional = $em->getRepository('AppBundle:User')->findOneBy(array("Id" => $turn['prof_id']));
 			
-				$list[] = array(
-					'position'   => $pos++,
-					'turn_id'     => $turn['turn_id'],
-					'prof_name'     => $turn['prof_name'],
-					'status'	   => $turn['status'],
-					'turn_date'	  => $turn['turn_date']
-				  );
+				if( $professional->getStatus() == "ACTIVO" ){
+					$list[] = array(
+						'position'   => $pos++,
+						'turn_id'     => $turn['turn_id'],
+						'prof_name'     => $turn['prof_name'],
+						'status'	   => $turn['status'],
+						'turn_date'	  => $turn['turn_date']
+					);
+				}else{
+					$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("turnId" => $turn['turn_id']));
+					$em->remove($turn);
 				}
+			}
 		
 				
 
