@@ -949,7 +949,7 @@ class WebserviceController extends Controller{
             $pos=1;
 			foreach($turns as $turn){
 				
-				$professional = $em->getRepository('AppBundle:User')->findOneBy(array("Id" => $turn['prof_id']));
+				$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $turn['prof_id']));
 			
 				if( $professional->getStatus() == "ACTIVO" ){
 					$list[] = array(
