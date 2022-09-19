@@ -1712,7 +1712,11 @@ class WebserviceController extends Controller{
 			$sumaryService = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
 			$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
 
-		
+			if($data->prof_id == 0){
+				$sumaryService->setRandom("y");
+			}else{
+				$sumaryService->setRandom("n");
+			}
 			$sumaryService->setProfessional($professional);
 			$em->persist($sumaryService);
 			$em->flush();
