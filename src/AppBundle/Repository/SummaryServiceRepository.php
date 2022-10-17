@@ -740,4 +740,31 @@ class SummaryServiceRepository extends EntityRepository
 		return $res->fetchAll ();
 	}
 
+  public function reportGeneral($date_start, $date_end,$organization) {
+		$query = "
+          SELECT sum(ss.total_payment) total, 
+                 sum(ss.total_payment*(1 - u.gain_factor))*0.9 ganancias_salon, 
+                 sum(ss.total_payment*(u.gain_factor))*0.9 ganancia_barbero, 
+                 sum(ss.total_payment*0.1) impuesto,
+                 sum(ss.tips) propina,
+                 sum(ss.tips*0.8) propina_barberos,
+                 sum(ss.tips*0.1) propina_cafe,
+                 sum(ss.tips*0.1) propina_cajera
+            FROM summary_service ss, user u
+           WHERE ss.professional_id = u.id
+             AND  ss.status_id = 5
+             AND  date_format(ss.created_at,'%Y-%m-%d') >= date_format('$date_start','%Y-%m-%d')
+             AND  date_format(ss.created_at,'%Y-%m-%d') <= date_format('$date_end','%Y-%m-%d')
+             AND  ss.organization_id=$organization;
+		";
+
+
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		    $res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+
 }

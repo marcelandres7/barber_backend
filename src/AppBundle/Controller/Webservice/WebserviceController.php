@@ -22,6 +22,7 @@ use Doctrine\ORM\EntityRepository;
 use AppBundle\Repository\RequirementRepository;
 use AppBundle\Entity\InspectionRequirementPicture;
 use AppBundle\Entity\Client;
+use AppBundle\Entity\Expense;
 use AppBundle\Entity\SummaryService;
 use AppBundle\Entity\OrderDetail;
 use AppBundle\Entity\Menus;
@@ -32,6 +33,7 @@ use AppBundle\Entity\TurnProfessional;
 use AppBundle\Repository\TurnProfessionalRepository;
 use AppBundle\Entity\MenusUser;
 use AppBundle\Entity\ProfessionalReservation;
+use AppBundle\Entity\ExpenseCategory;
 
 /**
  * Webservice controller.
@@ -57,7 +59,367 @@ class WebserviceController extends Controller{
     }
 
 	
+	/**
+     * @Route("/ws/delete-expense", name="/ws/delete-expense")
+     */
+    public function deleteExpense(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{			
+				$expense = $em->getRepository('AppBundle:Expense')->findOneBy(array("expenseId" => $data->expense_id));
+			
+				if($expense){
+					$em->remove($expense);
+					$em->flush();
+					
+				}
+			
+			$date_start="";
+			$date_end="";
+			$total_expense=0;
+
+			
+				$created_at = new \DateTime();
+				$date_end = date_format($created_at,"Y-m-d");
+				$date_start = date_format($created_at,"Y-m");
+				$date_start = $date_start."-01";
+			
+
+				$expenses = $em->getRepository('AppBundle:Expense')->reportExpense($date_start,$date_end);
+			
+				foreach($expenses as $expense){
+
+					$total_expense=$total_expense+ $expense['pay'];
+
+					$expenseList[] = array(
+						'expense_id'   => $expense['expense_id'],
+						'category_id'  => $expense['category_id'],
+						'category_name'=> $expense['category_name'],
+						'amount'       => $expense['pay'],
+						// 'date_pay'     => date_format($expense['pay_date'],"Y-m-d H:i"),
+						'date_pay'     => $expense['pay_date'],
+						'description'  => $expense['comment'],
+						'path_imagen'  => "uploads/".$expense['path_image'],
+						'status'       => $expense['status'],
+						
+					);
+				}
+
+				$list =  array(
+					'list_expense' => $expenseList,
+					'total_expense' => $total_expense,
+					'date_start'    => $date_start,
+					'date_end'      => $date_end,
+				);
+				
+			 return new JsonResponse(array('status' => 'success', 'data' =>$list ));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }
+
 	
+	/**
+     * @Route("/ws/set-expense-category", name="/ws/set-expense-category")
+     */
+    public function setExpenseCategory(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	
+			$UPDATE=true;
+
+			if($data->option == "new"){
+				$expenseCategory = new ExpenseCategory();
+			}else{
+				$expenseCategory = $em->getRepository('AppBundle:ExpenseCategory')->findOneBy(array("expenseCategoryId" => $data->category_id));
+			
+				if($data->option == "delete"){
+					$em->remove($expenseCategory);
+					$em->flush();
+					$UPDATE=false;
+				}
+				
+			}
+			
+			if($UPDATE){
+				$expenseCategory->setCategoryName($data->category_name);
+				$expenseCategory->setStatus(1);
+				$em->persist($expenseCategory);
+				$em->flush();
+			}
+
+			
+
+			$categoryList = $em->getRepository('AppBundle:ExpenseCategory')->findBy(array("status" => 1));
+						
+					foreach($categoryList as $cat){
+					
+						$catList[] = array(
+							'category_id'   => $cat->getExpenseCategoryId(),
+							'category_name' => $cat->getCategoryName()
+						);
+
+					} 
+				
+			 return new JsonResponse(array('status' => 'success', 'data' =>$catList ));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }
+	
+	/**
+     * @Route("/ws/get-list-expense", name="/ws/get-list-expense")
+     */
+    public function getListExpense(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+			$catList=array();
+			$expenseList=array();
+			$em = $this->getDoctrine()->getManager();
+			$date_start="";
+			$date_end="";
+			$total_expense=0;
+
+			if( !$data->date_from ){
+				$created_at = new \DateTime();
+				$date_end = date_format($created_at,"Y-m-d");
+				$date_start = date_format($created_at,"Y-m");
+				$date_start = $date_start."-01";
+			}else{
+				$date_start = $data->date_from;
+				$date_end = $data->date_to;
+			}
+        
+				// $expenses = $em->getRepository('AppBundle:Expense')->findBy(array("status" => 'activo'));
+						
+				// 	foreach($expenses as $expense){
+					
+				// 		$expenseList[] = array(
+				// 			'expense_id'   => $expense->getExpenseId(),
+				// 			'amount'       => $expense->getPay(),
+				// 			'date_pay'     => date_format($expense->getPayDate(),"Y-m-d H:i"),
+				// 			'description' => $expense->getComment(),
+				// 			'path_imagen'  => "uploads/".$expense->getPathImage(),
+				// 			'category_id'  => $expense->getCategory()->getExpenseCategoryId(),
+				// 			'category_name'=> $expense->getCategory()->getCategoryName(),
+				// 			'status'       => $expense->getStatus()
+				// 		);
+
+				// 	} 
+
+					$expenses = $em->getRepository('AppBundle:Expense')->reportExpense($date_start,$date_end);
+				
+					foreach($expenses as $expense){
+
+						$total_expense=$total_expense+ $expense['pay'];
+
+						$expenseList[] = array(
+							'expense_id'   => $expense['expense_id'],
+							'category_id'  => $expense['category_id'],
+							'category_name'=> $expense['category_name'],
+							'amount'       => $expense['pay'],
+							// 'date_pay'     => date_format($expense['pay_date'],"Y-m-d H:i"),
+							'date_pay'     => $expense['pay_date'],
+							'description'  => $expense['comment'],
+							'path_imagen'  => "uploads/".$expense['path_image'],
+							'status'       => $expense['status'],
+							
+						);
+
+					}
+
+					$category = $em->getRepository('AppBundle:ExpenseCategory')->findAll(array("status" => 1));
+						
+					foreach($category as $cat){
+					
+						$catList[] = array(
+							'category_id'   => $cat->getExpenseCategoryId(),
+							'category_name' => $cat->getCategoryName()
+						);
+					} 
+
+					$list =  array(
+						'category' => $catList,
+						'list_expense' => $expenseList,
+						'total_expense' => $total_expense,
+						'date_start'    => $date_start,
+						'date_end'      => $date_end,
+					);
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
+	/**
+     * @Route("/ws/create-expense", name="/ws/create-expense")
+     */
+    public function createExpense(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	$active=0;
+			$fileName="";
+		
+
+			if ($data->hash){
+				$ext    = $data->ext;
+				$base64 = $data->hash;
+				$fileName = md5(date("YmdHis")).rand("1000","9000").".".$ext;
+				$new = "uploads/".$fileName;
+				$paths = $this->getProjectPaths();	        
+			// $new = $paths["uploads_path"].$fileName;
+				$decoded = base64_decode($base64);
+				file_put_contents($new, $decoded);
+			}
+
+			$category = $em->getRepository('AppBundle:ExpenseCategory')->findOneBy(array("expenseCategoryId" => $data->category));
+
+			$expenseNew = new Expense();
+			$expenseNew->setPay($data->amount);
+			$expenseNew->setPayDate(new \DateTime($data->date_buy));
+			$expenseNew->setPathImage($fileName);
+			$expenseNew->setComment($data->description);
+			$expenseNew->setCategory($category);
+			$expenseNew->setStatus("activo");
+			$expenseNew->setCreatedAt(new \DateTime());
+			$em->persist($expenseNew);
+			$em->flush();
+				
+			 return new JsonResponse(array('status' => 'success'));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }  
+	
+	
+	/**
+     * @Route("/ws/get-category-expense", name="/ws/get-category-expense")
+     */
+    public function getCategoryExpense(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+        
+				$category = $em->getRepository('AppBundle:ExpenseCategory')->findBy(array("status" => 1));
+						
+					foreach($category as $cat){
+					
+						$catList[] = array(
+							'category_id'   => $cat->getExpenseCategoryId(),
+							'category_name' => $cat->getCategoryName()
+						);
+
+					} 
+
+				return new JsonResponse(array('status' => 'success','data'=>$catList));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
+	/**
+     * @Route("/ws/get-report-general", name="/ws/get-report-general")
+     */
+    public function getReportGeneral(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data){
+
+			$em = $this->getDoctrine()->getManager();
+            $reportList = array();
+			$listProductsSale=array();
+			$date_start='';
+			$date_end='';
+			$organization_id=1;
+
+			if( !$data->date_from ){
+				$created_at = new \DateTime();
+				$date_end = date_format($created_at,"Y-m-d");
+				$date_start = date_format($created_at,"Y-m");
+				$date_start = $date_start."-01";
+			}else{
+				$date_start = $data->date_from;
+				$date_end = $data->date_to;
+			}
+			
+				$report = $em->getRepository('AppBundle:SummaryService')->reportGeneral($date_start,$date_end,$organization_id);
+				
+					foreach($report as $rep){
+					
+						$reportList[] = array(
+							'total'           => $rep['total'],
+							'ganancias_salon' => $rep['ganancias_salon'],
+							'ganancia_barbero'=> $rep['ganancia_barbero'],
+							'impuesto'        => $rep['impuesto'],
+							'propina'         => $rep['propina'],
+							'propina_barberos'=> $rep['propina_barberos'],
+							'propina_cafe'	  => $rep['propina_cafe'],
+							'propina_cajera'  => $rep['propina_cajera'],
+							
+						);
+
+					}
+				
+				$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($date_start,$date_end);
+
+				$total_products=0;
+				foreach($reportRangeProduct as $saleProductRange)
+				{  
+					$total_products=$total_products+ $saleProductRange['payment_total'];   				
+					$listProductsSale[] = array(
+						'product_name' => $saleProductRange['product_name'],
+						'quantity'     => $saleProductRange['quantity'],
+						'payment_total'=> $saleProductRange['payment_total']
+						
+					);
+				}
+
+				$expenses = $em->getRepository('AppBundle:Expense')->reportExpense($date_start,$date_end);
+				$total_expense=0;
+
+				foreach($expenses as $expense){
+					$total_expense=$total_expense+ $expense['pay'];
+				}
+
+				$list = array(
+				  'list_product'  => $listProductsSale,
+				  'total_products'=> $total_products,
+				  'list_general'  => $reportList,
+				  'date_start'    => $date_start,
+				  'date_end'      => $date_end,
+				  'total_report'  => $total_products + $reportList[0]['propina'] + $reportList[0]['total'],
+				  'total_expense' => $total_expense
+				);
+		    
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
 	/**
      * @Route("/ws/set-update-product-client", name="/ws/set-update-product-client")
      */

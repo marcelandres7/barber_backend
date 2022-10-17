@@ -1,0 +1,58 @@
+AppBundle\Entity\Expense:
+    type: entity
+    table: expense
+    repositoryClass: AppBundle\Repository\ExpenseRepository
+    indexes:
+        expenseTocategory_idx:
+            columns:
+                - category_id
+    id:
+        expenseId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: expense_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        pay:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+        payDate:
+            type: datetime
+            nullable: true
+            column: pay_date
+        comment:
+            type: string
+            nullable: true
+            length: 2000
+            fixed: false
+        pathImage:
+            type: string
+            nullable: true
+            length: 2000
+            fixed: false
+            column: path_image
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    manyToOne:
+        category:
+            targetEntity: ExpenseCategory
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                category_id:
+                    referencedColumnName: expense_category_id
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

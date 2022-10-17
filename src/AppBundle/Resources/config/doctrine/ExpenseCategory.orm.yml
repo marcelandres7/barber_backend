@@ -1,0 +1,30 @@
+AppBundle\Entity\ExpenseCategory:
+    type: entity
+    table: expense_category
+    id:
+        expenseCategoryId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: expense_category_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        categoryName:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+            column: category_name
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        comments:
+            type: string
+            nullable: true
+            length: 1000
+            fixed: false
+    lifecycleCallbacks: {  }
