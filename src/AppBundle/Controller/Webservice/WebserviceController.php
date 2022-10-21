@@ -189,6 +189,7 @@ class WebserviceController extends Controller{
 			$date_start="";
 			$date_end="";
 			$total_expense=0;
+			$paths = $this->getProjectPaths();
 
 			if( !$data->date_from ){
 				$created_at = new \DateTime();
@@ -231,7 +232,7 @@ class WebserviceController extends Controller{
 							// 'date_pay'     => date_format($expense['pay_date'],"Y-m-d H:i"),
 							'date_pay'     => $expense['pay_date'],
 							'description'  => $expense['comment'],
-							'path_imagen'  => "uploads/".$expense['path_image'],
+							'path_imagen'  => $paths["uploads_path"].$expense['path_image'],
 							'status'       => $expense['status'],
 							
 						);
