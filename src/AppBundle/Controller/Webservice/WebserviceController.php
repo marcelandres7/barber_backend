@@ -59,6 +59,50 @@ class WebserviceController extends Controller{
     }
 
 	
+		/**
+     * @Route("/ws/edit-expense", name="/ws/edit-expense")
+     */
+    public function editExpense(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	$active=0;
+			$fileName="";
+		
+
+			if ($data->hash){
+				$ext    = $data->ext;
+				$base64 = $data->hash;
+				$fileName = md5(date("YmdHis")).rand("1000","9000").".".$ext;
+				$new = "uploads/".$fileName;
+				$paths = $this->getProjectPaths();	        
+			// $new = $paths["uploads_path"].$fileName;
+				$decoded = base64_decode($base64);
+				file_put_contents($new, $decoded);
+			}
+
+			$expenseEdit = $em->getRepository('AppBundle:Expense')->findOneBy(array("expenseId" => $data->expense_id));
+			$expenseCategory = $em->getRepository('AppBundle:ExpenseCategory')->findOneBy(array("expenseCategoryId" => $data->category));
+	
+			$expenseEdit->setPay($data->amount);
+			$expenseEdit->setPayDate(new \DateTime($data->date_buy));
+			$expenseEdit->setPathImage($fileName);
+			$expenseEdit->setComment($data->description);
+			$expenseEdit->setCategory($expenseCategory);
+			$expenseEdit->setStatus("activo");
+			$expenseEdit->setCreatedAt(new \DateTime());
+			$em->persist($expenseEdit);
+			$em->flush();
+				
+			 return new JsonResponse(array('status' => 'success'));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }  
+	
 	/**
      * @Route("/ws/delete-expense", name="/ws/delete-expense")
      */
