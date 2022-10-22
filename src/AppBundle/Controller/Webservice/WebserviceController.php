@@ -113,7 +113,9 @@ class WebserviceController extends Controller{
 		
 		if($data)
 		{			
-				$expense = $em->getRepository('AppBundle:Expense')->findOneBy(array("expenseId" => $data->expense_id));
+			$expenseList=array();
+
+			$expense = $em->getRepository('AppBundle:Expense')->findOneBy(array("expenseId" => $data->expense_id));
 			
 				if($expense){
 					$em->remove($expense);
