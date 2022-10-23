@@ -4340,24 +4340,24 @@ class WebserviceController extends Controller{
 			
 			foreach($professional as $listProf){
 
-				$service = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => $listProf));
+				//$service = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => $listProf,"status" => 5));
 				$listServicesPending= array();
 				$listServicesDone= array();
 			
-					 foreach($service as $list){
+					//  foreach($service as $list){
 
 						
-							$listProd=array();
-							$prods=explode(",", $list->getServices());
-							foreach($prods as $prod){
-								$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+					// 		$listProd=array();
+					// 		$prods=explode(",", $list->getServices());
+					// 		foreach($prods as $prod){
+					// 			$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 								
-								$listProd[] = array(
-									'product_id'   => $product->getMenuId(),
-									'product_name' => $product->getMenuName(),
-									'product_menu_price' => $product->getPrice()
-								);
-							}
+					// 			$listProd[] = array(
+					// 				'product_id'   => $product->getMenuId(),
+					// 				'product_name' => $product->getMenuName(),
+					// 				'product_menu_price' => $product->getPrice()
+					// 			);
+					// 		}
 
 							// if($list->getPayoutBarber() =="no"){
 
@@ -4384,7 +4384,7 @@ class WebserviceController extends Controller{
 							// 	);
 							// }
 
-					 }
+					// }
 
 
 
