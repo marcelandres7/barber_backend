@@ -743,7 +743,7 @@ class SummaryServiceRepository extends EntityRepository
   public function reportGeneral($date_start, $date_end,$organization) {
 		$query = "
           SELECT sum(ss.total_payment) total, 
-                 sum(ss.total_payment*(1 - u.gain_factor - 0.1)) ganancias_salon, 
+                sum(ss.total_payment*(IF(u.gain_factor=1,0,(1 - u.gain_factor - 0.1)))) ganancias_salon, 
                  sum(ss.total_payment*(u.gain_factor)) ganancia_barbero, 
                  sum(ss.total_payment*0.1) impuesto,
                  sum(ss.tips) propina,
