@@ -110,7 +110,7 @@ class SummaryServiceRepository extends EntityRepository
            max(ss.created_at) max_date
       FROM summary_service ss
      WHERE ss.professional_id = $prof_id
-       AND status_id in(3,5)  
+       AND status_id in(5)  
 		";
 
         if($created_date) {
@@ -753,8 +753,8 @@ class SummaryServiceRepository extends EntityRepository
             FROM summary_service ss, user u
            WHERE ss.professional_id = u.id
              AND  ss.status_id = 5
-             AND  date_format(ss.created_at,'%Y-%m-%d') >= date_format('$date_start','%Y-%m-%d')
-             AND  date_format(ss.created_at,'%Y-%m-%d') <= date_format('$date_end','%Y-%m-%d')
+             AND   date_format(ss.service_end,'%Y-%m-%d') >= date_format('$date_start','%Y-%m-%d')
+             AND   date_format(ss.service_end,'%Y-%m-%d') <= date_format('$date_end','%Y-%m-%d')
              AND  ss.organization_id=$organization;
 		";
 
