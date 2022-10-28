@@ -399,6 +399,7 @@ class WebserviceController extends Controller{
 			$date_start='';
 			$date_end='';
 			$organization_id=1;
+			$ganancia_salon=0;
 
 			if( !$data->date_from ){
 				$created_at = new \DateTime();
@@ -413,7 +414,9 @@ class WebserviceController extends Controller{
 				$report = $em->getRepository('AppBundle:SummaryService')->reportGeneral($date_start,$date_end,$organization_id);
 				
 					foreach($report as $rep){
-					
+						
+						$ganancia_salon= $rep['ganancias_salon'];
+
 						$reportList[] = array(
 							'total'           => $rep['total'],
 							'ganancias_salon' => $rep['ganancias_salon'],
@@ -456,7 +459,8 @@ class WebserviceController extends Controller{
 				  'date_start'    => $date_start,
 				  'date_end'      => $date_end,
 				  'total_report'  => $total_products + $reportList[0]['propina'] + $reportList[0]['total'],
-				  'total_expense' => $total_expense
+				  'total_expense' => $total_expense,
+				  'utilidad'      => $reportList[0]['ganancias_salon'] - $total_expense
 				);
 		    
 
