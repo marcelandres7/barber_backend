@@ -61,7 +61,7 @@ class ReservationController extends Controller {
         }
         $totales["totalPrice"] = $totalPrice;
         $totales["totalDuration"] = $totalDuration;
-        $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idprofString)]);
+        $profMenus = $em->getRepository('AppBundle:User')->findBy(["id" => explode(",",$idprofString),"status" => ["ACTIVO","INACTIVO"]]);
         $dateTime   = new \DateTime();
         $dateNow    = $dateTime->format('Y-m-d H:i:s');
         $form = $this->createFormBuilder()
