@@ -1,20 +1,16 @@
 AppBundle\Entity\UserRoleModulePermission:
     type: entity
     table: user_role_module_permission
-    repositoryClass: AppBundle\Repository\UserRoleModulePermissionRepository
     indexes:
-        urmp2module_idx:
-            columns:
-                - module_id
-        urmp2user_role_idx:
+        fk_user_role_id_1002_idx:
             columns:
                 - user_role_id
-        urmp2user_idx:
+        fk_module_id_1001_idx:
+            columns:
+                - module_id
+        fk_created_by_1012_idx:
             columns:
                 - created_by
-        urmp2user2_idx:
-            columns:
-                - updated_by
     id:
         id:
             type: integer
@@ -24,6 +20,16 @@ AppBundle\Entity\UserRoleModulePermission:
             generator:
                 strategy: IDENTITY
     fields:
+        userRoleId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: user_role_id
+        moduleId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: module_id
         viewModule:
             type: boolean
             nullable: false
@@ -54,6 +60,16 @@ AppBundle\Entity\UserRoleModulePermission:
             nullable: false
             default: '0'
             column: main_module
+        createdBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
+        updatedBy:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: updated_by
         createdAt:
             type: datetime
             nullable: true
@@ -62,41 +78,4 @@ AppBundle\Entity\UserRoleModulePermission:
             type: datetime
             nullable: true
             column: updated_at
-    manyToOne:
-        module:
-            targetEntity: ModuleCatalog
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                module_id:
-                    referencedColumnName: id
-            orphanRemoval: false
-        createdBy:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                created_by:
-                    referencedColumnName: id
-            orphanRemoval: false
-        updatedBy:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                updated_by:
-                    referencedColumnName: id
-            orphanRemoval: false
-        userRole:
-            targetEntity: UserRole
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                user_role_id:
-                    referencedColumnName: id
-            orphanRemoval: false
     lifecycleCallbacks: {  }

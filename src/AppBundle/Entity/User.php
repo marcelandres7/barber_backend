@@ -534,4 +534,88 @@ class User implements UserInterface, \Serializable
     {
         return $this->userOrder;
     }
+    /**
+     * @var integer
+     */
+    private $userRoleId;
+
+    /**
+     * @var integer
+     */
+    private $organizationId;
+
+    /**
+     * @var integer
+     */
+    private $legal;
+
+
+    /**
+     * Set userRoleId
+     *
+     * @param integer $userRoleId
+     * @return User
+     */
+    public function setUserRoleId($userRoleId)
+    {
+        $this->userRoleId = $userRoleId;
+    
+        return $this;
+    }
+
+    /**
+     * Get userRoleId
+     *
+     * @return integer 
+     */
+    public function getUserRoleId()
+    {
+        return $this->userRoleId;
+    }
+
+    /**
+     * Set organizationId
+     *
+     * @param integer $organizationId
+     * @return User
+     */
+    public function setOrganizationId($organizationId)
+    {
+        $this->organizationId = $organizationId;
+    
+        return $this;
+    }
+
+    /**
+     * Get organizationId
+     *
+     * @return integer 
+     */
+    public function getOrganizationId()
+    {
+        return $this->organizationId;
+    }
+
+    /**
+     * Set legal
+     *
+     * @param integer $legal
+     * @return User
+     */
+    public function setLegal($legal)
+    {
+        $this->legal = $legal;
+    
+        return $this;
+    }
+
+    /**
+     * Get legal
+     *
+     * @return integer 
+     */
+    public function getLegal()
+    {
+        return $this->legal;
+    }
 }

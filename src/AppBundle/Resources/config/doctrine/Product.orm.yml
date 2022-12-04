@@ -1,6 +1,11 @@
 AppBundle\Entity\Product:
     type: entity
     table: product
+    repositoryClass: AppBundle\Repository\ProductRepository
+    indexes:
+        productTOcategory_idx:
+            columns:
+                - product_category
     id:
         productId:
             type: integer
@@ -52,4 +57,14 @@ AppBundle\Entity\Product:
             type: datetime
             nullable: true
             column: created_at
+    manyToOne:
+        productCategory:
+            targetEntity: ProductCategory
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                product_category:
+                    referencedColumnName: product_category_id
+            orphanRemoval: false
     lifecycleCallbacks: {  }

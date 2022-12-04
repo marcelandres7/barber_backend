@@ -413,23 +413,46 @@ class WebserviceController extends Controller{
 			
 				$report = $em->getRepository('AppBundle:SummaryService')->reportGeneral($date_start,$date_end,$organization_id);
 				
-					foreach($report as $rep){
-						
-						$ganancia_salon= $rep['ganancias_salon'];
+				$serv_special=0;
+				$serv_normal=0;
+				$special_total=0;
+				$normal_total=0;
+	
+				$services=explode(",", $report[0]['service']);
+	
+					foreach($services as $serv){
+					$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+					
+					if($service->getPercentBarber() > 0){
+						$serv_special=$serv_special+1;
+						$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+					}else{
+						$serv_normal=$serv_normal+1;
+						$normal_total=$normal_total+$service->getPrice();
+					}	
+					}
+				    
 
-						$reportList[] = array(
-							'total'           => $rep['total'],
-							'ganancias_salon' => $rep['ganancias_salon'],
-							'ganancia_barbero'=> $rep['ganancia_barbero'],
-							'impuesto'        => $rep['impuesto'],
-							'propina'         => $rep['propina'],
-							'propina_barberos'=> $rep['propina_barberos'],
-							'propina_cafe'	  => $rep['propina_cafe'],
-							'propina_cajera'  => $rep['propina_cajera'],
-							
+					// foreach($report as $rep){
+						
+						$ganancia_salon= $report[0]['ganancias_salon']-$special_total;
+
+						$reportList = array(
+							'total'           => $report[0]['total'],
+							'ganancias_salon' => $report[0]['ganancias_salon']-$special_total,
+							'ganancia_barbero'=> $report[0]['ganancia_barbero']+$special_total,
+							'impuesto'        => $report[0]['impuesto'],
+							'propina'         => $report[0]['propina'],
+							'propina_barberos'=> $report[0]['propina_barberos'],
+							'propina_cafe'	  => $report[0]['propina_cafe'],
+							'propina_cajera'  => $report[0]['propina_cajera'],
+							'serv_normal'     => $serv_normal,
+							'normal_total'    => $normal_total,
+							'serv_special'    => $serv_special,
+							'special_total'   => $special_total
 						);
 
-					}
+					// }
 				
 				$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($date_start,$date_end);
 
@@ -458,9 +481,9 @@ class WebserviceController extends Controller{
 				  'list_general'  => $reportList,
 				  'date_start'    => $date_start,
 				  'date_end'      => $date_end,
-				  'total_report'  => $total_products + $reportList[0]['propina'] + $reportList[0]['total'],
+				  'total_report'  => $ganancia_salon ,
 				  'total_expense' => $total_expense,
-				  'utilidad'      => $reportList[0]['ganancias_salon'] - $total_expense
+				  'utilidad'      => $ganancia_salon - $total_expense
 				);
 		    
 
@@ -1467,7 +1490,7 @@ class WebserviceController extends Controller{
 				$clientNew->setName($data->client_name);
 				$clientNew->setPhone($data->client_phone);
 				$clientNew->setEmail($data->client_email);
-				$clientNew->setRegister(1);
+				$clientNew->setRegister(0);
 				$clientNew->setPromotion(0);
 				$clientNew->setCreatedAt(new \DateTime());
 				$em->persist($clientNew);
@@ -1801,11 +1824,22 @@ class WebserviceController extends Controller{
 			foreach($reportRangeDetail as $sreportBarberer)
 			{  $random='Aleatorio';
 				$listProd=array();
+				$serv_special=0;
+				$serv_normal=0;
+				$special_total=0;
+				$normal_total=0;
 
 				$prods=explode(",", $sreportBarberer["services"]);
 						 foreach($prods as $prod){
 							$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
-							
+
+							if($product->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$product->getPrice()*($product->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$product->getPrice();
+							}	
 							$listProd[] = array(
 								'product_id'   => $product->getMenuId(),
 								'product_name' => $product->getMenuName(),
@@ -1832,7 +1866,12 @@ class WebserviceController extends Controller{
 					'services'          => $listProd,
 					'random'            => $random,
 					'gain_factor'       => $sreportBarberer['gain_factor']*100,
-					'amount_point_sale' => $sreportBarberer['amount_point_sale']
+					'amount_point_sale' => $sreportBarberer['amount_point_sale'],
+					'product_sale'      => $sreportBarberer['product_sale'],
+					'serv_normal'   	=> $serv_normal,
+					'normal_total'    	=> $normal_total,
+					'serv_special'    	=> $serv_special,
+					'special_total'   	=> $special_total
 					
 				);
 			}
@@ -1865,10 +1904,22 @@ class WebserviceController extends Controller{
 			{  $random='Aleatorio';
 				$listProd=array();
 
+				$serv_special=0;
+				$serv_normal=0;
+				$special_total=0;
+				$normal_total=0;
 				$prods=explode(",", $sreportBarberer["services"]);
 						 foreach($prods as $prod){
 							$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
 							
+							if($product->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$product->getPrice()*($product->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$product->getPrice();
+							}	
+
 							$listProd[] = array(
 								'product_id'   => $product->getMenuId(),
 								'product_name' => $product->getMenuName(),
@@ -1886,16 +1937,20 @@ class WebserviceController extends Controller{
 					'professional_name' => $sreportBarberer['professional_name'],
 					'total_payment'     => $sreportBarberer['total_payment'],
 					'tips'              => $sreportBarberer['tips'],
+					'amount_tips_percent'=> $sreportBarberer['amount_tips_percent'],
 					'method_pay_name'   => $sreportBarberer['method_pay_name'],
-					'gain_real'         => $sreportBarberer['gain_real'],
+					'gain_real'         => $sreportBarberer['gain_real']+$sreportBarberer['amount_tips_percent'],
 					'percent_PV'        => $sreportBarberer['percent_PV'],
-					'tips'              => $sreportBarberer['tips'],
 					'minutes_used'      => $sreportBarberer['minutes_used'],
 					'created_at'        => $sreportBarberer['created_at'],
 					'services'          => $listProd,
 					'random'            => $random,
 					'gain_factor'       => $sreportBarberer['gain_factor']*100,
-					'amount_point_sale' => $sreportBarberer['amount_point_sale']
+					'amount_point_sale' => $sreportBarberer['amount_point_sale'],
+					'serv_normal'   	=> $serv_normal,
+					'normal_total'    	=> $normal_total,
+					'serv_special'    	=> $serv_special,
+					'special_total'   	=> $special_total
 					
 				);
 			}
@@ -1923,12 +1978,29 @@ class WebserviceController extends Controller{
 			$listReportGeneral = array();
 			$listBarber= array();
 			$listProductsSale= array();
+			$serv_special=0;
+			$serv_normal=0;
+			$special_total=0;
+			$normal_total=0;
 				
 			$reportRange = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRange($data->date_start,$data->date_end);
 			$reportRangeBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberrange($data->date_start,$data->date_end);
 			$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($data->date_start,$data->date_end);
 			$reportRangeCancel = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRangeCancel($data->date_start,$data->date_end);
 			
+			$services=explode(",", $reportRange[0]['service']);
+
+						 foreach($services as $serv){
+							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+							
+							if($service->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$service->getPrice();
+							}	
+						 }
 		
 			
 				$listReportGeneral = array(
@@ -1948,18 +2020,41 @@ class WebserviceController extends Controller{
 					'amount_point'       => $reportRange[0]['amount_point'],
 					'amount_product'     => $reportRange[0]['amount_product'],
 					'qty_product'        => $reportRange[0]['qty_product'],
-					'gain_barber'        => $reportRange[0]['gain_barber'],
+					'gain_barber'        => $reportRange[0]['gain_barber']+$special_total,
 					'total_total'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']+$reportRange[0]['total_products'],
 					'total_neto'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']- $reportRange[0]['amount_point_sale'],
 					'canceled'           => $reportRangeCancel[0]['cancelados'],
 					'deleted'            => $reportRangeCancel[0]['eliminados'],
-					'sub_total'			 => $reportRange[0]['total_payment']
+					'sub_total'			 => $reportRange[0]['total_payment'],
+					'serv_special'       => $serv_special,
+					'serv_normal' 		 => $serv_normal,
+					'normal_total'       => $normal_total,
+					'special_total'      => $special_total
 				);
 			
 
 
 			foreach($reportRangeBarber as $sreportBarberer)
 			{  
+				$serv_barber=array();
+				$serv_normal=0;
+			    $serv_special=0;
+				$special_total=0;
+				$normal_total=0;
+
+				$serv_barber=explode(",", $sreportBarberer['service']);
+
+						 foreach($serv_barber as $serv){
+							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+							
+							if($service->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$service->getPrice();
+							}	
+						 }
 				       				
 				$listBarber[] = array(
 					'total_payment'      => $sreportBarberer['total_payment'],
@@ -1970,6 +2065,7 @@ class WebserviceController extends Controller{
 					'qty_barber_selected'=> $sreportBarberer['qty_barber_selected'],
 					'qty_barber_random'  => $sreportBarberer['qty_barber_random'],
 					'tips'               => $sreportBarberer['tips'],
+					'amount_tips_percent'=> $sreportBarberer['amount_tips_percent'],
 					'avg_hour_used'      => $sreportBarberer['avg_hour_used'],
 					'first_client'       => $sreportBarberer['first_client'],
 					'last_client'        => $sreportBarberer['last_client'],
@@ -1981,7 +2077,12 @@ class WebserviceController extends Controller{
 					'amount_product'     => $sreportBarberer['amount_product'],
 					'qty_product'        => $sreportBarberer['qty_product'],
 					'gain_barber'        => $sreportBarberer['gain_barber'],
+					'gain_barber_total'  => $sreportBarberer['gain_barber']+$special_total+$sreportBarberer['amount_tips_percent'],
 					'gain_factor'        => $sreportBarberer['gain_factor']*100,
+					'serv_normal'        => $serv_normal,
+					'normal_total'       => $normal_total,
+					'serv_special'       => $serv_special,
+					'special_total'      => $special_total,
 					
 				);
 			}
@@ -2025,16 +2126,39 @@ class WebserviceController extends Controller{
 			$em = $this->getDoctrine()->getManager();
  			
 
-			$list  = array();
+			$list = array(
+				'list_general'  => [],
+				'list_x_barber' => [],
+				'list_products' => [],
+				'total_products' => []
+			);
 			$listReportGeneral = array();
 			$listBarber= array();
 			$listProductsSale= array();
+			$serv_special=0;
+			$serv_normal=0;
+			$special_total=0;
+			$normal_total=0;
 				
 			$reportToday = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralToday();
 			$reportTodayBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberToday();
 			$reportSaleProductToday = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsToday();
 			$portTodayCanceled = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberTodayCancel();
 		
+		if($reportToday[0]['total_payment']){
+			$services=explode(",", $reportToday[0]['service']);
+
+						 foreach($services as $serv){
+							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+							
+							if($service && $service->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$service->getPrice();
+							}	
+						 }
 			
 				$listReportGeneral = array(
 					'total_payment'      => $reportToday[0]['total_payment'],
@@ -2053,28 +2177,58 @@ class WebserviceController extends Controller{
 					'amount_point'       => $reportToday[0]['amount_point'],
 					'amount_product'     => $reportToday[0]['amount_product'],
 					'qty_product'        => $reportToday[0]['qty_product'],
-					'gain_barber'        => $reportToday[0]['gain_barber'],
+					'gain_barber'        => $reportToday[0]['gain_barber']+$special_total,
 					'total_total'		 => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']+$reportToday[0]['total_products'],
 					'total_neto'         => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']- $reportToday[0]['amount_point_sale'],
 					'canceled'           => $portTodayCanceled[0]['cancelados'],
-					'deleted'           => $portTodayCanceled[0]['eliminados'],
-					'sub_total'			=> $reportToday[0]['total_payment']
+					'deleted'            => $portTodayCanceled[0]['eliminados'],
+					'sub_total'			 => $reportToday[0]['total_payment'],
+					'serv_special'       => $serv_special,
+					'serv_normal' 		 => $serv_normal,
+					'normal_total'       => $normal_total,
+					'special_total'      => $special_total
+
 				);
 			
 
-
+			
+			
 			foreach($reportTodayBarber as $sreportBarberer)
 			{  
+				$serv_barber=array();
+				$serv_normal=0;
+			    $serv_special=0;
+				$special_total=0;
+				$normal_total=0;
+
+				$serv_barber=explode(",", $sreportBarberer['service']);
+
+						 foreach($serv_barber as $serv){
+							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+							
+							if($service->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$service->getPrice();
+							}	
+						 }
 				       				
 				$listBarber[] = array(
 					'total_payment'      => $sreportBarberer['total_payment'],
 					'qty_client'         => $sreportBarberer['qty_client'],
 					'qty_service'        => $sreportBarberer['qty_service'],
+					'serv_normal'        => $serv_normal,
+					'normal_total'       => $normal_total,
+					'serv_special'       => $serv_special,
+					'special_total'      => $special_total,
 					'qty_cash'           => $sreportBarberer['qty_cash'],
 					'qty_point'          => $sreportBarberer['qty_point'],
 					'qty_barber_selected'=> $sreportBarberer['qty_barber_selected'],
 					'qty_barber_random'  => $sreportBarberer['qty_barber_random'],
 					'tips'               => $sreportBarberer['tips'],
+					'amount_tips_percent'=> $sreportBarberer['amount_tips_percent'],
 					'avg_minutes_used'   => $sreportBarberer['avg_minutes_used'],
 					'first_client'       => $sreportBarberer['first_client'],
 					'last_client'        => $sreportBarberer['last_client'],
@@ -2085,6 +2239,7 @@ class WebserviceController extends Controller{
 					'amount_product'     => $sreportBarberer['amount_product'],
 					'qty_product'        => $sreportBarberer['qty_product'],
 					'gain_barber'        => $sreportBarberer['gain_barber'],
+					'gain_barber_total'  => $sreportBarberer['gain_barber']+$special_total+$sreportBarberer['amount_tips_percent'],
 					'amount_point_sale'  => $sreportBarberer['amount_point_sale'],
 					'gain_factor'        => $sreportBarberer['gain_factor']*100,
 					
@@ -2111,8 +2266,8 @@ class WebserviceController extends Controller{
 				'total_products' => $total_products
 			);
 
-
-			
+     
+		}	
 			return new JsonResponse(array('data' => $list));
 	  }
 	  return new JsonResponse(array('data' => "error"));
@@ -2349,6 +2504,11 @@ class WebserviceController extends Controller{
 			$total_balance=0;
 			$balance_old_date="";
 			$gain_balance=0;
+			$serv_barber=array();
+			$serv_normal=0;
+			$serv_special=0;
+			$special_total=0;
+			$normal_total=0;
 
 			$payment = $em->getRepository('AppBundle:Payment')->reportPay( $data->prof_id);
 			$paymentAll = $em->getRepository('AppBundle:Payment')->findBy(array("professional" => $data->prof_id),array('paymentId' => 'desc'));
@@ -2372,9 +2532,29 @@ class WebserviceController extends Controller{
 				$balance_old=($payment_list[0]['amount_pay']+$payment_list[0]['amount_pending'])*1;
 				$pending_balance=$payment[0]['amount_pending'];
 				$date_pay= $payment[0]['created_at'];
+				
 				$balance =  $em->getRepository('AppBundle:SummaryService')->reportBalance($data->prof_id,$date_pay);
+				
+				
+				if($balance[0]['cant_client'] > 0){
 
-				if($balance){
+					$serv_barber=explode(",", $balance[0]['service']);
+
+						if($serv_barber){
+							foreach($serv_barber as $serv){
+								$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+								
+								if($service && $service->getPercentBarber() > 0){
+									$serv_special=$serv_special+1;
+									$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+								}else{
+									$serv_normal=$serv_normal+1;
+									$normal_total=$normal_total+$service->getPrice();
+								}	
+							}
+						}
+
+			
 					$total_balance=$balance[0]['total_payment']*$data->gain_factor+$pending_balance;
 					$gain_balance=$balance[0]['total_payment']*$data->gain_factor;
 				}else{
@@ -2382,28 +2562,49 @@ class WebserviceController extends Controller{
 				}
 			}else{
 				$balance =  $em->getRepository('AppBundle:SummaryService')->reportBalance($data->prof_id,"");
-				$total_balance=$balance[0]['total_payment']*$data->gain_factor;
-				$gain_balance=$total_balance;
+				
+				if($balance){
+					$serv_barber=explode(",", $balance[0]['service']);
+
+							foreach($serv_barber as $serv){
+								$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+								
+								if($service->getPercentBarber() > 0){
+									$serv_special=$serv_special+1;
+									$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+								}else{
+									$serv_normal=$serv_normal+1;
+									$normal_total=$normal_total+$service->getPrice();
+								}	
+							}
+					$total_balance=$balance[0]['total_payment']*$data->gain_factor;
+					$gain_balance=$total_balance;
+				}	
 			}
 			
 			$list=array();
 
 				$list = array(
-					'cant_client'     => $balance[0]['cant_client'],
-					'total_payment'   => $balance[0]['total_payment'],
-					'cant_service'    => $balance[0]['cant_service'],
-					'amount_tips'     =>$balance[0]['amount_tips'],
-					'amount_deb_cred' =>$balance[0]['amount_pay_deb_cred'],
-					'cant_deb_cred' =>$balance[0]['pay_deb_cred'],
-					'pending_balance' => $pending_balance*1,
+					'cant_client'        => $balance[0]['cant_client'],
+					'total_payment'      => $balance[0]['total_payment'],
+					'cant_service'       => $balance[0]['cant_service'],
+					'amount_tips'        => $balance[0]['amount_tips'],
+					'amount_tips_percent'=> $balance[0]['amount_tips_percent'],
+					'amount_deb_cred'    => $balance[0]['amount_pay_deb_cred'],
+					'cant_deb_cred'      => $balance[0]['pay_deb_cred'],
+					'pending_balance'    => $pending_balance*1,
 					//'total_balance'   => $total_balance*1-$balance[0]['amount_pay_deb_cred']+$balance[0]['amount_tips'], MENOS COMISON PUNTO DE VENTA
-					'total_balance'   => $total_balance*1+$balance[0]['amount_tips'],
-					'min_date'        => $balance[0]['min_date'],
-					'max_date'        => $balance[0]['max_date'],
-					'balance_old'	  => $balance_old,
-					'balance_old_date'=> $balance_old_date,
-					'gain_balance'    =>$gain_balance,
-					'payment_list'    => $payment_list
+					'total_balance'      => $total_balance*1+$balance[0]['amount_tips_percent']+$special_total,
+					'min_date'           => $balance[0]['min_date'],
+					'max_date'        	 => $balance[0]['max_date'],
+					'balance_old'	  	 => $balance_old,
+					'balance_old_date'	 => $balance_old_date,
+					'gain_balance'    	 => $gain_balance,
+					'payment_list'    	 => $payment_list,
+					'serv_special'   	 => $serv_special,
+					'special_total'   	 => $special_total,
+					'serv_normal'        => $serv_normal,
+					'normal_total' 		 => $normal_total
 				);
 			
 
@@ -2469,10 +2670,22 @@ class WebserviceController extends Controller{
 			foreach($profesional_service as $prof)
 			{	$random='Aleatorio';
 				$listProd=array();
+				$serv_special=0;
+				$serv_normal=0;
+				$special_total=0;
+				$normal_total=0;
 
 				$prods=explode(",", $prof["services"]);
 						 foreach($prods as $prod){
 							$product = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $prod));
+
+							if($product->getPercentBarber() > 0){
+								$serv_special=$serv_special+1;
+								$special_total=$special_total+$product->getPrice()*($product->getPercentBarber()*1/100);
+							}else{
+								$serv_normal=$serv_normal+1;
+								$normal_total=$normal_total+$product->getPrice();
+							}	
 							
 							$listProd[] = array(
 								'product_id'   => $product->getMenuId(),
@@ -2485,6 +2698,10 @@ class WebserviceController extends Controller{
 							$random="Seleccionado";
 						 }
 
+						
+
+					
+
 				$list[] = array(
 					'prof_id'            => $prof["professional_id"],
 					'service_summary_id' => $prof["id_summary_service"],
@@ -2494,7 +2711,11 @@ class WebserviceController extends Controller{
 					'created_at'         => $prof["created_at"],
 					'random'             => $random,
 					'services'           => $listProd,
-					'gain'               => $prof["total_payment"]*$gain_factor
+					'gain'               => $prof["total_payment"]*$gain_factor,
+					'serv_normal'     	 => $serv_normal,
+					'normal_total'   	 => $normal_total,
+					'serv_special'   	 => $serv_special,
+					'special_total'  	 => $special_total
 					
 				);
 			}
@@ -2534,7 +2755,9 @@ class WebserviceController extends Controller{
 
 			
 			$product = $em->getRepository('AppBundle:Product')->findOneBy(array("productId" => $data->product_id));
+			$categoryProduct = $em->getRepository('AppBundle:ProductCategory')->findOneBy(array("productCategoryId" => $data->category_id));
 
+			
 			if($data->isActive == true){
 				$active=1;
 			}
@@ -2544,7 +2767,9 @@ class WebserviceController extends Controller{
 			if ($data->hash){
 				$product->setPathImagen($fileName);
 			}
+
 			$product->setPrice($data->price);
+			$product->setProductCategory($categoryProduct);
 			$product->setDescription($data->description);
 			$product->setIsActive($active);
 			$product->setCreatedAt(new \DateTime());
@@ -2583,7 +2808,7 @@ class WebserviceController extends Controller{
 				file_put_contents($new, $decoded);
 			}
 
-			
+			$categoryProduct = $em->getRepository('AppBundle:ProductCategory')->findOneBy(array("productCategoryId" => $data->category_id));
 			
 			if($data->isActive == true){
 				$active=1;
@@ -2591,6 +2816,7 @@ class WebserviceController extends Controller{
 
 			$productNew = new Product();
 			$productNew->setProductName($data->name);
+			$productNew->setProductCategory($categoryProduct);
 			$productNew->setInventoryQuantity($data->quantity);
 			$productNew->setPathImagen($fileName);
 			$productNew->setPrice($data->price);
@@ -2813,6 +3039,7 @@ class WebserviceController extends Controller{
 			$menu->setMenuClass($menuClass);
 			$menu->setDuration($data->duration);
 			$menu->setMenuType($menuType);
+			$menu->setPercentBarber($data->percent_barber);
 			$menu->setCreatedAt(new \DateTime());
 			$menu->setMenuOrder($data->position);
 			$em->persist($menu);
@@ -2961,6 +3188,7 @@ class WebserviceController extends Controller{
 			$menuNew->setDuration($data->duration);
 			$menuNew->setMenuClass($menuClass);
 			$menuNew->setMenuType($menuType);
+			$menuNew->setPercentBarber($data->percent_barber);
 			$menuNew->setCreatedAt(new \DateTime());
 			$menuNew->setMenuOrder($data->position);
 			$em->persist($menuNew);
@@ -3047,6 +3275,7 @@ class WebserviceController extends Controller{
 					'picture_path'    => $paths["uploads_path"].$menu->getPicturePath(),
 					'price'           => $menu->getPrice(),
 					'order_menu'      => $menu->getMenuOrder(),
+					'percent_barber'  => $menu->getPercentBarber(),
 					'is_active'       => $status,
 					'description'     => $menu->getDescription(),
 					'duration'        => $menu->getDuration(),
@@ -3086,29 +3315,71 @@ class WebserviceController extends Controller{
 		//$data = json_decode(file_get_contents("php://input"));
 		
 		if(true)
-		{	$list=array();
+		{	$listP=array();
+			$listC=array();
+			$listCategory=array();
+
 			$paths = $this->getProjectPaths();
 			//$products = $em->getRepository('AppBundle:Product')->findAll();
-			$products = $em->getRepository('AppBundle:Product')->findBy(array("isActive" => [0,1] ));
-			
+			//$products = $em->getRepository('AppBundle:Product')->findBy(array("isActive" => [0,1] ));
+			$products = $em->getRepository('AppBundle:Product')->listProduct('1');
+			$consumibles = $em->getRepository('AppBundle:Product')->listProduct('2');
+			$productCategory = $em->getRepository('AppBundle:ProductCategory')->findBy(array("status" => 1 ));
+
 			foreach($products as $prod)
 			{
-				$list[] = array(
-					'product_id'   => $prod->getProductId(),
-					'produc_id'   => $prod->getProductId(),
-					'product_name'=> $prod-> getProductName(),
-					'price'	      => $prod->getPrice(),
-					'description' => $prod->getDescription(),
-					'imagen_path' => $paths["uploads_path"].$prod->getPathImagen(),
+				$listP[] = array(
+					'product_id'  => $prod['product_id'],
+					'produc_id'   => $prod['product_id'],
+					'product_name'=> $prod['product_name'],
+					'category'    => $prod['category_product'],
+					'price'	      => $prod['price'],
+					'description' => $prod['description'],
+					'imagen_path' => $paths["uploads_path"].$prod['path_imagen'],
 					'item_qty'    => 0,
-					'exists_qty'  => $prod->getInventoryQuantity(),
-					'is_active'   => $prod->getIsActive(),
+					'exists_qty'  => $prod['inventory_quantity'],
+					'is_active'   => $prod['is_active'],
 					'quantity'    => 0,
 					'discount'    => 0,
 					'list_percent'=> array('10','20','30','40','50'),
 					'otherPercent' => ""
 				);
 			}
+
+			foreach($consumibles as $comsu)
+			{
+				$listC[] = array(
+					'product_id'  => $comsu['product_id'],
+					'produc_id'   => $comsu['product_id'],
+					'product_name'=> $comsu['product_name'],
+					'category'    => $comsu['category_product'],
+					'price'	      => $comsu['price'],
+					'description' => $comsu['description'],
+					'imagen_path' => $paths["uploads_path"].$comsu['path_imagen'],
+					'item_qty'    => 0,
+					'exists_qty'  => $comsu['inventory_quantity'],
+					'is_active'   => $comsu['is_active'],
+					'quantity'    => 0,
+					'discount'    => 0,
+					'list_percent'=> array('10','20','30','40','50'),
+					'otherPercent' => ""
+				);
+			}
+
+			foreach($productCategory as $category)
+			{
+				$listCategory[] = array(
+					'product_category_id'  => $category->getProductCategoryId(),
+					'produc_category_name'   => $category->getProductCategoryName(),
+					'product_category_status'=> $category->getStatus()
+				);
+			}
+
+			$list = array(
+				'productos'   => $listP,
+				'consumibles' => $listC,
+				'category' => $listCategory
+			);
        
 			 return new JsonResponse(array('status' => 'success', "data" => $list));									 
 		 }
@@ -3706,7 +3977,7 @@ class WebserviceController extends Controller{
 			$reportDairy = $em->getRepository('AppBundle:SummaryService')->reportDay($data->prof_id);
 			$prof =  $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));	
 			$gainFactor = $prof->getGainFactor();
-		
+					
 			
 		foreach($reportDairy as $list){
 			$dayOfWeek="";
@@ -3734,6 +4005,26 @@ class WebserviceController extends Controller{
 					break;
 			}
 
+
+			$serv_special=0;
+			$serv_normal=0;
+			$special_total=0;
+			$normal_total=0;
+
+	           $services=explode(",", $list['service']);
+
+				foreach($services as $serv){
+				$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+				
+					if($service->getPercentBarber() > 0){
+						$serv_special=$serv_special+1;
+						$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+					}else{
+						$serv_normal=$serv_normal+1;
+						$normal_total=$normal_total+$service->getPrice();
+					}	
+				}
+
 		
 			if( true ){	
 			//if( $list['payout_barber'] == "no" ){	
@@ -3746,7 +4037,11 @@ class WebserviceController extends Controller{
 					'generated_total' => $list['generated_total'],
 					'selected_count'  => $list['selected_count'],
 					'random_count'    => $list['random_count'],
-					'gain_total'	  => $list['generated_total']*$gainFactor
+					'gain_total'	  => $list['generated_total']*$gainFactor+$special_total,
+					'serv_normal'     => $serv_normal,
+					'normal_total'    => $normal_total,
+					'serv_special'    => $serv_special,
+					'special_total'   => $special_total
 				);
 		    }else{
 				$reportDone[] = array(

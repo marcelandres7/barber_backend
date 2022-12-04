@@ -27,6 +27,16 @@ AppBundle\Entity\UserSchedule:
             generator:
                 strategy: IDENTITY
     fields:
+        userId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: user_id
+        organizationId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: organization_id
         weekday:
             type: string
             nullable: true
@@ -45,54 +55,23 @@ AppBundle\Entity\UserSchedule:
             nullable: true
             unsigned: false
             column: is_active
+        categoryId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: category_id
+        eventId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: event_id
         createdAt:
             type: datetime
             nullable: true
             column: created_at
-    manyToOne:
-        category:
-            targetEntity: Category
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                category_id:
-                    referencedColumnName: category_id
-            orphanRemoval: false
         createdBy:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                created_by:
-                    referencedColumnName: id
-            orphanRemoval: false
-        event:
-            targetEntity: Event
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                event_id:
-                    referencedColumnName: event_id
-            orphanRemoval: false
-        organization:
-            targetEntity: Organization
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                organization_id:
-                    referencedColumnName: organization_id
-            orphanRemoval: false
-        user:
-            targetEntity: User
-            cascade: {  }
-            mappedBy: null
-            inversedBy: null
-            joinColumns:
-                user_id:
-                    referencedColumnName: id
-            orphanRemoval: false
+            type: integer
+            nullable: true
+            unsigned: false
+            column: created_by
     lifecycleCallbacks: {  }

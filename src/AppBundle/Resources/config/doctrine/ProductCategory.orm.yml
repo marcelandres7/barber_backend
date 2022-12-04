@@ -1,0 +1,25 @@
+AppBundle\Entity\ProductCategory:
+    type: entity
+    table: product_category
+    id:
+        productCategoryId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: product_category_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        productCategoryName:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: product_category_name
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+    lifecycleCallbacks: {  }

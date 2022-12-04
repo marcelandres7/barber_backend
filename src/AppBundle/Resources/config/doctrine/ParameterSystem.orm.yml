@@ -1,0 +1,35 @@
+AppBundle\Entity\ParameterSystem:
+    type: entity
+    table: parameter_system
+    id:
+        parameterSystemId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: parameter_system_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        parameterName:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+            column: parameter_name
+        value1:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 2
+        value2:
+            type: string
+            nullable: true
+            length: 100
+            fixed: false
+        description:
+            type: string
+            nullable: true
+            length: 500
+            fixed: false
+    lifecycleCallbacks: {  }

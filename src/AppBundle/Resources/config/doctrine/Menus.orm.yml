@@ -36,11 +36,6 @@ AppBundle\Entity\Menus:
             nullable: true
             precision: 10
             scale: 2
-        duration:
-            type: integer
-            nullable: true
-            unsigned: false
-            column: duration            
         menuOrder:
             type: integer
             nullable: true
@@ -56,6 +51,16 @@ AppBundle\Entity\Menus:
             nullable: true
             unsigned: false
             column: is_active
+        duration:
+            type: integer
+            nullable: true
+            unsigned: false
+        percentBarber:
+            type: decimal
+            nullable: true
+            precision: 10
+            scale: 0
+            column: percent_barber
         createdAt:
             type: datetime
             nullable: true

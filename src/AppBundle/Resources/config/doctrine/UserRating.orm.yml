@@ -1,0 +1,48 @@
+AppBundle\Entity\UserRating:
+    type: entity
+    table: user_rating
+    indexes:
+        fk_appoitment_id_1001_idx:
+            columns:
+                - appointment_id
+    id:
+        userRatingId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: user_rating_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        userFromId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: user_from_id
+        userToId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: user_to_id
+        rating:
+            type: integer
+            nullable: true
+            unsigned: false
+            comment: 'Este es el número de la calificación, puede ser de 1 a 5'
+        comments:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        appointmentId:
+            type: integer
+            nullable: true
+            unsigned: false
+            comment: 'El rating se otorga únicamente cuando '
+            column: appointment_id
+        createdAt:
+            type: datetime
+            nullable: true
+            column: created_at
+    lifecycleCallbacks: {  }

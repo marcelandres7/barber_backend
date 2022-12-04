@@ -66,12 +66,15 @@ class SummaryServiceRepository extends EntityRepository
 
 	public function reportDay($prof_id) {
 		$query = "
-        SELECT Date_format(service_end,'%Y-%m-%d') created_date, count(1) attended_client,sum(1+(length(services)-length(replace(services,',','')))) as service_count, 
+        SELECT Date_format(service_end,'%Y-%m-%d') created_date, 
+               count(1) attended_client,
+               sum(1+(length(services)-length(replace(services,',','')))) as service_count,
+               group_concat(services) as service,
                sum(total_payment) generated_total, sum(IF(random='n',1,0)) selected_count,sum(IF(random='y',1,0)) random_count, 
                payout_barber,payout_date,GROUP_CONCAT(id_summary_service) services_id   
          FROM summary_service
         WHERE professional_id = $prof_id
-          AND status_id in (3,5)
+          AND status_id in (5)
        GROUP BY date_format(service_end,'%Y-%m-%d')
        ORDER BY 1 desc limit 31 ;
 		";
@@ -84,12 +87,14 @@ class SummaryServiceRepository extends EntityRepository
 
     public function reportDetailDay($prof_id, $created_date) {
 		$query = "
-        SELECT c.name as client_name,ss.id_summary_service,ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used, ss.service_end as created_at,ss.services,ss.random
+        SELECT c.name as client_name,ss.id_summary_service, 
+        ss.professional_id,ss.total_payment,TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used,
+         ss.service_end as created_at,ss.services,ss.random
          FROM summary_service ss, client c
         WHERE ss.professional_id = $prof_id
           AND ss.client_id = c.client_id
-          AND  status_id in (3,5)
-          AND   date_format(ss.service_end,'%Y-%m-%d')='$created_date'
+          AND  status_id in (5)
+          AND   date_format(ss.service_end,'%Y-%m-%d') = date_format('$created_date','%Y-%m-%d')
 		";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
@@ -104,17 +109,21 @@ class SummaryServiceRepository extends EntityRepository
     SELECT count(1) cant_client,
            sum(ss.total_payment) total_payment, 
            sum(1+(length(services)-length(replace(services,',','')))) as cant_service,
-           sum(tips) as amount_tips, sum(if(method_payment = 2,(ss.total_payment+ss.tips)*0.03,0)) as amount_pay_deb_cred,
+           group_concat(services) as service,
+           sum(tips) as amount_tips, 
+           sum(tips*ps.value1) as amount_tips_percent,
+           sum(if(method_payment = 2,(ss.total_payment+ss.tips)*0.03,0)) as amount_pay_deb_cred,
            sum(if(method_payment = 2,1,0)) as pay_deb_cred, 
            min(ss.created_at) min_date,
            max(ss.created_at) max_date
-      FROM summary_service ss
+      FROM summary_service ss,parameter_system ps
      WHERE ss.professional_id = $prof_id
        AND status_id in(5)  
+       AND ps.parameter_system_id=2
 		";
 
         if($created_date) {
-			$query .= "AND ss.created_at > '$created_date'";
+			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$created_date','%Y-%m-%d HH:mm:ss')";
 		}
 
 		$query .= ";";
@@ -134,10 +143,11 @@ class SummaryServiceRepository extends EntityRepository
                         AND summary_service_id is null) as total_products,
                     count(1) as qty_client,
                     sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
+                    group_concat(services) as service,
                     sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, 
                     sum(if(ss.method_payment = 2,1,0)) as qty_point,
                     #(sum(if(ss.method_payment < 3,ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))+(sum(if(ss.method_payment > 2,(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))*((SELECT (1-percent) FROM method_payment where method_payment_id=ss.method_payment)*1))) as gain_barber_descuento,
-                    sum((ss.total_payment*u.gain_factor)+ifnull(ss.tips,0)) as gain_barber,
+                    sum((ss.total_payment*u.gain_factor)) as gain_barber,
                     sum(IF(ss.random='n',1,0)) as qty_barber_selected,
                     sum(IF(ss.random='y',1,0)) as qty_barber_random,
                     sum(ss.tips) as tips,round(sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/count(1)) as avg_minutes_used,
@@ -173,22 +183,29 @@ class SummaryServiceRepository extends EntityRepository
 
   public function reportSummaryBarberToday( ) {
 		$query = "
-            SELECT  ss.professional_id,concat(u.first_name,' ',u.last_name) as professional_name, sum(ss.total_payment) as total_payment, count(1) as qty_client,sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
+            SELECT  ss.professional_id,concat(u.first_name,' ',u.last_name) as professional_name, 
+                    sum(ss.total_payment) as total_payment, 
+                    count(1) as qty_client,
+                    sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
+                    group_concat(services) as service,
                     sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, sum(if(ss.method_payment = 2,1,0)) as qty_point,
                     sum(IF(ss.random='n',1,0)) as qty_barber_selected,sum(IF(ss.random='y',1,0)) as qty_barber_random,
-                    sum(ss.tips) as tips,round(sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/count(1)) as avg_minutes_used,
+                    sum(ss.tips) as tips,
+                    sum(ss.tips*ps.value1) as amount_tips_percent,
+                    round(sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/count(1)) as avg_minutes_used,
                     (sum(if(ss.method_payment in (1,3),ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))+(sum(if(ss.method_payment = 2,ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))*((SELECT (1-percent) FROM method_payment where method_payment_id=ss.method_payment)*1))) as gain_barber_descuento,
-                    sum((ss.total_payment*u.gain_factor)+ifnull(ss.tips,0)) as gain_barber,
+                    sum((ss.total_payment*u.gain_factor)) as gain_barber,
                     min(ss.created_at) as first_client,max(ss.created_at) as last_client,u.gain_factor,
                     (sum(if(ss.method_payment in (1,3),ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))+sum(if(ss.method_payment = 2, (IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0)),0))) * ((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1)  as amount_point_sale,
                     sum(if(ss.method_payment in (1,3),ss.total_payment+IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0),0)) as amount_cash, 
                     sum(if(ss.method_payment = 2,ss.total_payment+IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0),0)) as amount_point,
                     sum(IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0)) as amount_product,
                     sum((SELECT count(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service )) as qty_product
-             FROM   summary_service ss  , user u
+             FROM   summary_service ss  , user u, parameter_system ps
             WHERE   date_format(service_end,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')
              AND    u.id=ss.professional_id
              AND    ss.status_id in (5)
+             AND    ps.parameter_system_id=2
         GROUP BY    ss.professional_id
 		";
 
@@ -229,10 +246,11 @@ class SummaryServiceRepository extends EntityRepository
                     AND summary_service_id is null ) as total_products,
                 count(1) as qty_client,
                 sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
+                group_concat(services) as service,
                 sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, 
                 sum(if(ss.method_payment = 2,1,0)) as qty_point,
                 (sum(if(ss.method_payment in (1,3),ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))+(sum(if(ss.method_payment = 2,(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))*((SELECT (1-percent) FROM method_payment where method_payment_id=ss.method_payment)*1))) as gain_barber_descuento,
-                sum((ss.total_payment*u.gain_factor)+ifnull(ss.tips,0)) as gain_barber,
+                sum((ss.total_payment*u.gain_factor)) as gain_barber,
                 sum(IF(ss.random='n',1,0)) as qty_barber_selected,
                 sum(IF(ss.random='y',1,0)) as qty_barber_random,
                 sum(ss.tips) as tips,round(sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/count(1)) as avg_minutes_used,
@@ -289,23 +307,27 @@ class SummaryServiceRepository extends EntityRepository
             sum(ss.total_payment) as total_payment, 
             count(1) as qty_client,
             sum(1+(length(services)-length(replace(services,',','')))) as qty_service,
+            group_concat(services) as service,
              u.gain_factor,
             (sum(if(ss.method_payment in (1,3),ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))+(sum(if(ss.method_payment = 2,(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))*((SELECT (1-percent) FROM method_payment where method_payment_id=ss.method_payment)*1))) as gain_barber_descuento,
-            sum((ss.total_payment*u.gain_factor)+ifnull(ss.tips,0)) as gain_barber,
+            sum((ss.total_payment*u.gain_factor)) as gain_barber,
             sum(if(ss.method_payment in (1,3),1,0)) as qty_cash, sum(if(ss.method_payment = 2,1,0)) as qty_point,
             sum(IF(ss.random='n',1,0)) as qty_barber_selected,sum(IF(ss.random='y',1,0)) as qty_barber_random,
-            sum(ss.tips) as tips,sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/60 aS avg_hour_used,
+            sum(ss.tips) as tips,
+            sum(ss.tips*ps.value1) as amount_tips_percent,
+            sum(TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end))/60 aS avg_hour_used,
             min(ss.created_at) as first_client,max(ss.created_at) as last_client,
             (sum(if(ss.method_payment = 2,ss.total_payment*u.gain_factor+ifnull(ss.tips,0),0))) * ((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1) as amount_point_sale,
             sum(if(ss.method_payment in (1,3),ss.total_payment+IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0),0)) as amount_cash, 
             sum(if(ss.method_payment = 2,ss.total_payment+IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0),0)) as amount_point,
             sum((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service )) as amount_product,
             sum((SELECT count(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service )) as qty_product
-      FROM  summary_service ss  ,user u
+      FROM  summary_service ss  ,user u, parameter_system ps
      WHERE  u.id=ss.professional_id
        AND  date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
        AND  date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')
        AND ss.status_id in (5)
+       AND    ps.parameter_system_id=2
   GROUP BY  ss.professional_id
 		";
 
@@ -332,22 +354,24 @@ class SummaryServiceRepository extends EntityRepository
                       ss.id_summary_service,
                       ss.total_payment,
                       ifnull(ss.tips,0)as tips,
+                      (ss.tips*ps.value1) as amount_tips_percent,
                       mp.name method_pay_name,
                       u.gain_factor,
                       (if(ss.method_payment in (1,3),(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))+(if(ss.method_payment = 2,(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0)) as gain_real_descuento,
-                      (ss.total_payment*u.gain_factor)+ifnull(ss.tips,0) as gain_real,
+                      (ss.total_payment*u.gain_factor)as gain_real,
                       (if(ss.method_payment = 2,(ss.total_payment)+ifnull(ss.tips,0),0))*(((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1)) as amount_point_sale,
                       ((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1) as percent_PV,
                       TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used,
                       ss.created_at,
                       ss.services,
                       ss.random
-                FROM summary_service ss, client c, user u, method_payment mp
+                FROM summary_service ss, client c, user u, method_payment mp, parameter_system ps
                WHERE  ss.client_id = c.client_id
                  AND  ss.professional_id=u.id
-                 AND  status_id in (3,5)
+                 AND  status_id in (5)
                  AND  mp.method_payment_id=ss.method_payment
                  AND  date_format(ss.service_end,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')
+                 AND    ps.parameter_system_id=2
             ORDER BY ss.service_end;
 		";
 
@@ -388,24 +412,29 @@ class SummaryServiceRepository extends EntityRepository
                       ss.id_summary_service,
                       ss.total_payment,
                       ifnull(ss.tips,0)as tips,
+                      (ss.tips*ps.value1) as amount_tips_percent,
                       mp.name method_pay_name,
                       u.gain_factor ,
                       (if(ss.method_payment in (1,3),(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))+(if(ss.method_payment = 2,(ss.total_payment*u.gain_factor)+ifnull(ss.tips,0),0))*(1-((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1)) as gain_real_descuento,
                       ((ss.total_payment*u.gain_factor)+ifnull(ss.tips,0)) as gain_real,
-                      ((if(ss.method_payment = 2,ss.total_payment+ss.tips,0))+(if(ss.method_payment = 2,(IFNULL((SELECT (od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0)),0)))*((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1) as amount_point_sale,
+                      ((if(ss.method_payment = 2,ss.total_payment+ss.tips,0))+(if(ss.method_payment = 2,(IFNULL((SELECT sum(od.payment_total) FROM order_detail od where od.summary_service_id=ss.id_summary_service ),0)),0)))*((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1) as amount_point_sale,
                       ((SELECT percent FROM method_payment where method_payment_id=ss.method_payment)*1) as percent_PV,
                       TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used,
                       ss.created_at,
                       ss.services,
-                      ss.random
-                FROM summary_service ss, client c, user u, method_payment mp
+                      ss.random,
+                      (IFNULL((SELECT group_concat(CONCAT_WS(' ',od.quantity,p.product_name))
+                              FROM order_detail od, product p
+                              WHERE od.product_id = p.product_id
+                              AND od.summary_service_id=ss.id_summary_service),0)) as product_sale
+                FROM summary_service ss, client c, user u, method_payment mp, parameter_system ps
                WHERE  ss.client_id = c.client_id
                  AND  ss.professional_id=u.id
-                 AND  status_id in (3,5)
                  AND  mp.method_payment_id=ss.method_payment
                  AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
                  AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')
-                 AND ss.status_id in (3,5)
+                 AND ss.status_id in (5)
+                 AND    ps.parameter_system_id=2
             ORDER BY ss.service_end;
 		";
 
@@ -445,14 +474,13 @@ class SummaryServiceRepository extends EntityRepository
                 FROM  summary_service ss, client c, user u, method_payment mp
                WHERE  ss.client_id = c.client_id
                  AND  ss.professional_id=u.id
-                 AND ss.professional_id = $prof_id
-                 AND  status_id in (3,5)
+                 AND  ss.professional_id = $prof_id
                  AND  mp.method_payment_id=ss.method_payment
-                 AND ss.status_id in (3,5)
+                 AND  ss.status_id in (5)
 	           	";
 
          if($data_end) {
-		      	$query .= "AND ss.created_at > '$data_end'";
+		      	$query .= "AND ss.service_end > '$data_end'";
 	    	 }
 
 		     $query .= "ORDER BY ss.service_end DESC;";
@@ -743,13 +771,14 @@ class SummaryServiceRepository extends EntityRepository
   public function reportGeneral($date_start, $date_end,$organization) {
 		$query = "
           SELECT sum(ss.total_payment) total, 
-                sum(ss.total_payment*(IF(u.gain_factor=1,0,(1 - u.gain_factor - 0.1)))) ganancias_salon, 
+                 sum(ss.total_payment*(1 - u.gain_factor)) ganancias_salon,
                  sum(ss.total_payment*(u.gain_factor)) ganancia_barbero, 
                  sum(ss.total_payment*0.1) impuesto,
                  sum(ss.tips) propina,
                  sum(ss.tips*0.8) propina_barberos,
                  sum(ss.tips*0.1) propina_cafe,
-                 sum(ss.tips*0.1) propina_cajera
+                 sum(ss.tips*0.1) propina_cajera,
+                 group_concat(services) as service
             FROM summary_service ss, user u
            WHERE ss.professional_id = u.id
              AND  ss.status_id = 5

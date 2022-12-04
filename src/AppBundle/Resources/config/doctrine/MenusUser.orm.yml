@@ -23,17 +23,14 @@ AppBundle\Entity\MenusUser:
             nullable: true
             length: 100
             fixed: false
-            default: 'NULL'
         createdAt:
             type: datetime
             nullable: true
-            default: 'NULL'
             column: created_at
         createdBy:
             type: integer
             nullable: true
             unsigned: false
-            default: 'NULL'
             column: created_by
     manyToOne:
         menus:

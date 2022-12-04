@@ -336,4 +336,32 @@ class Menus
     {
         return $this->menuType;
     }
+    /**
+     * @var string
+     */
+    private $percentBarber;
+
+
+    /**
+     * Set percentBarber
+     *
+     * @param string $percentBarber
+     * @return Menus
+     */
+    public function setPercentBarber($percentBarber)
+    {
+        $this->percentBarber = $percentBarber;
+    
+        return $this;
+    }
+
+    /**
+     * Get percentBarber
+     *
+     * @return string 
+     */
+    public function getPercentBarber()
+    {
+        return $this->percentBarber;
+    }
 }

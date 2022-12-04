@@ -248,4 +248,60 @@ class Product
     {
         return $this->createdAt;
     }
+    /**
+     * @var string
+     */
+    private $categoryProduct;
+
+
+    /**
+     * Set categoryProduct
+     *
+     * @param string $categoryProduct
+     * @return Product
+     */
+    public function setCategoryProduct($categoryProduct)
+    {
+        $this->categoryProduct = $categoryProduct;
+    
+        return $this;
+    }
+
+    /**
+     * Get categoryProduct
+     *
+     * @return string 
+     */
+    public function getCategoryProduct()
+    {
+        return $this->categoryProduct;
+    }
+    /**
+     * @var integer
+     */
+    private $productCategory;
+
+
+    /**
+     * Set productCategory
+     *
+     * @param integer $productCategory
+     * @return Product
+     */
+    public function setProductCategory($productCategory)
+    {
+        $this->productCategory = $productCategory;
+    
+        return $this;
+    }
+
+    /**
+     * Get productCategory
+     *
+     * @return integer 
+     */
+    public function getProductCategory()
+    {
+        return $this->productCategory;
+    }
 }

@@ -3,16 +3,19 @@ AppBundle\Entity\User:
     table: user
     repositoryClass: AppBundle\Repository\UserRepository
     indexes:
-        user2user_rol_idx:
+        fk_user_role_id_100_idx:
             columns:
                 - user_role_id
-        user2user_idx:
+        fk_created_by_1008_idx:
             columns:
                 - created_by
-        user2user2_idx:
+        fk_organization_id_1005_idx:
             columns:
-                - updated_by
-        user2organization_idx:
+                - organization_id
+        fk_user_role_id_1001_idx:
+            columns:
+                - user_role_id
+        fk_organization_id_1008_idx:
             columns:
                 - organization_id
     uniqueConstraints:
@@ -28,12 +31,6 @@ AppBundle\Entity\User:
             generator:
                 strategy: IDENTITY
     fields:
-        gainFactor:
-            type: decimal
-            nullable: true
-            precision: 3
-            scale: 2
-            column: gain_factor
         firstName:
             type: string
             nullable: true
@@ -46,18 +43,6 @@ AppBundle\Entity\User:
             length: 64
             fixed: false
             column: last_name
-        avatarPath:
-            type: string
-            nullable: true
-            length: 300
-            fixed: false
-            column: avatar_path
-        bio:
-            type: string
-            nullable: true
-            length: 500
-            fixed: false
-            column: bio
         email:
             type: string
             nullable: false
@@ -74,6 +59,11 @@ AppBundle\Entity\User:
             length: null
             fixed: false
             default: ACTIVO
+        userRoleId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: user_role_id
         createdAt:
             type: datetime
             nullable: true
@@ -82,19 +72,39 @@ AppBundle\Entity\User:
             type: datetime
             nullable: true
             column: updated_at
+        bio:
+            type: text
+            nullable: true
+            length: 65535
+            fixed: false
+        avatarPath:
+            type: string
+            nullable: true
+            length: 300
+            fixed: false
+            column: avatar_path
+        gainFactor:
+            type: decimal
+            nullable: true
+            precision: 3
+            scale: 2
+            column: gain_factor
         securityCode:
             type: string
             nullable: true
-            length: 64
+            length: 20
             fixed: false
             column: security_code
         userOrder:
             type: float
-            nullable: false
+            nullable: true
             precision: 10
             scale: 2
-            default: '0.00'
             column: user_order
+        legal:
+            type: integer
+            nullable: true
+            unsigned: false
     manyToOne:
         organization:
             targetEntity: Organization
