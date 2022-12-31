@@ -388,7 +388,7 @@ class SummaryServiceRepository extends EntityRepository
 	}
 
 
-  public function reportSummaryRangeDetail($data_start,$data_end) {
+  public function reportSummaryRangeDetail($data_start,$data_end,$prof_id) {
 
     if( !$data_start )
 		{
@@ -434,15 +434,15 @@ class SummaryServiceRepository extends EntityRepository
                  AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
                  AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')
                  AND ss.status_id in (5)
-                 AND    ps.parameter_system_id=2
-            ORDER BY ss.service_end;
+                 AND ps.parameter_system_id=2
+            
 		";
 
-    //     if($created_date) {
-		// 	$query .= "AND ss.created_at > '$created_date'";
-	  //  	}
+         if($prof_id) {
+		    	  $query .= " AND ss.professional_id = $prof_id";
+	    	  }
 
-		// $query .= ";";
+		     $query .= " ORDER BY ss.service_end;";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
@@ -470,7 +470,9 @@ class SummaryServiceRepository extends EntityRepository
                       TIMESTAMPDIFF(MINUTE, ss.service_start, ss.service_end) AS minutes_used,
                       ss.created_at,
                       ss.services,
-                      ss.random
+                      ss.random,
+                      ss.service_start,
+                      ss.service_end
                 FROM  summary_service ss, client c, user u, method_payment mp
                WHERE  ss.client_id = c.client_id
                  AND  ss.professional_id=u.id
@@ -677,11 +679,13 @@ class SummaryServiceRepository extends EntityRepository
 
 
 		$query = "
-            SELECT todos-eliminados as cancelados, eliminados 
-             FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
-                        FROM summary_service ss 
-                       WHERE ss.status_id in (4)
-                         AND date_format(ss.created_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')) as result
+              SELECT IFNULL(todos-eliminados,0) as cancelados, IFNULL(eliminados,0) as eliminados, ( SELECT count(1) as 'leave' FROM summary_service ss 
+                                                                                        WHERE ss.status_id in (9)
+                                                                                          AND date_format(ss.created_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')) as leave_room
+              FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
+                          FROM summary_service ss 
+                          WHERE ss.status_id in (4)
+                          AND date_format(ss.created_at,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')) as result
 	          	";
 
     //     if($created_date) {
@@ -714,12 +718,15 @@ class SummaryServiceRepository extends EntityRepository
 		}
 
 		$query = "
-               SELECT todos-eliminados as cancelados, eliminados 
-                 FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
-                            FROM summary_service ss 
-                           WHERE ss.status_id in (4)
-                             AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
-                             AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')) as result
+            SELECT IFNULL(todos-eliminados,0) as cancelados, IFNULL(eliminados,0) as eliminados, ( SELECT count(1) as 'leave' FROM summary_service ss 
+                                                                                                    WHERE ss.status_id in (9)
+                                                                                                      AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
+                                                                                                      AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')) as leave_room 
+              FROM (   SELECT count(1) as 'todos', sum(if(LENGTH(ss.service_start) > 0,if(LENGTH(ss.service_end) > 0,1,0),0)) as 'eliminados'
+                  FROM summary_service ss 
+                WHERE ss.status_id in (4)
+                  AND date_format(ss.service_end,'%Y-%m-%d') >= date_format('$data_start','%Y-%m-%d')
+                  AND date_format(ss.service_end,'%Y-%m-%d') <= date_format('$data_end','%Y-%m-%d')) as result
 		        ";
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );

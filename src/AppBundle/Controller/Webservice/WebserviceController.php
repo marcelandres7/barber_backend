@@ -1789,7 +1789,9 @@ class WebserviceController extends Controller{
 						'random'            => $random,
 						'gain_factor'       => $sreportBarberer['gain_factor']*100,
 						'amount_point_sale' => $sreportBarberer['amount_point_sale'],
-						'order_datail'      => $listOrder
+						'order_datail'      => $listOrder,
+						'service_end'       => $sreportBarberer['service_end'],
+						'service_start'     => $sreportBarberer['service_start']
 						
 					);
 				}
@@ -1814,11 +1816,16 @@ class WebserviceController extends Controller{
 
 			$em = $this->getDoctrine()->getManager();
 			
-
+			$user=$data->userInfo;
 			$list  = array();
 			$listProd= array();
+			$profId="";
+
+			if($user->rol_id == 2){
+				$profId=$user->id;
+			}
 				
-			$reportRangeDetail = $em->getRepository('AppBundle:SummaryService')->reportSummaryRangeDetail($data->date_start,$data->date_end);
+			$reportRangeDetail = $em->getRepository('AppBundle:SummaryService')->reportSummaryRangeDetail($data->date_start,$data->date_end,$profId);
 			
 
 			foreach($reportRangeDetail as $sreportBarberer)
@@ -2025,6 +2032,7 @@ class WebserviceController extends Controller{
 					'total_neto'		 => $reportRange[0]['total_payment']+$reportRange[0]['amount_product']+$reportRange[0]['tips']- $reportRange[0]['amount_point_sale'],
 					'canceled'           => $reportRangeCancel[0]['cancelados'],
 					'deleted'            => $reportRangeCancel[0]['eliminados'],
+					'leave_room'		 => $reportRangeCancel[0]['leave_room'],
 					'sub_total'			 => $reportRange[0]['total_payment'],
 					'serv_special'       => $serv_special,
 					'serv_normal' 		 => $serv_normal,
@@ -2182,6 +2190,7 @@ class WebserviceController extends Controller{
 					'total_neto'         => $reportToday[0]['total_payment']+$reportToday[0]['amount_product']+$reportToday[0]['tips']- $reportToday[0]['amount_point_sale'],
 					'canceled'           => $portTodayCanceled[0]['cancelados'],
 					'deleted'            => $portTodayCanceled[0]['eliminados'],
+					'leave_room'		 => $portTodayCanceled[0]['leave_room'],
 					'sub_total'			 => $reportToday[0]['total_payment'],
 					'serv_special'       => $serv_special,
 					'serv_normal' 		 => $serv_normal,
@@ -3892,7 +3901,41 @@ class WebserviceController extends Controller{
 		
 		 return new JsonResponse(array('status' => 'error'));
 	 
-	 }   
+	 }  
+	 
+	/**
+     * @Route("/ws/set-leave-service", name="/ws/set-leave-service")
+     */
+    public function setLeaveService(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
+			$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 9));
+			$service->setStatus($status );
+			//$service->setServiceEnd(new \DateTime());
+			//$client->setAvatar($avatar);
+
+			if(count($data)>1){
+				$turn = $em->getRepository('AppBundle:TurnProfessional')->findOneBy(array("profId" => $data->prof_id));
+				if($turn){
+					$turn->setStatus("Disponible");
+					$turn->setTurnDate(new \DateTime());
+					$em->persist($turn);
+				}
+			 }
+			$em->persist($service);
+			$em->flush();
+       
+			 return new JsonResponse(array('status' => 'success'));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 } 
 
 	/**
      * @Route("/ws/update-service", name="/ws/update-service")
