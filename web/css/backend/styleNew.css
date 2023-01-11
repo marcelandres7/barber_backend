@@ -205,7 +205,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .img-sty{
-  max-width: 270px!important;
+  max-width: 350px!important;
   border-radius: 6px;
 }
 
@@ -436,6 +436,6 @@ ui-datepicker thead {
 
 @media (max-width: 350px) {
   .img-sty{
-    max-width: 185px!important;
+    max-width: 350px!important;
   }
 }
