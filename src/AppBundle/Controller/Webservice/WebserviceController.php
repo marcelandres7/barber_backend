@@ -3686,7 +3686,7 @@ class WebserviceController extends Controller{
 			$lisForApproveReserveToday= array();
 			$lisReserveToday = array();
 
-			$productMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4]));
+			$productMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4],"isActive"=>1));
 			foreach($productMenu as $prodM){
 				
 				$listProdMenu[] = array(
