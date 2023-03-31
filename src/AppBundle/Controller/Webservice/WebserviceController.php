@@ -412,26 +412,29 @@ class WebserviceController extends Controller{
 			}
 			
 				$report = $em->getRepository('AppBundle:SummaryService')->reportGeneral($date_start,$date_end,$organization_id);
+				$report2 = $em->getRepository('AppBundle:SummaryService')->reportGeneral2($date_start,$date_end,$organization_id);
 				
 				$serv_special=0;
 				$serv_normal=0;
 				$special_total=0;
 				$normal_total=0;
-	
-				$services=explode(",", $report[0]['service']);
+
+
+				foreach($report2 as $rep2){
+					$services=explode(",", $rep2['services']);
 	
 					foreach($services as $serv){
-					$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
-					
-					if($service->getPercentBarber() > 0){
-						$serv_special=$serv_special+1;
-						$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
-					}else{
-						$serv_normal=$serv_normal+1;
-						$normal_total=$normal_total+$service->getPrice();
-					}	
+						$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+						
+						if($service->getPercentBarber() > 0){
+							$serv_special=$serv_special+1;
+							$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+						}else{
+							$serv_normal=$serv_normal+1;
+							$normal_total=$normal_total+$service->getPrice();
+						}	
 					}
-				    
+				}
 
 					// foreach($report as $rep){
 						

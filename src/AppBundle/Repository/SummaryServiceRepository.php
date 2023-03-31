@@ -803,4 +803,22 @@ class SummaryServiceRepository extends EntityRepository
 	}
 
 
+  public function reportGeneral2($date_start, $date_end,$organization) {
+		$query = "
+          SELECT  services
+            FROM summary_service ss, user u
+           WHERE ss.professional_id = u.id
+             AND  ss.status_id = 5
+             AND   date_format(ss.service_end,'%Y-%m-%d') >= date_format('$date_start','%Y-%m-%d')
+             AND   date_format(ss.service_end,'%Y-%m-%d') <= date_format('$date_end','%Y-%m-%d')
+             AND  ss.organization_id=$organization;
+		";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		    $res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+
 }
