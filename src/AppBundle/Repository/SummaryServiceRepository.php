@@ -123,10 +123,106 @@ class SummaryServiceRepository extends EntityRepository
 		";
 
         if($created_date) {
-			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$created_date','%Y-%m-%d HH:mm:ss')";
+			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') >= date_format('$created_date','%Y-%m-%d HH:mm:ss')";
 		}
 
 		$query .= ";";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reportBalanceMonthBarber($prof_id,$start_date,$end_date) {
+		$query = "
+    SELECT  count(1) cant_servicio_mon,
+            sum(IF(ss.tips > 0,1,0)) cant_tips_mon,
+            ifnull(sum(tips),0) as amount_tips_mon,
+		        ifnull(sum(tips*ps.value1),0) as amount_tips_percent_mon,
+            ifnull(sum((ss.total_payment)*(1-ps.value1)),0) total_payment_tax_mon
+    FROM summary_service ss ,parameter_system ps
+    WHERE ss.professional_id = $prof_id
+    AND ss.status_id in(5)  
+    AND ps.parameter_system_id=2
+    AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') >= date_format('$start_date','%Y-%m-%d HH:mm:ss')
+    AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') <= date_format('$end_date','%Y-%m-%d HH:mm:ss')
+		";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reportBalanceSpecialBonus($prof_id, $created_date) {
+		$query = "
+    SELECT count(1) cant_client,
+           s.name nombre_status,
+           ss.status_id,
+           sum(ss.total_payment+tips) total_payment, 
+           sum((ss.total_payment+tips)*(1-ps.value1)) total_payment_tax,
+           sum(1+(length(services)-length(replace(services,',','')))) as cant_service,
+           group_concat(services) as service,
+           sum(tips) as amount_tips, 
+           sum(tips*(1-ps.value1)) as amount_tips_tax,
+           min(ss.created_at) min_date,
+           max(ss.created_at) max_date
+      FROM summary_service ss,parameter_system ps,status s
+     WHERE ss.professional_id = $prof_id
+       AND ss.status_id in(10,11)  
+       AND s.status_id=ss.status_id
+       AND ps.parameter_system_id=3
+		";
+
+        if($created_date) {
+			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$created_date','%Y-%m-%d HH:mm:ss')";
+		}
+
+		$query .= "GROUP BY ss.status_id;";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		$res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+  public function reportBalancePending($prof_id, $date_current, $date_before) {
+		$query = "
+    select * from (
+      SELECT count(1) cant_client,
+                sum(ss.total_payment) total_payment, 
+                sum((ss.total_payment+tips)*(1-ps.value1)) total_payment_tax,
+                sum(1+(length(services)-length(replace(services,',','')))) as cant_service,
+                group_concat(services) as service,
+                sum(tips) as amount_tips, 
+                sum(tips*ps.value1) as amount_tips_percent,
+                 sum(tips*(1-ps.value1)) as amount_tips_tax
+           FROM summary_service ss,parameter_system ps,status s
+          WHERE ss.professional_id = $prof_id
+            AND s.status_id in(5)  
+            AND ps.parameter_system_id=2
+            AND s.status_id=ss.status_id
+            AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$date_before','%Y-%m-%d HH:mm:ss')
+          AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') <  date_format('$date_current','%Y-%m-%d HH:mm:ss')
+           union  
+               SELECT count(1) cant_client,
+                IFNULL(sum(ss.total_payment+tips),0) total_payment, 
+           IFNULL(sum((ss.total_payment+tips)*(1-ps.value1)),0) total_payment_tax,
+           IFNULL((1+(length(services)-length(replace(services,',','')))),0) as cant_service,
+                group_concat(services) as service,
+                sum(tips) as amount_tips, 
+                sum(tips*(1-ps.value1)) as amount_tips_percent,
+                 sum(tips*(1-ps.value1)) as amount_tips_tax
+           FROM summary_service ss,parameter_system ps,status s
+          WHERE ss.professional_id = $prof_id
+            AND ss.status_id in(10,11)  
+            AND s.status_id=ss.status_id
+            AND ps.parameter_system_id=3
+            AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$date_before','%Y-%m-%d HH:mm:ss')
+             AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') <  date_format('$date_before','%Y-%m-%d HH:mm:ss') 
+             ) a	";
+
 
         $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 		$res->execute ();
@@ -284,7 +380,7 @@ class SummaryServiceRepository extends EntityRepository
 		return $res->fetchAll ();
 	}
   
-  public function reportSummaryBarberRange($data_start,$data_end ) {
+  public function reportSummaryBarberrange($data_start,$data_end ) {
 
     if( !$data_start )
 		{
@@ -472,13 +568,16 @@ class SummaryServiceRepository extends EntityRepository
                       ss.services,
                       ss.random,
                       ss.service_start,
-                      ss.service_end
-                FROM  summary_service ss, client c, user u, method_payment mp
+                      ss.service_end,
+                      ss.status_id,
+                      s.name status_name
+                FROM  summary_service ss, client c, user u, method_payment mp, status s
                WHERE  ss.client_id = c.client_id
                  AND  ss.professional_id=u.id
                  AND  ss.professional_id = $prof_id
                  AND  mp.method_payment_id=ss.method_payment
-                 AND  ss.status_id in (5)
+                 AND  ss.status_id in (5,10,11)
+                 AND  ss.status_id = s.status_id
 	           	";
 
          if($data_end) {

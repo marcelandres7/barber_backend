@@ -44,16 +44,20 @@ class WebserviceController extends Controller{
     public function getProjectPaths(){
         $enviroment = $this->container->get('kernel')->getEnvironment();
         $paths = array();
-        if($enviroment == "prod"){
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
-			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
-        }else{
-            $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
-			// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
-			//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
-        }
+        // if($enviroment == "prod"){
+        //     $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+		// 	// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+		// 	//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
+        // }else{
+        //     $paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+		// 	// $paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
+		// 	//$paths["uploads_path"]= 'http://ixtusltda.cl/barber_backend/web/uploads/';
+        // }
         
+        //$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend/web/uploads/';
+		//$paths["uploads_path"]= 'http://barberiahernandez.com/barber_backend_bosque/web/uploads/';
+		$paths["uploads_path"]= 'http://barberiahernandez.com/prueba/web/uploads/';
+		//$paths["uploads_path"]= 'http://localhost/barber_backend/web/uploads/';
         return $paths;
         
     }
@@ -1722,6 +1726,32 @@ class WebserviceController extends Controller{
 	 }  
 
 	/**
+     * @Route("/ws/set-bonus-special", name="/ws/set-bonus-special")
+     */
+    public function setBonusSpecial(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	
+			
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
+			$status =$em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => $data->bonus));
+		
+			$service->setStatus($status);
+			$service->setCreatedAt(new \DateTime());
+			$em->persist($service);
+			$em->flush();
+				
+			 return new JsonResponse(array('status' => 'success'));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }  
+
+	/**
      * @Route("/ws/get-professional-payment-list", name="/ws/get-professional-payment-list")
      */
     public function getProfessionalPaymentList(Request $request)
@@ -1794,7 +1824,9 @@ class WebserviceController extends Controller{
 						'amount_point_sale' => $sreportBarberer['amount_point_sale'],
 						'order_datail'      => $listOrder,
 						'service_end'       => $sreportBarberer['service_end'],
-						'service_start'     => $sreportBarberer['service_start']
+						'service_start'     => $sreportBarberer['service_start'],
+						'status_id'         => $sreportBarberer['status_id'],
+						'status_name'       => $sreportBarberer['status_name'],
 						
 					);
 				}
@@ -1995,6 +2027,7 @@ class WebserviceController extends Controller{
 				
 			$reportRange = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRange($data->date_start,$data->date_end);
 			$reportRangeBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberrange($data->date_start,$data->date_end);
+			$reportRangeBarber2  = $em->getRepository('AppBundle:SummaryService')->reportGeneral2($data->date_start,$data->date_end,1);
 			$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($data->date_start,$data->date_end);
 			$reportRangeCancel = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRangeCancel($data->date_start,$data->date_end);
 			
@@ -2044,6 +2077,22 @@ class WebserviceController extends Controller{
 				);
 			
 
+				// foreach($reportRangeBarber2 as $rep2){
+					
+				// 	$services=explode(",", $rep2['services']);
+	
+				// 	foreach($services as $serv){
+				// 		$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+						
+				// 		if($service->getPercentBarber() > 0){
+				// 			$serv_special=$serv_special+1;
+				// 			$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+				// 		}else{
+				// 			$serv_normal=$serv_normal+1;
+				// 			$normal_total=$normal_total+$service->getPrice();
+				// 		}	
+				// 	}
+				// }
 
 			foreach($reportRangeBarber as $sreportBarberer)
 			{  
@@ -2053,19 +2102,24 @@ class WebserviceController extends Controller{
 				$special_total=0;
 				$normal_total=0;
 
-				$serv_barber=explode(",", $sreportBarberer['service']);
+				foreach($reportRangeBarber2 as $rep2){
+					$serv=explode(",", $rep2['services']);
 
-						 foreach($serv_barber as $serv){
-							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
-							
-							if($service->getPercentBarber() > 0){
-								$serv_special=$serv_special+1;
-								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
-							}else{
-								$serv_normal=$serv_normal+1;
-								$normal_total=$normal_total+$service->getPrice();
-							}	
-						 }
+					foreach($serv_barber as $serv){
+						$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+						
+						if($service->getPercentBarber() > 0){
+							$serv_special=$serv_special+1;
+							$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+						}else{
+							$serv_normal=$serv_normal+1;
+							$normal_total=$normal_total+$service->getPrice();
+						}	
+					 }
+
+				}
+
+						
 				       				
 				$listBarber[] = array(
 					'total_payment'      => $sreportBarberer['total_payment'],
@@ -2432,6 +2486,7 @@ class WebserviceController extends Controller{
 					if($data->pay >= $payment->getAmountPending()){
 						$v_pay = $v_pay - $payment->getAmountPending();
 						$payment->setAmountPending(0);
+
 						
 						}else{
 							//$v_pending = $payment->getAmountPending() - $v_pay;
@@ -2444,7 +2499,7 @@ class WebserviceController extends Controller{
 				$payNew = new Payment();
 				$payNew->setAmountPay($data->pay);
 				$payNew->setAmountPending($v_balance);
-				$payNew->setDescription("");
+				$payNew->setDescription($data->option);
 				$payNew->setProfessional($professional);
 				$payNew->setCreatedAt(new \DateTime());
 				$em->persist($payNew);
@@ -2521,6 +2576,16 @@ class WebserviceController extends Controller{
 			$serv_special=0;
 			$special_total=0;
 			$normal_total=0;
+			$bonus_list=array();
+			$cant_serv_bonus=0;
+			$total_pay_bonus=0;
+			$total_pay_bonus_tax=0;
+			$cant_service=0;
+			$amount_tips_percent_pend=0;
+			$gain_balance_pend=0;
+			$cant_service_pend=0;
+			$cant_serv_bonus_pend=0;
+			$total_pay_bonus_tax_pend=0;
 
 			$payment = $em->getRepository('AppBundle:Payment')->reportPay( $data->prof_id);
 			$paymentAll = $em->getRepository('AppBundle:Payment')->findBy(array("professional" => $data->prof_id),array('paymentId' => 'desc'));
@@ -2545,8 +2610,31 @@ class WebserviceController extends Controller{
 				$pending_balance=$payment[0]['amount_pending'];
 				$date_pay= $payment[0]['created_at'];
 				
-				$balance =  $em->getRepository('AppBundle:SummaryService')->reportBalance($data->prof_id,$date_pay);
 				
+				$balance =  $em->getRepository('AppBundle:SummaryService')->reportBalance($data->prof_id,$date_pay);
+				$balance_special =  $em->getRepository('AppBundle:SummaryService')->reportBalanceSpecialBonus($data->prof_id,$date_pay);
+				
+				
+				$amount_tips_percent=$balance[0]['amount_tips_percent'];
+				$cant_service=$balance[0]['cant_service'];
+
+				if($pending_balance > 0){
+					$pay_date_current= $payment_list[0]['pay_date'];
+					$pay_date_current=$pay_date_current->format('Y-m-d H:i:s T');
+					$pay_date_before= $payment_list[1]['pay_date'];
+					$pay_date_before=$pay_date_before->format('Y-m-d H:i:s T');
+
+				//	 var_dump($pay_date_before);
+				//	 var_dump($pay_date_current);
+				//	 die;
+
+					$item_pending=$em->getRepository('AppBundle:SummaryService')->reportBalancePending($data->prof_id,$pay_date_current,$pay_date_before);
+					$gain_balance_pend=$item_pending[0]['total_payment']*$data->gain_factor;
+					$amount_tips_percent_pend=$item_pending[0]['amount_tips_percent'];
+					$cant_service_pend=$item_pending[0]['cant_service'];
+					$cant_serv_bonus_pend=$item_pending[1]['cant_service'];
+					$total_pay_bonus_tax_pend=$item_pending[1]['total_payment_tax'];
+				}
 				
 				if($balance[0]['cant_client'] > 0){
 
@@ -2572,6 +2660,8 @@ class WebserviceController extends Controller{
 				}else{
 					$total_balance=$pending_balance;
 				}
+
+
 			}else{
 				$balance =  $em->getRepository('AppBundle:SummaryService')->reportBalance($data->prof_id,"");
 				
@@ -2593,20 +2683,57 @@ class WebserviceController extends Controller{
 					$gain_balance=$total_balance;
 				}	
 			}
+
+
 			
+
+			if($balance_special){
+				foreach($balance_special as $special){
+					
+					$bonus_list[] = array(
+						// 'cant_clients'      => $special['cant_clients'],
+						'total_payment'     => $special['total_payment'],
+						'total_payment_tax' => $special['total_payment_tax'],
+						'cant_service'      => $special['cant_service'],
+						'service'           => $special['service'],
+						'amount_tips'       => $special['amount_tips'],
+						'nombre_status'	    => $special['nombre_status'],
+						'amount_tips_tax'   => $special['amount_tips_tax'],
+						'nombre_status'     => $special['nombre_status'],
+						'status_id'         => $special['status_id']
+					);
+					
+					$cant_serv_bonus=$cant_serv_bonus+$special['cant_service'];
+					$total_pay_bonus=$total_pay_bonus+$special['total_payment'];
+					$total_pay_bonus_tax=$total_pay_bonus_tax+$special['total_payment_tax'];	
+				}
+			}
+			
+			// Saldo de Propina mensual
+
+			if( !$data->date_from ){
+				$created_at = new \DateTime();
+				$date_end = date_format($created_at,"Y-m-d");
+				$date_start = date_format($created_at,"Y-m");
+				$date_start = $date_start."-01";
+			}
+
+			$balance_month=$em->getRepository('AppBundle:SummaryService')->reportBalanceMonthBarber($data->prof_id,$date_start,$date_end);
+
+
 			$list=array();
 
 				$list = array(
 					'cant_client'        => $balance[0]['cant_client'],
 					'total_payment'      => $balance[0]['total_payment'],
-					'cant_service'       => $balance[0]['cant_service'],
+					'cant_service'       => $cant_service,
 					'amount_tips'        => $balance[0]['amount_tips'],
-					'amount_tips_percent'=> $balance[0]['amount_tips_percent'],
+					'amount_tips_percent'=> $amount_tips_percent,
 					'amount_deb_cred'    => $balance[0]['amount_pay_deb_cred'],
 					'cant_deb_cred'      => $balance[0]['pay_deb_cred'],
 					'pending_balance'    => $pending_balance*1,
 					//'total_balance'   => $total_balance*1-$balance[0]['amount_pay_deb_cred']+$balance[0]['amount_tips'], MENOS COMISON PUNTO DE VENTA
-					'total_balance'      => $total_balance*1+$balance[0]['amount_tips_percent']+$special_total,
+					'total_balance'      => $total_balance*1+$balance[0]['amount_tips_percent']+$special_total+$total_pay_bonus_tax,
 					'min_date'           => $balance[0]['min_date'],
 					'max_date'        	 => $balance[0]['max_date'],
 					'balance_old'	  	 => $balance_old,
@@ -2616,7 +2743,23 @@ class WebserviceController extends Controller{
 					'serv_special'   	 => $serv_special,
 					'special_total'   	 => $special_total,
 					'serv_normal'        => $serv_normal,
-					'normal_total' 		 => $normal_total
+					'normal_total' 		 => $normal_total,
+					'cant_serv_bonus'    => $cant_serv_bonus,
+					'total_pay_bonus'    => $total_pay_bonus,
+					'total_pay_bonus_tax'=> $total_pay_bonus_tax,
+					'detail_bonus'       => $bonus_list,
+					'amount_tips_percent_pend' => $amount_tips_percent_pend,
+					'gain_balance_pend'  =>$gain_balance_pend,
+					'cant_service_pend'  => $cant_service_pend,
+					'cant_serv_bonus_pend' => $cant_serv_bonus_pend,
+					'total_pay_bonus_tax_pend' => $total_pay_bonus_tax_pend,
+					'cant_tips_mon'      => $balance_month[0]['cant_tips_mon'],
+					'cant_servicio_mon'  => $balance_month[0]['cant_servicio_mon'],
+					'amount_tips_mon'    => $balance_month[0]['amount_tips_mon'],
+					'amount_tips_percent_mon' => $balance_month[0]['amount_tips_percent_mon'],
+					'total_payment_tax_mon' => $balance_month[0]['total_payment_tax_mon'],
+					'date_start_mon' => $date_start,
+					'date_end_mon' => $date_end
 				);
 			
 
