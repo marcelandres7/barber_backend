@@ -117,8 +117,30 @@ class ReservationController extends Controller {
         $hours = ["00","01","02","03","04","05","06","07","07","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
         $minutes = ["00","15","30","45"];
         $hm = [];
+
+       
+        $inicio_AM=9;
+        $inicio_PM=14;
+
+        $fecha_actual = date('Y-m-d'); // Obtiene la fecha actual en formato 'YYYY-MM-DD'
+        $hoy = strtotime('today'); // Obtiene la fecha de hoy en formato de timestamp
+
+        //  if (strtotime($fecha_actual) == $hoy ) {
+         if ($fecha_actual == $dateSearch ) {
+         $hora_actual = new \DateTime(); // Obtiene la hora actual
+        
+            // echo $hora_actual->format('H:i:s');
+            $inicio_AM=12;
+            $inicio_PM=$hora_actual->format('H')*1+4;
+
+            if ($inicio_PM < 14 ){
+                $inicio_PM = 14;
+            }
+
+         } 
+
         foreach ($hours as $valH) {
-            if (intval($valH)>9 && intval($valH)<12) {
+            if (intval($valH)>$inicio_AM && intval($valH)<12) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
@@ -136,7 +158,7 @@ class ReservationController extends Controller {
                     }
                 }
             }
-            if (intval($valH)>=14 && intval($valH)<$lastHourOfDay) {
+            if (intval($valH)>=$inicio_PM && intval($valH)<$lastHourOfDay) {
                 foreach ($minutes as $valM) {
                     $hourMinutes    = $dateSearch." ".$valH.":".$valM;
                     $timeToVerify   = new \DateTime($hourMinutes);
