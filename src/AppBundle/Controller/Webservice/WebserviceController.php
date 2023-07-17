@@ -2705,7 +2705,8 @@ class WebserviceController extends Controller{
 					
 					$cant_serv_bonus=$cant_serv_bonus+$special['cant_service'];
 					$total_pay_bonus=$total_pay_bonus+$special['total_payment'];
-					$total_pay_bonus_tax=$total_pay_bonus_tax+$special['total_payment_tax'];	
+					// $total_pay_bonus_tax=$total_pay_bonus_tax+$special['total_payment_tax'];
+					$total_pay_bonus_tax=0;	
 				}
 			}
 			
@@ -2724,6 +2725,7 @@ class WebserviceController extends Controller{
 			$list=array();
 
 				$list = array(
+					'profesional_id'     => $data->prof_id,
 					'cant_client'        => $balance[0]['cant_client'],
 					'total_payment'      => $balance[0]['total_payment'],
 					'cant_service'       => $cant_service,

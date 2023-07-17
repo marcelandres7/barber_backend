@@ -285,7 +285,7 @@ class ReservationController extends Controller {
         $sumaryServiceObj->setRandom("n");
         $em->persist($sumaryServiceObj);
         $em->flush();
-        $this->addFlash('success_message', $this->getParameter('exito_mensaje_contacto'));
+        $this->addFlash('success_message', $this->getParameter('exito_mensaje_contacto'),60);
         return $this->redirectToRoute('reservation');
     }
 
