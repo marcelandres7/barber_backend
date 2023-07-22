@@ -123,7 +123,7 @@ class SummaryServiceRepository extends EntityRepository
 		";
 
         if($created_date) {
-			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') >= date_format('$created_date','%Y-%m-%d HH:mm:ss')";
+			$query .= "AND date_format(ss.service_end,'%Y-%m-%d HH:mm:ss') > date_format('$created_date','%Y-%m-%d HH:mm:ss')";
 		}
 
 		$query .= ";";
