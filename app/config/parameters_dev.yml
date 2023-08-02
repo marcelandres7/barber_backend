@@ -10,7 +10,7 @@ parameters:
 
     database_host: localhost
     database_port: 3306 
-    database_name: barber
+    database_name: emda_prlm
     database_user: root
     database_password:
         
@@ -43,7 +43,7 @@ parameters:
 #TEXTOS DE RESPUESTA PARA EL USUARIO
     exito: Record saved successfully.
     exito_revisado: Tu registro fue guardado con &eacute;xito y tus datos seran validados. En 48 horas te enviaremos un mensaje de texto a tu n&uacute;mero de tel&eacute;fono registrado, para informar si tu inscripcion ha sido confirmada.
-    exito_mensaje_contacto: Tu mensaje se ha enviado correctamente, pronto nos comunicaremos contigo.
+    exito_mensaje_contacto: Esta reserva no requiere confirmaci&oacute;n solo debe llegar al sal&oacute;n y anunciar su llegada de no asistir omitiremos la reserva y se eliminara autom&aacute;ticamente.
     error_mensaje_contacto: Ocurrio un error al enviar tu mensaje, por favor intentalo nuevamente.
     exito_actualizar: Registration successfully updated.
     exito_eliminar: Registration was successfully deleted.
