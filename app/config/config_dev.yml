@@ -7,6 +7,8 @@ framework:
         strict_requirements: true
     profiler: { only_exceptions: false }
     translator: { fallback: "%locale%" }
+    session:
+        cookie_lifetime: 60
 
 web_profiler:
     toolbar: false
@@ -31,3 +33,5 @@ monolog:
         #    type:   chromephp
         #    level:  info
 
+
+    
