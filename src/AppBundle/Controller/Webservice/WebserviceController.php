@@ -2586,6 +2586,7 @@ class WebserviceController extends Controller{
 			$cant_service_pend=0;
 			$cant_serv_bonus_pend=0;
 			$total_pay_bonus_tax_pend=0;
+			$balance_special=0;
 
 			$payment = $em->getRepository('AppBundle:Payment')->reportPay( $data->prof_id);
 			$paymentAll = $em->getRepository('AppBundle:Payment')->findBy(array("professional" => $data->prof_id),array('paymentId' => 'desc'));
