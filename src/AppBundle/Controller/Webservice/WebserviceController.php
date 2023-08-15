@@ -2732,7 +2732,7 @@ class WebserviceController extends Controller{
 					'total_payment'      => $balance[0]['total_payment'],
 					'cant_service'       => $cant_service,
 					'amount_tips'        => $balance[0]['amount_tips'],
-					'amount_tips_percent'=> $amount_tips_percent,
+					'amount_tips_percent'=> $balance[0]['amount_tips_percent'], //$amount_tips_percent,
 					'amount_deb_cred'    => $balance[0]['amount_pay_deb_cred'],
 					'cant_deb_cred'      => $balance[0]['pay_deb_cred'],
 					'pending_balance'    => $pending_balance*1,
