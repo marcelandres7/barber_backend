@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\Entity\SummaryService;
+use AppBundle\Entity\Menus;
 use AppBundle\Entity\Client;
 
 /**
@@ -23,8 +24,46 @@ class ReservationController extends Controller {
         $this->get("session")->set("module_id", $this->moduleId);
         $em = $this->getDoctrine()->getManager();
         $list = $em->getRepository('AppBundle:Menus')->findBy(["menuType" => [2,4], "isActive"=>1]);
+        $iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
+        $listProdMenu=array();
+
+    
+        foreach($list as $prodM){
+				
+            $listProdMenu[] = array(
+                'menuId'    => $prodM->getMenuId(),
+                'menuName'  => $prodM->getMenuName(),
+                'price' => $prodM->getPrice()*$iva->getValue2(),
+                'picturePath' => $prodM->getPicturePath(),
+                'menuOrder' => $prodM->getMenuOrder(),
+                'description' => $prodM->getDescription(),
+                'duration' => $prodM->getDuration(),
+                'createdAt' => $prodM->getCreatedAt(),
+                'createdBy' => $prodM->getCreatedBy()
+            );
+        }
+
+        // $newList = new Menus();
+        // $tamanio = count($listProdMenu);
+        // for ($i=0; $i<$tamanio;$i++){
+        //      $newList->getMenuId($listProdMenu[$i]['id']);
+        //      $newList->setMenuName($listProdMenu[$i]['name']);
+        //    // var_dump($listProdMenu[$i]['name']");
+        //      $newList->setPicturePath($listProdMenu[$i]['picturePath']);
+        //      $newList->setPrice($listProdMenu[$i]['price']);
+        //      $newList->setDuration($listProdMenu[$i]['duration']);
+        //      $newList->setMenuOrder($listProdMenu[$i]['menuOrder']);
+        //      $newList->setDescription($listProdMenu[$i]['description']);
+        //      $newList->setCreatedAt($listProdMenu[$i]['createdAt']);
+        //      $newList->setCreatedBy($listProdMenu[$i]['createdBy']);
+        // }
+
+        // foreach($newList as $pr){
+        // var_dump($pr->getPrice());
+        // }
+        // die;
         return $this->render('@App/Website/Reservation/index.html.twig', array(
-                    "list" => $list,
+                    "list" => $listProdMenu,
                     "view" => "services"
         ));
     }
@@ -52,11 +91,29 @@ class ReservationController extends Controller {
             return $this->redirectToRoute("reservation");
         }
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $idMenus]);
+        $iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
+
+        foreach($serviceData as $prodM){
+				
+            $serviceDataNew[] = array(
+                'menuId'    => $prodM->getMenuId(),
+                'menuName'  => $prodM->getMenuName(),
+                'price' => $prodM->getPrice()*$iva->getValue2(),
+                'picturePath' => $prodM->getPicturePath(),
+                'menuOrder' => $prodM->getMenuOrder(),
+                'description' => $prodM->getDescription(),
+                'duration' => $prodM->getDuration(),
+                'createdAt' => $prodM->getCreatedAt(),
+                'createdBy' => $prodM->getCreatedBy()
+            );
+        }
+
+
         $totalPrice = 0;
         $totalDuration = 0;
         $totales = [];
         foreach ($serviceData as $value) {
-            $totalPrice = $totalPrice + $value->getPrice();
+            $totalPrice = $totalPrice + ($value->getPrice()*1.19);
             $totalDuration = $totalDuration + $value->getDuration();
         }
         $totales["totalPrice"] = $totalPrice;
@@ -78,7 +135,8 @@ class ReservationController extends Controller {
         $form->handleRequest($request);
         return $this->render('@App/Website/Reservation/index.html.twig', array(
             "form" => $form->createView(),
-            "service" => $serviceData,
+            // "service" => $serviceData,
+            "service" => $serviceDataNew,
             "totales" => $totales,
             "prof" => $profMenus,
             "day" => $dateNow,
@@ -285,7 +343,7 @@ class ReservationController extends Controller {
         $sumaryServiceObj->setRandom("n");
         $em->persist($sumaryServiceObj);
         $em->flush();
-        $this->addFlash('success_message', $this->getParameter('exito_mensaje_contacto'),60);
+        $this->addFlash('success_message', $this->getParameter('exito_mensaje_contacto'),100);
         return $this->redirectToRoute('reservation');
     }
 

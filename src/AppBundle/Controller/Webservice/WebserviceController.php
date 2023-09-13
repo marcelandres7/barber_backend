@@ -1566,7 +1566,8 @@ class WebserviceController extends Controller{
 			// $organization = $em->getRepository('AppBundle:Organization')->findOneBy(array("organizationId" =>$data->organization_id));
 			$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2 ));
 		    $mainMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3,4] ,"isActive" => '1'));
-			
+			$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
+
 			if($mainMenu){
 				$list = array();
 
@@ -1581,7 +1582,7 @@ class WebserviceController extends Controller{
 						'type_name'   => $menu->getMenuType()->getMenuTypeName(),
 						'description' => $menu->getDescription(),
 						// 'imagen_path' =>  $paths["uploads_path"].$menu->getPicturePath(),
-						'price'       => $menu->getPrice(),
+						'price'       => $menu->getPrice()*$iva->getValue2(),
 						'order'       => $menu->getMenuOrder(),
 						// 'color'       => "dark"
 					);
@@ -3634,7 +3635,8 @@ class WebserviceController extends Controller{
 		$type = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2 ));
 		// $secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => $type ,"isActive" => '1'),array('menuOrder'=>'ASC'));
 		$secondMenu = $em->getRepository('AppBundle:Menus')->findBy(array("menuType" => [2,3] ,"isActive" => '1'),array('menuOrder'=>'ASC'));
-		
+		$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
+
 		foreach($secondMenu as $menu)
 		{
 			$list2[] = array(
@@ -3647,7 +3649,7 @@ class WebserviceController extends Controller{
 				'description' => $menu->getDescription(),
 				//'imagen_path' => $menu->getPicturePath(),
 				'imagen_path' =>  $paths["uploads_path"].$menu->getPicturePath(),
-				'price'       => $menu->getPrice(),
+				'price'       => $menu->getPrice()*$iva->getValue(),
 				'order'       => $menu->getMenuOrder(),
 				'color'       => "dark"
 				
@@ -3829,6 +3831,7 @@ class WebserviceController extends Controller{
 
 			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,2,6,7]), array('idSummaryService'=>'ASC'));
 			$reservePending =$em->getRepository('AppBundle:SummaryService')->reservePending($user->id);
+			$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
 			
 			$list  = array();
 			$listProd = array();
@@ -3842,7 +3845,7 @@ class WebserviceController extends Controller{
 				$listProdMenu[] = array(
 					'product_menu_id'    => $prodM->getMenuId(),
 					'product_menu_name'  => $prodM->getMenuName(),
-					'product_menu_price' => $prodM->getPrice()
+					'product_menu_price' => $prodM->getPrice()*$iva->getValue2()
 				);
 			}
 
@@ -3861,7 +3864,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'   => $product->getMenuId(),
 						'product_name' => $product->getMenuName(),
-						'price'		   => $product->getPrice()
+						'price'		   => $product->getPrice()*$iva->getValue2()
 					);
 				}
 				
@@ -4098,7 +4101,7 @@ class WebserviceController extends Controller{
 		if($data)
 		{	
 			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
-			
+			$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
 			$products='';    	
 			foreach($data->service_list as $list){
 				
@@ -4112,7 +4115,7 @@ class WebserviceController extends Controller{
 			//$service->setServiceEnd(new \DateTime());
 			//$client->setAvatar($avatar);
 			$service->setServices($products);
-			$service->setTotalPayment($data->total_price);
+			$service->setTotalPayment($data->total_price/$iva->getValue2());
 			$em->persist($service);
 			$em->flush();
        
@@ -4315,6 +4318,7 @@ class WebserviceController extends Controller{
 		$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);
 		$ReserveAll = $em->getRepository('AppBundle:SummaryService')->getListReserveConfirm($data->organization_id,'1,7',"all");
 		$ReserveToday = $em->getRepository('AppBundle:SummaryService')->getListReserveConfirm($data->organization_id,'1,7',"today");
+		$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
         
         foreach($clientPending as $pending){
             $listProd=array();
@@ -4337,7 +4341,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'         => $product->getMenuId(),
 						'product_name'       => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
+						'product_menu_price' => $product->getPrice()*$iva->getValue2()
 					);
 				}
             
@@ -4350,7 +4354,7 @@ class WebserviceController extends Controller{
                     'service_date'  	=> $pending['service_date'],
                     'professional_id'	=> $pending['professional_id'],
                     'professional_name' => $pending['professional_name'],
-                    'total'  			=> $pending['total'],
+                    'total'  			=> $pending['total']*$iva->getValue2(),
                     'start'  			=> $pending['service_start'],
                     'end'    			=> $pending['service_end'],
 					'schedulet'         => $pending['scheduled_to'],
@@ -4373,7 +4377,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'   => $product->getMenuId(),
 						'product_name' => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
+						'product_menu_price' => $product->getPrice()*$iva->getValue2()
 					);
 				}
             
@@ -4386,7 +4390,7 @@ class WebserviceController extends Controller{
                     'service_date'  	=> $complete['service_date'],
                     'professional_id'	=> $complete['professional_id'],
                     'professional_name' => $complete['professional_name'],
-                    'total'  			=> $complete['total'],
+                    'total'  			=> $complete['total']*$iva->getValue2(),
                     'start'  			=> $complete['service_start'],
                     'end'    			=> $complete['service_end'],
 					'schedulet'         => $complete['scheduled_to'],
@@ -4408,7 +4412,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'   => $product->getMenuId(),
 						'product_name' => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
+						'product_menu_price' => $product->getPrice()*$iva->getValue2()
 					);
 				}
             
@@ -4421,7 +4425,7 @@ class WebserviceController extends Controller{
                     'service_date'  	=> $payout['service_date'],
                     'professional_id'	=> $payout['professional_id'],
                     'professional_name' => $payout['professional_name'],
-                    'total'  			=> $payout['total'],
+                    'total'  			=> $payout['total']*$iva->getValue2(),
                     'start'  			=> $payout['service_start'],
                     'end'    			=> $payout['service_end'],
 					'method_pay_id'     => $payout['method_payment'],
@@ -4447,7 +4451,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'   => $product->getMenuId(),
 						'product_name' => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
+						'product_menu_price' => $product->getPrice()*$iva->getValue2()
 					);
 				}
             
@@ -4460,7 +4464,7 @@ class WebserviceController extends Controller{
                     'service_date'  	=> $booking['service_date'],
                     'professional_id'	=> $booking['professional_id'],
                     'professional_name' => $booking['professional_name'],
-                    'total'  			=> $booking['total'],
+                    'total'  			=> $booking['total']*$iva->getValue2(),
                     'start'  			=> $booking['service_start'],
                     'end'    			=> $booking['service_end'],
 					'schedulet'         => $booking['scheduled_to'],
@@ -4519,7 +4523,7 @@ class WebserviceController extends Controller{
 					$listProd[] = array(
 						'product_id'   => $product->getMenuId(),
 						'product_name' => $product->getMenuName(),
-						'product_menu_price' => $product->getPrice()
+						'product_menu_price' => $product->getPrice()*$iva->getValue2()
 					);
 				}
             
@@ -4532,7 +4536,7 @@ class WebserviceController extends Controller{
                     'service_date'  	=> $bookingToday['service_date'],
                     'professional_id'	=> $bookingToday['professional_id'],
                     'professional_name' => $bookingToday['professional_name'],
-                    'total'  			=> $bookingToday['total'],
+                    'total'  			=> $bookingToday['total']*$iva->getValue2(),
                     'start'  			=> $bookingToday['service_start'],
                     'end'    			=> $bookingToday['service_end'],
 					'schedulet'         => $bookingToday['scheduled_to'],
