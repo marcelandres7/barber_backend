@@ -34,6 +34,7 @@ use AppBundle\Repository\TurnProfessionalRepository;
 use AppBundle\Entity\MenusUser;
 use AppBundle\Entity\ProfessionalReservation;
 use AppBundle\Entity\ExpenseCategory;
+use AppBundle\Entity\TurnWasher;
 
 /**
  * Webservice controller.
@@ -63,7 +64,342 @@ class WebserviceController extends Controller{
     }
 
 	
-		/**
+	
+	/**
+     * @Route("/ws/set-finish-wash", name="/ws/set-finish-wash")
+     */
+    public function getFinishWash(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+
+		if($data){
+			$user_washer=$data->user;
+			$washer_item=$data->washer;
+
+			$washerListPend=array();
+			$washerListDone=array();
+			$em = $this->getDoctrine()->getManager();
+			$total_pending=0;
+			$total_done=0;
+			
+
+			
+				$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $washer_item->service_id));
+				$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 13));
+				$service->setStatus($status);
+				$em->persist($service);
+				$em->flush();
+
+				$turn_washer = $em->getRepository('AppBundle:TurnWasher')->findOneBy(array("turnWasherId" => $washer_item->turn_washer_id));
+
+					
+				$turn_washer->setStatus("Finalizado");
+				$em->persist($turn_washer);
+				$em->flush();
+						
+			
+
+					$washerPend = $em->getRepository('AppBundle:TurnWasher')->getListClientPend();
+				
+					if($washerPend){
+						foreach($washerPend as $pending){
+
+							$total_pending=$total_pending+1;
+
+							$washerListPend[] = array(
+								'turn_washer_id' =>$pending['turn_washer_id'],
+								'service_id'     =>$pending['service_id'],
+								'client_name'    =>$pending['client_name'],
+								'professional'   =>$pending['professional'],
+								'status'         =>$pending['status'],
+								'created_date'   =>$pending['created_date'],
+								'washer_id'      =>$pending['washer_id'],
+								'washer_name'    =>$pending['washer_name']
+								
+							);
+
+						}
+					}
+
+					$washerDone = $em->getRepository('AppBundle:TurnWasher')->getListClientDone();
+					
+					if($washerDone){
+						foreach($washerDone as $done){
+						
+							$total_done=$total_done+1;
+
+							$washerListDone[] = array(
+								'turn_washer_id' =>$done['turn_washer_id'],
+								'service_id'     =>$done['service_id'],
+								'client_name'    =>$done['client_name'],
+								'professional'   =>$done['professional'],
+								'status'         =>$done['status'],
+								'created_date'   =>$done['created_date'],
+								'washer_id'      =>$done['washer_id'],
+								'washer_name'    =>$done['washer_name']
+								
+							);
+						} 
+					}
+
+					$list =  array(
+						'total_pending'  => $total_pending,
+						'washerListPend' => $washerListPend,
+						'total_done'     => $total_done,
+						'washerListDone' => $washerListDone
+					);
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	/**
+     * @Route("/ws/get-take-wash", name="/ws/get-take-wash")
+     */
+    public function getTakeWash(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+
+		if($data){
+			$user_washer=$data->user;
+			$washer_item=$data->washer;
+
+			$washerListPend=array();
+			$washerListDone=array();
+			$em = $this->getDoctrine()->getManager();
+			$total_pending=0;
+			$total_done=0;
+			
+
+			
+			    $washer = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $user_washer->id));
+				$turn_washer = $em->getRepository('AppBundle:TurnWasher')->findOneBy(array("summaryServiceId" => $washer_item->service_id));
+
+					
+				$turn_washer->setWasherId($washer->getId());
+				$em->persist($turn_washer);
+				$em->flush();
+						
+			
+
+					$washerPend = $em->getRepository('AppBundle:TurnWasher')->getListClientPend();
+				
+					if($washerPend){
+						foreach($washerPend as $pending){
+
+							$total_pending=$total_pending+1;
+
+							$washerListPend[] = array(
+								'turn_washer_id' =>$pending['turn_washer_id'],
+								'service_id'     =>$pending['service_id'],
+								'client_name'    =>$pending['client_name'],
+								'professional'   =>$pending['professional'],
+								'status'         =>$pending['status'],
+								'created_date'   =>$pending['created_date'],
+								'washer_id'      =>$pending['washer_id'],
+								'washer_name'    =>$pending['washer_name']
+								
+							);
+
+						}
+					}
+
+					$washerDone = $em->getRepository('AppBundle:TurnWasher')->getListClientDone();
+					
+					if($washerDone){
+						foreach($washerDone as $done){
+						
+							$total_done=$total_done+1;
+
+							$washerListDone[] = array(
+								'turn_washer_id' =>$done['turn_washer_id'],
+								'service_id'     =>$done['service_id'],
+								'client_name'    =>$done['client_name'],
+								'professional'   =>$done['professional'],
+								'status'         =>$done['status'],
+								'created_date'   =>$done['created_date'],
+								'washer_id'      =>$done['washer_id'],
+								'washer_name'    =>$done['washer_name']
+								
+							);
+						} 
+				    }
+
+					$list =  array(
+						'total_pending'  => $total_pending,
+						'washerListPend' => $washerListPend,
+						'total_done'     => $total_done,
+						'washerListDone' => $washerListDone
+					);
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+	
+	
+	/**
+     * @Route("/ws/get-client-wash", name="/ws/get-client-wash")
+     */
+    public function getClientWash(Request $request)
+    {
+		$data = json_decode(file_get_contents("php://input"));
+		
+
+		if($data){
+			$washerListPend=array();
+			$washerListDone=array();
+			$em = $this->getDoctrine()->getManager();
+			$total_pending=0;
+			$total_done=0;
+			
+
+			// if( !$data->date_from ){
+			// 	$created_at = new \DateTime();
+			// 	$date_end = date_format($created_at,"Y-m-d");
+			// 	$date_start = date_format($created_at,"Y-m");
+			// 	$date_start = $date_start."-01";
+			// }else{
+			// 	$date_start = $data->date_from;
+			// 	$date_end = $data->date_to;
+			// }
+        
+				// $expenses = $em->getRepository('AppBundle:Expense')->findBy(array("status" => 'activo'));
+						
+				// 	foreach($expenses as $expense){
+					
+				// 		$expenseList[] = array(
+				// 			'expense_id'   => $expense->getExpenseId(),
+				// 			'amount'       => $expense->getPay(),
+				// 			'date_pay'     => date_format($expense->getPayDate(),"Y-m-d H:i"),
+				// 			'description' => $expense->getComment(),
+				// 			'path_imagen'  => "uploads/".$expense->getPathImage(),
+				// 			'category_id'  => $expense->getCategory()->getExpenseCategoryId(),
+				// 			'category_name'=> $expense->getCategory()->getCategoryName(),
+				// 			'status'       => $expense->getStatus()
+				// 		);
+
+				// 	} 
+
+					$washerPend = $em->getRepository('AppBundle:TurnWasher')->getListClientPend();
+				
+				if($washerPend){
+					foreach($washerPend as $pending){
+
+						$total_pending=$total_pending+1;
+
+						$washerListPend[] = array(
+							'turn_washer_id' =>$pending['turn_washer_id'],
+							'service_id'     =>$pending['service_id'],
+							'client_name'    =>$pending['client_name'],
+							'professional'   =>$pending['professional'],
+							'status'         =>$pending['status'],
+							'created_date'   =>$pending['created_date'],
+							'washer_id'      =>$pending['washer_id'],
+							'washer_name'    =>$pending['washer_name']
+							
+						);
+
+					}
+                 }
+					$washerDone = $em->getRepository('AppBundle:TurnWasher')->getListClientDone();
+				
+					if($washerDone){
+						foreach($washerDone as $done){
+						
+							$total_done=$total_done+1;
+
+							$washerListDone[] = array(
+								'turn_washer_id' =>$done['turn_washer_id'],
+								'service_id'     =>$done['service_id'],
+								'client_name'    =>$done['client_name'],
+								'professional'   =>$done['professional'],
+								'status'         =>$done['status'],
+								'created_date'   =>$done['created_date'],
+								'washer_id'      =>$done['washer_id'],
+								'washer_name'    =>$done['washer_name']
+								
+							);
+						} 
+				    }
+
+					$list =  array(
+						'total_pending'  => $total_pending,
+						'washerListPend' => $washerListPend,
+						'total_done'     => $total_done,
+						'washerListDone' => $washerListDone
+					);
+
+				return new JsonResponse(array('status' => 'success','data'=>$list));
+		    }else{
+				return new JsonResponse(array('status' => 'error'));
+			}		
+	
+	}
+
+	/**
+     * @Route("/ws/send-client-washer", name="/ws/send-client-washer")
+     */
+    public function setSendClientWasher(Request $request) {
+
+		$em = $this->getDoctrine()->getManager();		
+		$data = json_decode(file_get_contents("php://input"));
+		
+		if($data)
+		{	
+			$service = $em->getRepository('AppBundle:SummaryService')->findOneBy(array("idSummaryService" => $data->service_id));
+			$status = $em->getRepository('AppBundle:Status')->findOneBy(array("statusId" => 12));
+			$service->setStatus($status);
+			$em->persist($service);
+			$em->flush();
+			// if($data->random == "y"){
+			// 	$professional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
+			// 	$service->setProfessional($professional);
+			// }
+
+			$turnWasherNew = new TurnWasher();
+			$turnWasherNew->setSummaryServiceId($service->getIdSummaryService());
+			$turnWasherNew->setStatus("Pendiente");
+			$turnWasherNew->setCreatedDate(new \DateTime());			
+			$em->persist($turnWasherNew);
+			$em->flush();
+
+			//$service->setServiceStart(new \DateTime());
+		
+            //ACTUALIZA TABLA DE TURNO
+			
+			// $turns = $em->getRepository('AppBundle:TurnProfessional')->findBy(array("profId" => $data->prof_id),array('turnDate' => 'desc'));
+			// $first=true;
+
+			// if($turns){	
+			// 	foreach($turns as $turn){
+			// 		if($first){
+			// 			$turn->setStatus("Ocupado");
+			// 			$turn->setTurnDate(new \DateTime());
+			// 			$em->persist($turn);
+			// 			$first=false;
+			// 		}else{
+			// 			$em->remove($turn);
+			// 		}
+			// 	}
+			// $em->flush();
+
+             //}
+			 return new JsonResponse(array('status' => 'success'));									 
+		 }
+		
+		 return new JsonResponse(array('status' => 'error'));
+	 
+	 }   
+	
+	/**
      * @Route("/ws/edit-expense", name="/ws/edit-expense")
      */
     public function editExpense(Request $request) {
@@ -2025,12 +2361,14 @@ class WebserviceController extends Controller{
 			$serv_normal=0;
 			$special_total=0;
 			$normal_total=0;
+			$total_washes=0;
 				
 			$reportRange = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRange($data->date_start,$data->date_end);
 			$reportRangeBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberrange($data->date_start,$data->date_end);
 			$reportRangeBarber2  = $em->getRepository('AppBundle:SummaryService')->reportGeneral2($data->date_start,$data->date_end,1);
 			$reportRangeProduct = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsRange($data->date_start,$data->date_end);
 			$reportRangeCancel = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralRangeCancel($data->date_start,$data->date_end);
+			$reportWasher = $em->getRepository('AppBundle:TurnWasher')->reportWasherRange($data->date_start,$data->date_end);
 			
 			$services=explode(",", $reportRange[0]['service']);
 
@@ -2045,6 +2383,19 @@ class WebserviceController extends Controller{
 								$normal_total=$normal_total+$service->getPrice();
 							}	
 						 }
+				
+			
+			if($reportWasher){
+				foreach($reportWasher as $washerRep){
+					$total_washes=$total_washes+$washerRep['cant_washes'];
+
+					$listWasher[] = array(
+					'cant_washes'      => $washerRep['cant_washes'],
+					'washer_name'      => $washerRep['washer_name']
+					);
+					
+				}
+			}
 		
 			
 				$listReportGeneral = array(
@@ -2074,7 +2425,8 @@ class WebserviceController extends Controller{
 					'serv_special'       => $serv_special,
 					'serv_normal' 		 => $serv_normal,
 					'normal_total'       => $normal_total,
-					'special_total'      => $special_total
+					'special_total'      => $special_total,
+					'total_washes'       => $total_washes
 				);
 			
 
@@ -2169,7 +2521,8 @@ class WebserviceController extends Controller{
 				'list_general'  => $listReportGeneral,
 				'list_x_barber' => $listBarber,
 				'list_products' =>$listProductsSale,
-				'total_products' => $total_products
+				'total_products'=> $total_products,
+				'listWasher'    => $listWasher
 			);
 
 
@@ -2201,30 +2554,62 @@ class WebserviceController extends Controller{
 			$listReportGeneral = array();
 			$listBarber= array();
 			$listProductsSale= array();
+			$listWasher= array();
 			$serv_special=0;
 			$serv_normal=0;
 			$special_total=0;
 			$normal_total=0;
 				
 			$reportToday = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralToday();
+			$reportTodayService = $em->getRepository('AppBundle:SummaryService')->reportSummaryGeneralToday2();
 			$reportTodayBarber = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberToday();
 			$reportSaleProductToday = $em->getRepository('AppBundle:SummaryService')->reportSaleProductsToday();
 			$portTodayCanceled = $em->getRepository('AppBundle:SummaryService')->reportSummaryBarberTodayCancel();
+			$reportWasher = $em->getRepository('AppBundle:TurnWasher')->reportWasherToday();
 		
 		if($reportToday[0]['total_payment']){
-			$services=explode(",", $reportToday[0]['service']);
+			foreach($reportTodayService as $rep2){
+				$services=explode(",", $rep2['services']);
 
-						 foreach($services as $serv){
-							$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+				foreach($services as $serv){
+					$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
+					
+					if($service->getPercentBarber() > 0){
+						$serv_special=$serv_special+1;
+						$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+					}else{
+						$serv_normal=$serv_normal+1;
+						$normal_total=$normal_total+$service->getPrice();
+					}	
+				}
+			}
+
+			$total_washes=0;
+			if($reportWasher){
+				foreach($reportWasher as $washerRep){
+					$total_washes=$total_washes+$washerRep['cant_washes'];
+
+					$listWasher[] = array(
+					'cant_washes'      => $washerRep['cant_washes'],
+					'washer_name'      => $washerRep['washer_name']
+					);
+					
+				}
+			}
+		// 
+		// 	$services=explode(",", $reportToday[0]['service']);
+
+		// 				 foreach($services as $serv){
+		// 					$service = $em->getRepository('AppBundle:Menus')->findOneBy(array("menuId" => $serv));
 							
-							if($service && $service->getPercentBarber() > 0){
-								$serv_special=$serv_special+1;
-								$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
-							}else{
-								$serv_normal=$serv_normal+1;
-								$normal_total=$normal_total+$service->getPrice();
-							}	
-						 }
+		// 					if($service && $service->getPercentBarber() > 0){
+		// 						$serv_special=$serv_special+1;
+		// 						$special_total=$special_total+$service->getPrice()*($service->getPercentBarber()*1/100);
+		// 					}else{
+		// 						$serv_normal=$serv_normal+1;
+		// 						$normal_total=$normal_total+$service->getPrice();
+		// 					}	
+		// 				 }
 			
 				$listReportGeneral = array(
 					'total_payment'      => $reportToday[0]['total_payment'],
@@ -2253,7 +2638,8 @@ class WebserviceController extends Controller{
 					'serv_special'       => $serv_special,
 					'serv_normal' 		 => $serv_normal,
 					'normal_total'       => $normal_total,
-					'special_total'      => $special_total
+					'special_total'      => $special_total,
+					'total_washes'       => $total_washes
 
 				);
 			
@@ -2330,7 +2716,8 @@ class WebserviceController extends Controller{
 				'list_general'  => $listReportGeneral,
 				'list_x_barber' => $listBarber,
 				'list_products' => $listProductsSale,
-				'total_products' => $total_products
+				'total_products'=> $total_products,
+				'listWasher'    => $listWasher
 			);
 
      
@@ -3649,7 +4036,7 @@ class WebserviceController extends Controller{
 				'description' => $menu->getDescription(),
 				//'imagen_path' => $menu->getPicturePath(),
 				'imagen_path' =>  $paths["uploads_path"].$menu->getPicturePath(),
-				'price'       => $menu->getPrice()*$iva->getValue(),
+				'price'       => $menu->getPrice()*$iva->getValue2(),
 				'order'       => $menu->getMenuOrder(),
 				'color'       => "dark"
 				
@@ -3829,7 +4216,7 @@ class WebserviceController extends Controller{
 			$em = $this->getDoctrine()->getManager();
 			$paths = $this->getProjectPaths();
 
-			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,2,6,7]), array('idSummaryService'=>'ASC'));
+			$clientService = $em->getRepository('AppBundle:SummaryService')->findBy(array("professional" => [$user->id,0] , "status" => [1,2,6,7,12,13]), array('idSummaryService'=>'ASC'));
 			$reservePending =$em->getRepository('AppBundle:SummaryService')->reservePending($user->id);
 			$iva = $em->getRepository('AppBundle:ParameterSystem')->findOneBy(array("parameterSystemId" => 3 ));
 			
@@ -3869,7 +4256,7 @@ class WebserviceController extends Controller{
 				}
 				
 
-				if( $serv->getStatus()->getStatusId() == 1 ||  $serv->getStatus()->getStatusId() == 2){
+				if( $serv->getStatus()->getStatusId() == 1 ||  $serv->getStatus()->getStatusId() == 2 ||  $serv->getStatus()->getStatusId() == 12 ||  $serv->getStatus()->getStatusId() == 13){
 					$list[] = array(
 						'service_id'    => $serv->getIdSummaryService(),
 						'client_id'     => $client->getClientId(),
@@ -4312,7 +4699,7 @@ class WebserviceController extends Controller{
 		}
 
 
-        $clientPending = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,'1,2');
+        $clientPending = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,'1,2,12,13');
         $clientComplete = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,3);
         $clientPayout = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,5);
 		$clientBooking = $em->getRepository('AppBundle:SummaryService')->getListPaymentServices($data->organization_id,6);

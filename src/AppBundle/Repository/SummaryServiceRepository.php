@@ -277,6 +277,26 @@ class SummaryServiceRepository extends EntityRepository
 		return $res->fetchAll ();
 	}
 
+
+	public function reportSummaryGeneralToday2() {
+		$query = "
+          SELECT  services
+            FROM summary_service ss, user u
+           WHERE ss.professional_id = u.id
+             AND  ss.status_id = 5
+             AND   date_format(ss.service_end,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d')
+             AND  ss.organization_id=1;
+		";
+
+        $res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
+		    $res->execute ();
+
+		return $res->fetchAll ();
+	}
+
+
+
+
   public function reportSummaryBarberToday( ) {
 		$query = "
             SELECT  ss.professional_id,concat(u.first_name,' ',u.last_name) as professional_name, 

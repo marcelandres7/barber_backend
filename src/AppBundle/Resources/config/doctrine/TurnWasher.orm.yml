@@ -1,0 +1,39 @@
+AppBundle\Entity\TurnWasher:
+    type: entity
+    table: turn_washer
+    repositoryClass: AppBundle\Repository\TurnWasherRepository
+    id:
+        turnWasherId:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            column: turn_washer_id
+            generator:
+                strategy: IDENTITY
+    fields:
+        summaryServiceId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: summary_service_id
+        washerId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: washer_id
+        status:
+            type: string
+            nullable: true
+            length: 45
+            fixed: false
+        createdDate:
+            type: datetime
+            nullable: true
+            column: created_date
+        organizationId:
+            type: integer
+            nullable: true
+            unsigned: false
+            column: organization_id
+    lifecycleCallbacks: {  }
