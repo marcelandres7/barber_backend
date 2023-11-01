@@ -30,7 +30,8 @@ class TurnWasherRepository extends EntityRepository
 						AND  ss.id_summary_service=tw.summary_service_id
 						AND  c.client_id=ss.client_id
 						AND u.id=ss.professional_id
-						AND date_format(tw.created_date,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d'); ";
+						AND date_format(tw.created_date,'%Y-%m-%d') = date_format(now(),'%Y-%m-%d'); 
+						ORDER BY 1 ASC";
 
 					$res = $this->getEntityManager ()->getConnection ()->prepare ( $query );
 						$res->execute ();
