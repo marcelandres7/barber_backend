@@ -3431,6 +3431,7 @@ class WebserviceController extends Controller{
 			//$menuType = $em->getRepository('AppBundle:MenuType')->findOneBy(array("menuTypeId" => 2));
 			//$menuClass = $em->getRepository('AppBundle:MenuClass')->findOneBy(array("menuClassId" => $data->classMenuSelected));
 			$profesional = $em->getRepository('AppBundle:User')->findOneBy(array("id" => $data->prof_id));
+			$userRole = $em->getRepository('AppBundle:UserRole')->findOneBy(array("id" => $data->rol));
 
 			if($data->isActive == true){
 				$active="ACTIVO";
@@ -3448,6 +3449,7 @@ class WebserviceController extends Controller{
 			$profesional->setStatus($active);
 			$profesional->setEmail($data->email);
 			$profesional->setUserOrder($data->order);
+			$profesional->setUserRole($userRole);
 
 			if ($data->pass){
 				$profesional->setPassword($this->encodePassword($data->pass));
@@ -3627,7 +3629,7 @@ class WebserviceController extends Controller{
 			}
 			
 
-			$userRole = $em->getRepository('AppBundle:UserRole')->findOneBy(array("id" => 2));
+			$userRole = $em->getRepository('AppBundle:UserRole')->findOneBy(array("id" => $data->rol));
 			$organization = $em->getRepository('AppBundle:Organization')->findOneBy(array("organizationId" => 1));
 			
 			if($data->isActive == true){
@@ -3669,7 +3671,10 @@ class WebserviceController extends Controller{
 		
 		if(true)
 		{	$list=array();
-			$profesional_menu = $em->getRepository('AppBundle:User')->findBy(array("userRole" => [2,4], "organization" => $organizacion_id ),array('userOrder'=>'ASC'));
+			$role=array();
+
+			$profesional_menu = $em->getRepository('AppBundle:User')->findBy(array("userRole" => [2,4,5,6], "organization" => $organizacion_id ),array('userOrder'=>'ASC'));
+			$roles = $em->getRepository('AppBundle:UserRole')->findBy(array("id" => [2,6]),array('id'=>'ASC'));
 			
 			foreach($profesional_menu as $prof)
 			{  if($prof->getStatus() != 'ELIMINADO'){
@@ -3687,10 +3692,19 @@ class WebserviceController extends Controller{
 			  }
 			}
 
+
+			foreach($roles as $rol)
+			{  
+				$role[] = array(
+					'rol_id'      => $rol->getId(),
+					'rol_name'	   => $rol->getName()
+				);
+			}
+
 		
 
        
-			 return new JsonResponse(array('status' => 'success', "data" => $list));									 
+			 return new JsonResponse(array('status' => 'success', "data" => $list, 'roles' => $role));									 
 		 }
 		
 		 return new JsonResponse(array('status' => 'error'));
