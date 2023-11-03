@@ -109,11 +109,14 @@ class ReservationController extends Controller {
         }
 
 
+        // OBTENER EL IMPUESTO POR LA TABLA
+
+        $impuesto=1;
         $totalPrice = 0;
         $totalDuration = 0;
         $totales = [];
         foreach ($serviceData as $value) {
-            $totalPrice = $totalPrice + ($value->getPrice()*1.19);
+            $totalPrice = $totalPrice + ($value->getPrice()*$impuesto);
             $totalDuration = $totalDuration + $value->getDuration();
         }
         $totales["totalPrice"] = $totalPrice;
