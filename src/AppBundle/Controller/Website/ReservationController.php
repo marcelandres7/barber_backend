@@ -161,7 +161,22 @@ class ReservationController extends Controller {
         $serviceData = $em->getRepository('AppBundle:Menus')->findBy(["menuId" => $sIdArray]);
         $listBooking = $this->getDoctrine()->getRepository('AppBundle:SummaryService')->getListBooking( $pId, $sId, $dateSearch );
         $toExclude = [];
-        $lastHourOfDay = 22;
+
+        #ESTA VARIABLE CONTROLA LA HORA FIN QUE SE VA ATENDER
+        $lastHourOfDay=0;
+
+        $now = new \DateTime($dateSearch);
+
+        if ($now->format('l') == 'Sunday') {
+           // echo 'Hoy es domingo';
+            $lastHourOfDay = 20;
+        } else {
+           // echo 'Hoy no es domingo';
+            $lastHourOfDay = 21;
+        }
+        
+        // $lastHourOfDay = 21;
+       
         if ($listBooking && $serviceData) {
             foreach ($listBooking as $bookingValue) {
                 $dateStart  = new \DateTime($bookingValue["scheduled_to"]);
@@ -179,8 +194,8 @@ class ReservationController extends Controller {
         $minutes = ["00","15","30","45"];
         $hm = [];
 
-       
-        $inicio_AM=9;
+       #ESTA VARIABLE DA EL RANGO INICIAL DE HORA EN LA MAÑANA ATENDER
+        $inicio_AM=10;
         $inicio_PM=14;
 
         $fecha_actual = date('Y-m-d'); // Obtiene la fecha actual en formato 'YYYY-MM-DD'
